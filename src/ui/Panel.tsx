@@ -1,6 +1,7 @@
 import { project, setProjectName } from '../state/project.ts'
 import { BaseMapSection } from './BaseMapSection.tsx'
 import { Footer } from './Footer.tsx'
+import { LayersSection } from './LayersSection.tsx'
 import { Notices } from './Notices.tsx'
 
 export function Panel() {
@@ -17,6 +18,7 @@ export function Panel() {
       </header>
       <Notices />
       <BaseMapSection />
+      <LayersSection />
       <Footer />
     </aside>
   )

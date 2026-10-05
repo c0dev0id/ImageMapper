@@ -2,6 +2,7 @@ import type { Map as MapLibreMap } from 'maplibre-gl'
 import { createSignal, onMount, Show } from 'solid-js'
 import { BaseLayers } from './map/BaseLayers.tsx'
 import { MapContext } from './map/context.ts'
+import { ImageLayers } from './map/ImageLayers.tsx'
 import { MapView } from './map/MapView.tsx'
 import { initPersistence } from './state/persistence.ts'
 import { Panel } from './ui/Panel.tsx'
@@ -25,6 +26,7 @@ export function App() {
             <MapView onLoad={setMap} />
             <Show when={map()}>
               <BaseLayers />
+              <ImageLayers />
             </Show>
           </main>
         </div>
