@@ -1,4 +1,6 @@
 import { For, Show } from 'solid-js'
+import { unwrap } from 'solid-js/store'
+import { countPairs, prepareSkew } from '../gcp/gcps.ts'
 import { useMapAccessor } from '../map/context.ts'
 import { forgetImageBytes } from '../state/images.ts'
 import {
@@ -7,9 +9,11 @@ import {
   removeLayer,
   setActiveLayer,
   setLayerOpacity,
+  setLayerPlacement,
   setLayerVisible,
 } from '../state/project.ts'
 import type { ImageLayer } from '../state/schema.ts'
+import { setSkewNote, skewNote } from '../state/ui.ts'
 import { addImages, IMAGE_TYPES } from './addImages.ts'
 
 export function LayersSection() {
@@ -110,6 +114,41 @@ function LayerRow(props: { layer: ImageLayer }) {
           onInput={(e) => setLayerOpacity(layer.id, e.currentTarget.valueAsNumber)}
         />
       </div>
+      <Show when={active()}>
+        <GeorefStatus layer={layer} />
+      </Show>
     </li>
+  )
+}
+
+function GeorefStatus(props: { layer: ImageLayer }) {
+  const layer = props.layer
+  const counts = () => countPairs(layer.gcps)
+  const note = () => {
+    const n = skewNote()
+    return n?.layerId === layer.id ? n : undefined
+  }
+  const skew = () => {
+    const result = prepareSkew(unwrap(layer.gcps), layer.width, layer.height)
+    if (!result.ok) {
+      setSkewNote({ layerId: layer.id, kind: 'error', text: result.error })
+      return
+    }
+    setLayerPlacement(layer.id, result.pairs)
+    setSkewNote(result.warning ? { layerId: layer.id, kind: 'warning', text: result.warning } : undefined)
+  }
+  return (
+    <>
+      <div class="row">
+        <span class="grow muted">
+          {counts().complete} {counts().complete === 1 ? 'pair' : 'pairs'}
+          {counts().unmatched > 0 ? `, ${counts().unmatched} unmatched` : ''}
+        </span>
+        <button class="primary" disabled={counts().complete < 3} onClick={skew}>
+          Skew image to map
+        </button>
+      </div>
+      <Show when={note()}>{(n) => <p class={`note ${n().kind}`}>{n().text}</p>}</Show>
+    </>
   )
 }

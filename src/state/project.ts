@@ -1,7 +1,7 @@
 import { createStore, reconcile, unwrap } from 'solid-js/store'
 import type { Pair } from '../geo/types.ts'
 import { emptyProject, type Gcp, type ImageLayer, type Project, type View } from './schema.ts'
-import { setEditingRouteId, setMode, setSelection } from './ui.ts'
+import { setEditingRouteId, setMenu, setMode, setSelection, setSkewNote } from './ui.ts'
 
 /**
  * The project store. All writes go through the actions below so that every change is
@@ -39,6 +39,8 @@ export function replaceProject(next: Project): void {
   setSelection(undefined)
   setEditingRouteId(undefined)
   setMode('georef')
+  setMenu(undefined)
+  setSkewNote(undefined)
   setProject(reconcile(next, { key: 'id', merge: false }))
   onChange()
 }
@@ -92,6 +94,7 @@ export function moveLayer(id: string, delta: 1 | -1): void {
 export function setActiveLayer(id: string | undefined): void {
   if (project.activeLayerId === id) return
   setSelection(undefined)
+  setMenu(undefined)
   setProject('activeLayerId', id)
   onChange()
 }

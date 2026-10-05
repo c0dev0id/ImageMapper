@@ -34,3 +34,19 @@ export function dismissNotice(id: number): void {
 export function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
+
+export interface MenuItem {
+  label: string
+  enabled: boolean
+  run: () => void
+}
+
+/** The open context menu, positioned in CSS pixels relative to the map container. */
+export const [menu, setMenu] = createSignal<{ x: number; y: number; items: MenuItem[] }>()
+
+/** Result of the last "skew image to map" on a layer, shown in its panel row. */
+export const [skewNote, setSkewNote] = createSignal<{
+  layerId: string
+  kind: 'error' | 'warning'
+  text: string
+}>()

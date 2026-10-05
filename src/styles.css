@@ -199,3 +199,111 @@ button.primary:hover:not(:disabled) {
   white-space: nowrap;
   cursor: pointer;
 }
+
+.note {
+  margin: 4px 0 0;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.note.error {
+  background: #fff5f5;
+  color: #c92a2a;
+}
+
+.note.warning {
+  background: #fff9db;
+  color: #8f5f00;
+}
+
+/* Ground control point markers: image side = ring, map side = dot; matched pairs nest. */
+.gcp-marker {
+  cursor: pointer;
+}
+
+.gcp-marker.selected {
+  z-index: 2;
+}
+
+.gcp {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  border-radius: 50%;
+  font: bold 11px/1 system-ui, sans-serif;
+  user-select: none;
+}
+
+.gcp-image {
+  width: 30px;
+  height: 30px;
+  border: 4px solid var(--image-point);
+  color: transparent;
+  box-shadow: 0 0 0 1px #fff, inset 0 0 0 1px #fff;
+}
+
+.gcp-map {
+  width: 18px;
+  height: 18px;
+  background: var(--map-point);
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+.gcp-marker-image.selected .gcp,
+.gcp-marker-map.selected .gcp {
+  box-shadow: 0 0 0 3px #fcc419, 0 0 8px 3px rgba(252, 196, 25, 0.8);
+}
+
+.gcp.unpaired {
+  border-style: dashed;
+}
+
+.gcp-image.unpaired {
+  color: var(--image-point);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.context-menu {
+  position: absolute;
+  z-index: 10;
+  width: 210px;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.context-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  text-align: left;
+}
+
+.context-menu button:hover:not(:disabled) {
+  background: #e7f5ff;
+}
+
+.hint-bar {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  z-index: 5;
+  max-width: min(640px, calc(100% - 140px));
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: rgba(33, 37, 41, 0.85);
+  color: #fff;
+  font-size: 13px;
+  text-align: center;
+  pointer-events: none;
+}

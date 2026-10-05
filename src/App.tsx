@@ -2,7 +2,11 @@ import type { Map as MapLibreMap } from 'maplibre-gl'
 import { createSignal, onMount, Show } from 'solid-js'
 import { BaseLayers } from './map/BaseLayers.tsx'
 import { MapContext } from './map/context.ts'
+import { ContextMenu } from './map/ContextMenu.tsx'
+import { GcpLinks, GcpMarkers } from './map/GcpMarkers.tsx'
+import { HintBar } from './map/HintBar.tsx'
 import { ImageLayers } from './map/ImageLayers.tsx'
+import { Interactions } from './map/Interactions.tsx'
 import { MapView } from './map/MapView.tsx'
 import { initPersistence } from './state/persistence.ts'
 import { Panel } from './ui/Panel.tsx'
@@ -27,6 +31,11 @@ export function App() {
             <Show when={map()}>
               <BaseLayers />
               <ImageLayers />
+              <GcpLinks />
+              <GcpMarkers />
+              <Interactions />
+              <ContextMenu />
+              <HintBar />
             </Show>
           </main>
         </div>
