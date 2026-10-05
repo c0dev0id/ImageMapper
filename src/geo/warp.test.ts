@@ -1,0 +1,125 @@
+import { describe, expect, it } from 'vitest'
+import { fromMercator, mercatorPerPixel, toMercator } from './mercator.ts'
+import type { LngLat, Pair, Px } from './types.ts'
+import { initialPlacement, Warp } from './warp.ts'
+
+const W = 4000
+const H = 3000
+const corners: Px[] = [
+  [0, 0],
+  [W, 0],
+  [W, H],
+  [0, H],
+]
+
+/** Image to map via a rotation + scale around Munich, as a plain function. */
+function rotated([x, y]: Px): LngLat {
+  const angle = 0.3
+  const s = 2e-8
+  const dx = (x - W / 2) * s
+  const dy = (y - H / 2) * s
+  const [cx, cy] = toMercator([11.58, 48.14])
+  return fromMercator([
+    cx + dx * Math.cos(angle) - dy * Math.sin(angle),
+    cy + dx * Math.sin(angle) + dy * Math.cos(angle),
+  ])
+}
+
+const affinePairs: Pair[] = corners.map((image) => ({ image, map: rotated(image) }))
+
+describe('Warp', () => {
+  it('maps image pixels like the affine transform it was built from', () => {
+    const warp = new Warp(affinePairs, W, H)
+    for (const p of [
+      [10, 10],
+      [1234, 2345],
+      [3999, 1],
+      [2000, 1500],
+    ] as Px[]) {
+      const [lng, lat] = warp.imageToMap(p)
+      const [elng, elat] = rotated(p)
+      expect(lng).toBeCloseTo(elng, 9)
+      expect(lat).toBeCloseTo(elat, 9)
+    }
+  })
+
+  it('inverts its own mapping inside the image', () => {
+    const bent: Pair[] = [
+      ...affinePairs,
+      { image: [1000, 1000], map: rotated([1060, 950]) },
+      { image: [3000, 2200], map: rotated([2950, 2260]) },
+    ]
+    const warp = new Warp(bent, W, H)
+    for (const p of [
+      [5, 5],
+      [1000, 1000],
+      [2222, 1111],
+      [3990, 2990],
+    ] as Px[]) {
+      const back = warp.mapToImage(warp.imageToMap(p))
+      expect(back).toBeDefined()
+      expect(back![0]).toBeCloseTo(p[0], 4)
+      expect(back![1]).toBeCloseTo(p[1], 4)
+    }
+  })
+
+  it('passes through the control points of a bent warp', () => {
+    const target = rotated([1060, 950])
+    const warp = new Warp([...affinePairs, { image: [1000, 1000], map: target }], W, H)
+    const [lng, lat] = warp.imageToMap([1000, 1000])
+    // The grid is a linear approximation between vertices; sub-metre at this scale.
+    expect(Math.abs(lng - target[0])).toBeLessThan(1e-5)
+    expect(Math.abs(lat - target[1])).toBeLessThan(1e-5)
+  })
+
+  it('returns undefined outside the image', () => {
+    const warp = new Warp(affinePairs, W, H)
+    expect(warp.mapToImage(rotated([-50, 1500]))).toBeUndefined()
+    expect(warp.mapToImage(rotated([2000, 3100]))).toBeUndefined()
+    expect(warp.mapToImage([0, 0])).toBeUndefined()
+  })
+
+  it('reports no flipped triangles for a faithful warp', () => {
+    expect(new Warp(affinePairs, W, H).countFlippedTriangles().flipped).toBe(0)
+  })
+
+  it('reports every triangle as flipped for a mirrored warp', () => {
+    const mirrored = corners.map((image) => ({ image, map: rotated([W - image[0], image[1]]) }))
+    const { flipped, total } = new Warp(mirrored, W, H).countFlippedTriangles()
+    expect(flipped).toBe(total)
+  })
+
+  it('reports some flipped triangles for a fold', () => {
+    const folded: Pair[] = [
+      ...affinePairs,
+      { image: [1000, 1500], map: rotated([3000, 1500]) },
+      { image: [3000, 1500], map: rotated([1000, 1500]) },
+    ]
+    const { flipped, total } = new Warp(folded, W, H).countFlippedTriangles()
+    expect(flipped).toBeGreaterThan(0)
+    expect(flipped).toBeLessThan(total)
+  })
+
+  it('builds a grid proportional to the image', () => {
+    const warp = new Warp(affinePairs, W, H, 64)
+    expect(warp.cols).toBe(64)
+    expect(warp.rows).toBe(48)
+    expect(warp.indices.length).toBe(64 * 48 * 6)
+  })
+})
+
+describe('initialPlacement', () => {
+  it('centres the image on the view and fills the requested share of the canvas', () => {
+    const center: LngLat = [11.58, 48.14]
+    const pairs = initialPlacement(W, H, center, 12, 1000, 800, 0.6)
+    const warp = new Warp(pairs, W, H)
+    const [lng, lat] = warp.imageToMap([W / 2, H / 2])
+    expect(lng).toBeCloseTo(center[0], 9)
+    expect(lat).toBeCloseTo(center[1], 9)
+    // Wide image: width limited by the canvas width -> 600 px on screen.
+    const left = toMercator(pairs[0].map)
+    const right = toMercator(pairs[1].map)
+    expect((right[0] - left[0]) / mercatorPerPixel(12)).toBeCloseTo(600, 6)
+    expect(right[1]).toBeCloseTo(left[1], 12)
+  })
+})
