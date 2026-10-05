@@ -365,3 +365,7 @@ button.primary:hover:not(:disabled) {
   justify-content: flex-end;
   margin-top: 6px;
 }
+
+.row.buttons {
+  margin-top: 6px;
+}

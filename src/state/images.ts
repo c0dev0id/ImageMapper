@@ -18,6 +18,10 @@ export function replaceImageBytes(images: Map<string, ArrayBuffer>): void {
   for (const [id, bytes] of images) bytesById.set(id, bytes)
 }
 
+export function allImageBytes(): ReadonlyMap<string, ArrayBuffer> {
+  return bytesById
+}
+
 export function imageBlob(id: string, mime: string): Blob | undefined {
   const bytes = bytesById.get(id)
   return bytes && new Blob([bytes], { type: mime })

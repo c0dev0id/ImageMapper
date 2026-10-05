@@ -1,7 +1,7 @@
 import { createStore, del, get, keys, set } from 'idb-keyval'
 import { replaceImageBytes } from './images.ts'
 import { project, replaceProject, serializeProject, setChangeListener } from './project.ts'
-import { parseProject } from './schema.ts'
+import { parseProject, type Project } from './schema.ts'
 import { errorMessage, notify } from './ui.ts'
 
 const db = createStore('mappic', 'data')
@@ -88,6 +88,22 @@ async function discardStoredProject(): Promise<void> {
   await del(PROJECT_KEY, db)
   enabled = true
   scheduleSave()
+  await flush()
+  await collectImageGarbage()
+}
+
+/**
+ * Replaces the current project (open a file, new project). Images are written first, so
+ * an interruption at any point leaves either the old or the new project complete.
+ */
+export async function adoptProject(next: Project, images: Map<string, ArrayBuffer>): Promise<void> {
+  try {
+    for (const [id, bytes] of images) await storeImage(id, bytes)
+  } catch (error) {
+    notify(`The images could not be stored in the browser and will be lost on reload: ${errorMessage(error)}`)
+  }
+  replaceImageBytes(images)
+  replaceProject(next)
   await flush()
   await collectImageGarbage()
 }
