@@ -360,3 +360,8 @@ button.primary:hover:not(:disabled) {
   margin-left: 6px;
   padding: 1px 10px;
 }
+
+.row.end {
+  justify-content: flex-end;
+  margin-top: 6px;
+}

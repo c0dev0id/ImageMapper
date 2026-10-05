@@ -1,9 +1,13 @@
 import { For, Show } from 'solid-js'
+import { unwrap } from 'solid-js/store'
+import { routeTracks, toGpx } from '../export/gpx.ts'
+import { decodePolyline } from '../routing/polyline.ts'
 import { nextRouteColor } from '../routing/routeEdit.ts'
 import { failedLegs, lastError, pendingLegs, retryFailedLegs } from '../routing/service.ts'
 import { addRoute, project, removeRoute, renameRoute, setRouteProfile } from '../state/project.ts'
 import type { Profile, Route } from '../state/schema.ts'
 import { editingRouteId, startDrawing, stopDrawing } from '../state/ui.ts'
+import { downloadBlob, fileBaseName } from './download.ts'
 
 const PROFILES: { value: Profile; label: string }[] = [
   { value: 'car', label: 'Car' },
@@ -24,7 +28,21 @@ function drawNewRoute() {
   startDrawing(id)
 }
 
+function exportGpx() {
+  const unrouted = pendingLegs() + failedLegs().size
+  if (
+    unrouted > 0 &&
+    !confirm(`${unrouted} ${unrouted === 1 ? 'leg is' : 'legs are'} not routed and will be exported as straight lines. Export anyway?`)
+  ) {
+    return
+  }
+  const tracks = routeTracks(unwrap(project.routes), (geometry) => decodePolyline(geometry))
+  const gpx = toGpx(project.name, tracks, new Date())
+  downloadBlob(new Blob([gpx], { type: 'application/gpx+xml' }), `${fileBaseName(project.name)}.gpx`)
+}
+
 export function RoutesSection() {
+  const exportable = () => project.routes.some((r) => r.waypoints.length >= 2)
   return (
     <section class="section">
       <div class="row">
@@ -47,6 +65,11 @@ export function RoutesSection() {
           <button onClick={retryFailedLegs}>Retry routing</button>
         </div>
       </Show>
+      <div class="row end">
+        <button disabled={!exportable()} onClick={exportGpx}>
+          Export GPX
+        </button>
+      </div>
     </section>
   )
 }
