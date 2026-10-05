@@ -59,8 +59,14 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - **Persistence.** The project is stored as JSON in IndexedDB, image bytes as
   ArrayBuffers (Safari private mode rejects Blobs). Autosave is enabled only after the
   stored project loaded successfully, so a failed load never overwrites data.
+- **Image storage clean-up.** Image bytes in IndexedDB are only deleted at start-up and
+  after Open/New, and never ones written in the current session, so a clean-up cannot
+  race with an image that is still being added.
+- **Rendering limits.** Textures are capped at 4096 px on the long side (about 350 dpi
+  for an A4 page) to bound GPU memory. `renderWorldCopies` is off because the custom
+  layer draws a single world copy; markers and lines would otherwise repeat.
 - **Project file.** A `.mappic` file is a plain ZIP with `project.json` and the
-  original image bytes.
+  original image bytes. Opening validates the whole file before anything is replaced.
 - **No migrations before 1.0.** Project files and stored data carry a version number;
   unknown versions are rejected.
 - **Third-party terms.** OSM tile usage policy (attribution, no offline caching),
