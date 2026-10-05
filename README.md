@@ -11,7 +11,8 @@ It runs entirely in the browser; nothing is uploaded anywhere.
 
 ## Workflow
 
-1. Move the map to the area of the tour.
+1. Move the map to the area of the tour: search for a place or address at the top of the
+   panel, or use the locate button below the zoom buttons.
 2. **Add images** (JPEG, PNG, WebP). Each image becomes a layer; the active layer is the
    one you are working on. Layers can be reordered, hidden and made transparent.
 3. Right-click (or long-press on a touch screen) a feature on the image and choose
@@ -53,6 +54,9 @@ mappic uses public services directly from the browser. Please respect their term
 - **Satellite imagery**: Esri World Imagery via its keyless legacy endpoint. Esri's terms
   only cover this together with Esri software or an ArcGIS subscription; the URL is a
   single constant in `src/config.ts`.
+- **Search**: [Nominatim](https://operations.osmfoundation.org/policies/nominatim/), searched
+  only when you press Enter (no search-as-you-type), at most one request per second,
+  repeated searches answered from a cache.
 - **Routing**: [FOSSGIS OSRM servers](https://routing.openstreetmap.de/about.html) (car, bike,
   foot). At most one request per second; mappic waits 1.1 s between requests. The terms
   require the operator's contact address to be shown, which the app does in its panel.

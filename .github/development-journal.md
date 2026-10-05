@@ -23,7 +23,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - fflate (ZIP project files), idb-keyval (IndexedDB access).
 - Vitest 5 for unit tests of the pure modules.
 - External services: OSM standard tiles, Esri World Imagery tiles, FOSSGIS OSRM
-  routing servers (routing.openstreetmap.de).
+  routing servers (routing.openstreetmap.de), Nominatim search.
 - Deployment: GitHub Actions to GitHub Pages.
 
 ## Key decisions
@@ -65,6 +65,10 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   click that may follow the lifting finger, and a long-press menu only reacts to a new
   tap. Draggable waypoint markers block MapLibre's long press, so they detect their own
   with pointer events (touch and pen only).
+- **Finding the area.** Locating uses MapLibre's GeolocateControl (one shot, no tracking).
+  Search uses Nominatim on explicit submit only, since its policy forbids
+  search-as-you-type; requests are spaced one second apart, identical requests cached,
+  and the visible area is passed as a preference once zoomed in (zoom >= 6).
 - **Persistence.** The project is stored as JSON in IndexedDB, image bytes as
   ArrayBuffers (Safari private mode rejects Blobs). Autosave is enabled only after the
   stored project loaded successfully, so a failed load never overwrites data.
@@ -87,6 +91,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 ## Core features
 
 - OSM base map, Esri satellite layer with visibility and opacity.
+- Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with order, visibility,
   opacity and an active layer.
 - Context-menu driven GCP editing (right-click or long press) and "skew image to map"
