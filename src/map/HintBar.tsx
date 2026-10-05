@@ -13,10 +13,10 @@ export function HintBar() {
     if (sel && sel.layerId === layer.id) {
       const n = gcpNumber(layer.gcps, sel.gcpId)
       return sel.side === 'image'
-        ? `Image point ${n} selected: right-click the same place on the map and choose "Match point on map".`
-        : `Map point ${n} selected: right-click the same place on the image and choose "Match point on image".`
+        ? `Image point ${n} selected: right-click or long-press the same place on the map and choose "Match point on map".`
+        : `Map point ${n} selected: right-click or long-press the same place on the image and choose "Match point on image".`
     }
-    return 'Right-click a feature on the image, then the same feature on the map. Skew the image with 3 or more pairs.'
+    return 'Right-click or long-press a feature on the image, then the same feature on the map. Skew the image with 3 or more pairs.'
   }
   const drawing = () => (mode() === 'route' ? routeById(editingRouteId()) : undefined)
   return (
@@ -30,8 +30,8 @@ export function HintBar() {
     >
       {(route) => (
         <div class="hint-bar interactive">
-          <strong>{route().name}</strong>: click to add points, drag to move them, right-click a point to
-          remove it.{' '}
+          <strong>{route().name}</strong>: click to add points, drag to move them, right-click or
+          long-press a point to remove it.{' '}
           <button class="primary" onClick={stopDrawing}>
             Done
           </button>

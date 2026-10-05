@@ -41,8 +41,11 @@ export interface MenuItem {
   run: () => void
 }
 
-/** The open context menu, positioned in CSS pixels relative to the map container. */
-export const [menu, setMenu] = createSignal<{ x: number; y: number; items: MenuItem[] }>()
+/**
+ * The open context menu, positioned in CSS pixels relative to the map container. A menu
+ * opened by a long press (`touch`) ignores the lifting finger until it is tapped again.
+ */
+export const [menu, setMenu] = createSignal<{ x: number; y: number; touch: boolean; items: MenuItem[] }>()
 
 /** Result of the last "skew image to map" on a layer, shown in its panel row. */
 export const [skewNote, setSkewNote] = createSignal<{

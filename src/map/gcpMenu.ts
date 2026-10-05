@@ -9,7 +9,7 @@ import { selection, setMenu, setSelection } from '../state/ui.ts'
 const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits
 
 /** Opens the georeferencing context menu for a right-click at `point` / `lngLat`. */
-export function openGcpMenu(map: MapLibreMap, point: Point, lngLat: MapLibreLngLat): void {
+export function openGcpMenu(map: MapLibreMap, point: Point, lngLat: MapLibreLngLat, touch: boolean): void {
   const layer = activeLayer()
   const warp = warpOf(layer?.id)
   const wrapped = lngLat.wrap()
@@ -39,6 +39,7 @@ export function openGcpMenu(map: MapLibreMap, point: Point, lngLat: MapLibreLngL
   setMenu({
     x: point.x,
     y: point.y,
+    touch,
     items: entries.map((entry) => ({
       label: entry.label,
       enabled: entry.enabled,

@@ -26,26 +26,37 @@ export function ContextMenu() {
   }
 
   return (
-    <Show when={menu()}>
-      {(m) => (
-        <ul ref={list} class="context-menu" style={position(m())} onContextMenu={(e) => e.preventDefault()}>
-          <For each={m().items}>
-            {(item) => (
-              <li>
-                <button
-                  disabled={!item.enabled}
-                  onClick={() => {
-                    setMenu(undefined)
-                    item.run()
-                  }}
-                >
-                  {item.label}
-                </button>
-              </li>
-            )}
-          </For>
-        </ul>
-      )}
+    <Show when={menu()} keyed>
+      {(m) => {
+        // A long-press menu opens under the finger; only a new tap may choose an item.
+        let armed = !m.touch
+        return (
+          <ul
+            ref={list}
+            class="context-menu"
+            style={position(m)}
+            onContextMenu={(e) => e.preventDefault()}
+            onPointerDown={() => (armed = true)}
+          >
+            <For each={m.items}>
+              {(item) => (
+                <li>
+                  <button
+                    disabled={!item.enabled}
+                    onClick={() => {
+                      if (!armed) return
+                      setMenu(undefined)
+                      item.run()
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                </li>
+              )}
+            </For>
+          </ul>
+        )
+      }}
     </Show>
   )
 }

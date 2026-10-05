@@ -374,3 +374,8 @@ button.icon.history {
   font-size: 20px;
   padding: 0 4px;
 }
+
+.context-menu {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
