@@ -20,6 +20,15 @@ export const ROUTING_ATTRIBUTION =
 export const ROUTING_MIN_INTERVAL_MS = 1100
 export const ROUTING_TIMEOUT_MS = 15_000
 
+/**
+ * Nominatim (OSM's geocoder): searches only on an explicit user action, at most one request
+ * per second, identical requests from a cache, no search-as-you-type
+ * (operations.osmfoundation.org/policies/nominatim).
+ */
+export const NOMINATIM_URL = 'https://nominatim.openstreetmap.org'
+export const SEARCH_MIN_INTERVAL_MS = 1000
+export const SEARCH_TIMEOUT_MS = 10_000
+
 export const SOURCE_URL = 'https://github.com/c0dev0id/mappic'
 
 /** Operator contact required by the FOSSGIS terms, assembled at runtime to keep it from crawlers. */
