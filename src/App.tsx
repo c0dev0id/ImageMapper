@@ -11,6 +11,7 @@ import { RouteEditor } from './map/RouteEditor.tsx'
 import { RouteLayers } from './map/RouteLayers.tsx'
 import { MapView } from './map/MapView.tsx'
 import { initPersistence } from './state/persistence.ts'
+import { errorMessage, notify } from './state/ui.ts'
 import { Panel } from './ui/Panel.tsx'
 
 export function App() {
@@ -19,8 +20,13 @@ export function App() {
 
   // The map is created after the stored project is restored, so it starts at the saved view.
   onMount(async () => {
-    await initPersistence()
-    setLoaded(true)
+    try {
+      await initPersistence()
+    } catch (error) {
+      notify(`Browser storage failed, work will not be kept: ${errorMessage(error)}`)
+    } finally {
+      setLoaded(true)
+    }
   })
 
   return (
