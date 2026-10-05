@@ -3,6 +3,7 @@ import { BaseMapSection } from './BaseMapSection.tsx'
 import { Footer } from './Footer.tsx'
 import { LayersSection } from './LayersSection.tsx'
 import { Notices } from './Notices.tsx'
+import { RoutesSection } from './RoutesSection.tsx'
 
 export function Panel() {
   return (
@@ -19,6 +20,7 @@ export function Panel() {
       <Notices />
       <BaseMapSection />
       <LayersSection />
+      <RoutesSection />
       <Footer />
     </aside>
   )

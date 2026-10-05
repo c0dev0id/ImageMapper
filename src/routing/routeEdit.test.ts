@@ -1,0 +1,65 @@
+import { describe, expect, it } from 'vitest'
+import type { Route } from '../state/schema.ts'
+import { addLeg, appendWaypoint, changeProfile, moveWaypoint, nextRouteColor, removeWaypoint } from './routeEdit.ts'
+
+const base: Route = {
+  id: 'r',
+  name: 'Route 1',
+  profile: 'car',
+  color: '#e8590c',
+  waypoints: [
+    { id: 'a', lngLat: [1, 1] },
+    { id: 'b', lngLat: [2, 2] },
+    { id: 'c', lngLat: [3, 3] },
+  ],
+  legs: { 'car/1,1;2,2': 'ab', 'car/2,2;3,3': 'bc' },
+}
+
+describe('route edits', () => {
+  it('appends a waypoint and keeps all legs', () => {
+    const r = appendWaypoint(base, { id: 'd', lngLat: [4, 4] })
+    expect(r.waypoints.map((w) => w.id)).toEqual(['a', 'b', 'c', 'd'])
+    expect(r.legs).toEqual(base.legs)
+  })
+
+  it('drops both legs next to a moved waypoint', () => {
+    const r = moveWaypoint(base, 'b', [2.5, 2.5])
+    expect(r.waypoints[1].lngLat).toEqual([2.5, 2.5])
+    expect(r.legs).toEqual({})
+  })
+
+  it('drops the legs of a removed middle waypoint', () => {
+    const r = removeWaypoint(base, 'b')
+    expect(r.waypoints.map((w) => w.id)).toEqual(['a', 'c'])
+    expect(r.legs).toEqual({})
+  })
+
+  it('keeps the remaining leg when the last waypoint is removed', () => {
+    expect(removeWaypoint(base, 'c').legs).toEqual({ 'car/1,1;2,2': 'ab' })
+  })
+
+  it('drops every leg when the profile changes', () => {
+    const r = changeProfile(base, 'bike')
+    expect(r.profile).toBe('bike')
+    expect(r.legs).toEqual({})
+  })
+
+  it('stores needed legs and ignores outdated results', () => {
+    const r = moveWaypoint(base, 'c', [9, 9])
+    expect(addLeg(r, 'car/2,2;9,9', 'new').legs).toEqual({ 'car/1,1;2,2': 'ab', 'car/2,2;9,9': 'new' })
+    expect(addLeg(r, 'car/2,2;3,3', 'stale')).toBe(r)
+  })
+
+  it('does not modify its input', () => {
+    moveWaypoint(base, 'b', [5, 5])
+    expect(base.waypoints[1].lngLat).toEqual([2, 2])
+    expect(Object.keys(base.legs)).toHaveLength(2)
+  })
+})
+
+describe('nextRouteColor', () => {
+  it('picks the first unused colour', () => {
+    expect(nextRouteColor([])).toBe('#e8590c')
+    expect(nextRouteColor([{ color: '#e8590c' }])).toBe('#1971c2')
+  })
+})

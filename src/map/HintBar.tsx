@@ -1,7 +1,7 @@
 import { Show } from 'solid-js'
 import { gcpNumber } from '../gcp/gcps.ts'
-import { activeLayer } from '../state/project.ts'
-import { mode, selection } from '../state/ui.ts'
+import { activeLayer, routeById } from '../state/project.ts'
+import { editingRouteId, mode, selection, stopDrawing } from '../state/ui.ts'
 
 /** A short instruction for the current state, shown over the map. */
 export function HintBar() {
@@ -18,9 +18,25 @@ export function HintBar() {
     }
     return 'Right-click a feature on the image, then the same feature on the map. Skew the image with 3 or more pairs.'
   }
+  const drawing = () => (mode() === 'route' ? routeById(editingRouteId()) : undefined)
   return (
-    <Show when={text()}>
-      <div class="hint-bar">{text()}</div>
+    <Show
+      when={drawing()}
+      fallback={
+        <Show when={text()}>
+          <div class="hint-bar">{text()}</div>
+        </Show>
+      }
+    >
+      {(route) => (
+        <div class="hint-bar interactive">
+          <strong>{route().name}</strong>: click to add points, drag to move them, right-click a point to
+          remove it.{' '}
+          <button class="primary" onClick={stopDrawing}>
+            Done
+          </button>
+        </div>
+      )}
     </Show>
   )
 }

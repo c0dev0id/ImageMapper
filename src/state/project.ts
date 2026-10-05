@@ -1,6 +1,15 @@
 import { createStore, reconcile, unwrap } from 'solid-js/store'
-import type { Pair } from '../geo/types.ts'
-import { emptyProject, type Gcp, type ImageLayer, type Project, type View } from './schema.ts'
+import type { LngLat, Pair } from '../geo/types.ts'
+import * as edit from '../routing/routeEdit.ts'
+import {
+  emptyProject,
+  type Gcp,
+  type ImageLayer,
+  type Profile,
+  type Project,
+  type Route,
+  type View,
+} from './schema.ts'
 import { setEditingRouteId, setMenu, setMode, setSelection, setSkewNote } from './ui.ts'
 
 /**
@@ -125,4 +134,56 @@ export function setLayerGcps(id: string, gcps: Gcp[]): void {
   if (index < 0) return
   setProject('layers', index, 'gcps', reconcile(gcps, { key: 'id', merge: false }))
   onChange()
+}
+
+export function routeById(id: string | undefined): Route | undefined {
+  return id === undefined ? undefined : project.routes.find((r) => r.id === id)
+}
+
+export function addRoute(route: Route): void {
+  setProject('routes', (routes) => [...routes, route])
+  onChange()
+}
+
+export function removeRoute(id: string): void {
+  setProject('routes', (routes) => routes.filter((r) => r.id !== id))
+  onChange()
+}
+
+export function renameRoute(id: string, name: string): void {
+  const index = project.routes.findIndex((r) => r.id === id)
+  if (index < 0) return
+  setProject('routes', index, 'name', name)
+  onChange()
+}
+
+/** Applies a pure edit to a route; reconciling by id keeps unchanged waypoints' identity. */
+function updateRoute(id: string, change: (route: Route) => Route): void {
+  const index = project.routes.findIndex((r) => r.id === id)
+  if (index < 0) return
+  const current = unwrap(project.routes[index])
+  const next = change(current)
+  if (next === current) return
+  setProject('routes', index, reconcile(next, { key: 'id', merge: false }))
+  onChange()
+}
+
+export function setRouteProfile(id: string, profile: Profile): void {
+  updateRoute(id, (r) => edit.changeProfile(r, profile))
+}
+
+export function appendWaypoint(routeId: string, lngLat: LngLat): void {
+  updateRoute(routeId, (r) => edit.appendWaypoint(r, { id: crypto.randomUUID(), lngLat }))
+}
+
+export function moveWaypoint(routeId: string, waypointId: string, lngLat: LngLat): void {
+  updateRoute(routeId, (r) => edit.moveWaypoint(r, waypointId, lngLat))
+}
+
+export function removeWaypoint(routeId: string, waypointId: string): void {
+  updateRoute(routeId, (r) => edit.removeWaypoint(r, waypointId))
+}
+
+export function setRouteLeg(routeId: string, key: string, geometry: string): void {
+  updateRoute(routeId, (r) => edit.addLeg(r, key, geometry))
 }

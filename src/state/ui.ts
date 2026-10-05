@@ -50,3 +50,17 @@ export const [skewNote, setSkewNote] = createSignal<{
   kind: 'error' | 'warning'
   text: string
 }>()
+
+/** Enters draw route mode for a route; georeferencing selection and menus are closed. */
+export function startDrawing(routeId: string): void {
+  setSelection(undefined)
+  setMenu(undefined)
+  setEditingRouteId(routeId)
+  setMode('route')
+}
+
+export function stopDrawing(): void {
+  setMenu(undefined)
+  setEditingRouteId(undefined)
+  setMode('georef')
+}

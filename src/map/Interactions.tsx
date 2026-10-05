@@ -1,6 +1,8 @@
 import type { MapMouseEvent } from 'maplibre-gl'
 import { onCleanup } from 'solid-js'
-import { menu, mode, setMenu, setSelection } from '../state/ui.ts'
+import { roundLngLat } from '../routing/legs.ts'
+import { appendWaypoint } from '../state/project.ts'
+import { editingRouteId, menu, mode, setMenu, setSelection, stopDrawing } from '../state/ui.ts'
 import { useMap } from './context.ts'
 import { openGcpMenu } from './gcpMenu.ts'
 import { fromMarker } from './markers.ts'
@@ -16,12 +18,17 @@ export function Interactions() {
   const onClick = (e: MapMouseEvent) => {
     if (fromMarker(e.originalEvent)) return
     setMenu(undefined)
-    if (mode() === 'georef') setSelection(undefined)
+    const routeId = editingRouteId()
+    if (mode() === 'route' && routeId) {
+      const { lng, lat } = e.lngLat.wrap()
+      appendWaypoint(routeId, roundLngLat([lng, lat]))
+    } else setSelection(undefined)
   }
   const onMoveStart = () => setMenu(undefined)
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key !== 'Escape') return
     if (menu()) setMenu(undefined)
+    else if (mode() === 'route') stopDrawing()
     else setSelection(undefined)
   }
 

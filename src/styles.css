@@ -307,3 +307,56 @@ button.primary:hover:not(:disabled) {
   text-align: center;
   pointer-events: none;
 }
+
+.routes {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+
+.route {
+  padding: 4px 6px;
+  margin: 0 -6px 2px;
+  border-radius: 4px;
+}
+
+.route.active {
+  background: #e7f5ff;
+}
+
+.route input {
+  min-width: 0;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.waypoint-marker {
+  cursor: grab;
+}
+
+.waypoint {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  font: bold 10px/1 system-ui, sans-serif;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+.hint-bar.interactive {
+  pointer-events: auto;
+}
+
+.hint-bar button {
+  margin-left: 6px;
+  padding: 1px 10px;
+}

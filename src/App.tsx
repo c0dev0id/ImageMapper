@@ -7,6 +7,8 @@ import { GcpLinks, GcpMarkers } from './map/GcpMarkers.tsx'
 import { HintBar } from './map/HintBar.tsx'
 import { ImageLayers } from './map/ImageLayers.tsx'
 import { Interactions } from './map/Interactions.tsx'
+import { RouteEditor } from './map/RouteEditor.tsx'
+import { RouteLayers } from './map/RouteLayers.tsx'
 import { MapView } from './map/MapView.tsx'
 import { initPersistence } from './state/persistence.ts'
 import { Panel } from './ui/Panel.tsx'
@@ -31,8 +33,10 @@ export function App() {
             <Show when={map()}>
               <BaseLayers />
               <ImageLayers />
+              <RouteLayers />
               <GcpLinks />
               <GcpMarkers />
+              <RouteEditor />
               <Interactions />
               <ContextMenu />
               <HintBar />
