@@ -1,7 +1,7 @@
 import type { MapMouseEvent } from 'maplibre-gl'
 import { onCleanup } from 'solid-js'
 import { roundLngLat } from '../routing/legs.ts'
-import { appendWaypoint } from '../state/project.ts'
+import { appendWaypoint, redo, undo } from '../state/project.ts'
 import { editingRouteId, menu, mode, setMenu, setSelection, stopDrawing } from '../state/ui.ts'
 import { useMap } from './context.ts'
 import { openGcpMenu } from './gcpMenu.ts'
@@ -26,6 +26,15 @@ export function Interactions() {
   }
   const onMoveStart = () => setMenu(undefined)
   const onKeyDown = (e: KeyboardEvent) => {
+    // Text fields keep their own undo and Escape handling.
+    if (isTextField(e.target)) return
+    const key = e.key.toLowerCase()
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (key === 'z' || key === 'y')) {
+      e.preventDefault()
+      if (key === 'y' || e.shiftKey) redo()
+      else undo()
+      return
+    }
     if (e.key !== 'Escape') return
     if (menu()) setMenu(undefined)
     else if (mode() === 'route') stopDrawing()
@@ -43,4 +52,11 @@ export function Interactions() {
     document.removeEventListener('keydown', onKeyDown)
   })
   return null
+}
+
+const NON_TEXT_INPUTS = new Set(['checkbox', 'radio', 'range', 'file', 'button', 'submit', 'reset', 'color'])
+
+function isTextField(target: EventTarget | null): boolean {
+  if (target instanceof HTMLInputElement) return !NON_TEXT_INPUTS.has(target.type)
+  return target instanceof HTMLTextAreaElement || (target instanceof HTMLElement && target.isContentEditable)
 }

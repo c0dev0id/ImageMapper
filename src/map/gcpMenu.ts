@@ -48,7 +48,7 @@ export function openGcpMenu(map: MapLibreMap, point: Point, lngLat: MapLibreLngL
         const result = applyGcpAction(unwrap(target.gcps), entry.action, { image: pixel, map: at }, () =>
           crypto.randomUUID(),
         )
-        setLayerGcps(target.id, result.gcps)
+        setLayerGcps(target.id, result.gcps, entry.label)
         setSelection(result.selected && { layerId: target.id, ...result.selected })
       },
     })),

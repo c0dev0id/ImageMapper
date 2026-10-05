@@ -2,7 +2,6 @@ import { For, Show } from 'solid-js'
 import { unwrap } from 'solid-js/store'
 import { countPairs, prepareSkew } from '../gcp/gcps.ts'
 import { useMapAccessor } from '../map/context.ts'
-import { forgetImageBytes } from '../state/images.ts'
 import {
   moveLayer,
   project,
@@ -93,11 +92,7 @@ function LayerRow(props: { layer: ImageLayer }) {
         <button
           class="icon"
           title="Delete layer"
-          onClick={() => {
-            if (!confirm(`Delete the layer "${layer.name}" and its points?`)) return
-            removeLayer(layer.id)
-            forgetImageBytes(layer.id)
-          }}
+          onClick={() => removeLayer(layer.id)}
         >
           ×
         </button>

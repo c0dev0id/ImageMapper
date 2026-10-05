@@ -369,3 +369,8 @@ button.primary:hover:not(:disabled) {
 .row.buttons {
   margin-top: 6px;
 }
+
+button.icon.history {
+  font-size: 20px;
+  padding: 0 4px;
+}

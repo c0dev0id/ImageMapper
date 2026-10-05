@@ -1,4 +1,7 @@
-/** Original image bytes per layer id, kept outside the reactive store. */
+/**
+ * Original image bytes per layer id, kept outside the reactive store. Bytes of deleted
+ * layers stay for the session, so undoing the deletion can show the image again.
+ */
 const bytesById = new Map<string, ArrayBuffer>()
 
 export function imageBytes(id: string): ArrayBuffer | undefined {
@@ -7,10 +10,6 @@ export function imageBytes(id: string): ArrayBuffer | undefined {
 
 export function addImageBytes(id: string, bytes: ArrayBuffer): void {
   bytesById.set(id, bytes)
-}
-
-export function forgetImageBytes(id: string): void {
-  bytesById.delete(id)
 }
 
 export function replaceImageBytes(images: Map<string, ArrayBuffer>): void {

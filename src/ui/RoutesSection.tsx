@@ -106,7 +106,6 @@ function RouteRow(props: { route: Route }) {
           class="icon"
           title="Delete route"
           onClick={() => {
-            if (!confirm(`Delete "${route.name}"?`)) return
             if (editing()) stopDrawing()
             removeRoute(route.id)
           }}
