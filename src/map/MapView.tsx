@@ -5,6 +5,7 @@ import { onCleanup, onMount } from 'solid-js'
 import { unwrap } from 'solid-js/store'
 import { ROUTING_ATTRIBUTION } from '../config.ts'
 import { project, setView } from '../state/project.ts'
+import { notify } from '../state/ui.ts'
 import { baseStyle } from './style.ts'
 
 maplibregl.setWorkerUrl(workerUrl)
@@ -29,6 +30,19 @@ export function MapView(props: { onLoad: (map: maplibregl.Map) => void }) {
       attributionControl: { compact: true, customAttribution: ROUTING_ATTRIBUTION },
     })
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right')
+    // One-shot "locate me": centres the map on the device position and marks it.
+    const geolocate = new maplibregl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true, timeout: 15_000 },
+      fitBoundsOptions: { maxZoom: 15 },
+    })
+    geolocate.on('error', (e) => {
+      notify(
+        e.code === 1 // PERMISSION_DENIED
+          ? 'The browser does not allow access to your location.'
+          : `Your location is not available: ${e.message}`,
+      )
+    })
+    map.addControl(geolocate, 'top-right')
     map.addControl(new maplibregl.ScaleControl(), 'bottom-left')
     map.on('load', () => props.onLoad(map))
     map.on('moveend', () => {
