@@ -56,6 +56,15 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - **State updates.** All writes go through actions; results of pure functions are
   applied with `reconcile` at the narrowest path. Components that own MapLibre
   objects are keyed by id so edits never recreate map layers.
+- **Undo.** Snapshots of the project are taken before every content edit (images, GCPs,
+  skews, routes, names) and restored with `reconcile`. Display settings (map view,
+  satellite, layer visibility and opacity) keep their current values on undo, so toggling
+  an image while looking for map features does not fill the history. Routing results are
+  not steps. Open/New/reload start a new history; deletions need no confirmation.
+- **Touch.** MapLibre fires `contextmenu` for a 500 ms touch on the map; the app drops the
+  click that may follow the lifting finger, and a long-press menu only reacts to a new
+  tap. Draggable waypoint markers block MapLibre's long press, so they detect their own
+  with pointer events (touch and pen only).
 - **Persistence.** The project is stored as JSON in IndexedDB, image bytes as
   ArrayBuffers (Safari private mode rejects Blobs). Autosave is enabled only after the
   stored project loaded successfully, so a failed load never overwrites data.
@@ -80,7 +89,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - OSM base map, Esri satellite layer with visibility and opacity.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with order, visibility,
   opacity and an active layer.
-- Context-menu driven GCP editing and "skew image to map" with fold/mirror checks.
+- Context-menu driven GCP editing (right-click or long press) and "skew image to map"
+  with fold/mirror checks.
+- Undo/redo of content edits.
 - Draw route mode: append, drag and remove waypoints; per-route OSRM profile.
 - GPX export of all routes as tracks.
 - Project save/open/new; automatic persistence in IndexedDB including map view.

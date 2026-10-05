@@ -14,20 +14,27 @@ It runs entirely in the browser; nothing is uploaded anywhere.
 1. Move the map to the area of the tour.
 2. **Add images** (JPEG, PNG, WebP). Each image becomes a layer; the active layer is the
    one you are working on. Layers can be reordered, hidden and made transparent.
-3. Right-click a feature on the image and choose **Mark point on image**, then right-click
-   the same feature on the map and choose **Match point on map** (or the other way round).
+3. Right-click (or long-press on a touch screen) a feature on the image and choose
+   **Mark point on image**, then do the same on the feature on the map and choose
+   **Match point on map** (or the other way round).
    Lowering the layer opacity or hiding the layer helps to find the feature on the map.
 4. With three or more pairs, press **Skew image to map**. Three pairs rotate, scale and
    skew the image; more pairs also bend it so that every pair matches exactly. Add pairs
    where the image is still off and skew again.
-5. **Draw route**: click to add waypoints, drag them to move, right-click one to remove it,
-   press Esc or Done to finish. Each route is routed for car, bike or foot.
+5. **Draw route**: click or tap to add waypoints, drag them to move, right-click or
+   long-press one to remove it, press Esc or Done to finish. Each route is routed for car,
+   bike or foot.
 6. **Export GPX** writes all routes into one file, one track per route.
 
 Image and map points of a pair are shown as a numbered ring (image) and dot (map),
 joined by a dashed line until a skew makes them coincide. Right-clicking a point offers
 to remove it; removing one side of a pair selects the other side so it can be matched
 again.
+
+**Undo** and **Redo** (the arrows next to Save/Open/New, or Ctrl+Z and Ctrl+Shift+Z) step
+through the edits of the current session: images, points, skews, routes and names. The
+map view, the satellite layer and layer visibility and opacity are not part of it, and
+opening a file, starting a new project or reloading starts a new history.
 
 ## Saving
 
