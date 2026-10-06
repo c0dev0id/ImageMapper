@@ -33,13 +33,28 @@ describe('gcpMenu', () => {
       hits: [],
       onImage: true,
     })
-    expect(labels(entries)).toEqual(['Mark point on image', 'Match point on map'])
-    expect(entries[1].action).toEqual({ kind: 'match', side: 'map', gcpId: 'b' })
+    expect(labels(entries)).toEqual(['Match point on map'])
+    expect(entries[0].action).toEqual({ kind: 'match', side: 'map', gcpId: 'b' })
   })
 
   it('offers matching on the image when a map point is selected', () => {
     const entries = gcpMenu({ gcps: [mapOnly], selected: { gcpId: 'c', side: 'map' }, hits: [], onImage: true })
-    expect(labels(entries)).toEqual(['Match point on image', 'Mark point on map'])
+    expect(labels(entries)).toEqual(['Match point on image'])
+  })
+
+  it('offers no new point beside the image while a map point waits for its match', () => {
+    const entries = gcpMenu({ gcps: [mapOnly], selected: { gcpId: 'c', side: 'map' }, hits: [], onImage: false })
+    expect(labels(entries)).toEqual(['Match point on image (disabled)'])
+  })
+
+  it('keeps removing available while a point is selected', () => {
+    const entries = gcpMenu({
+      gcps: [paired, imageOnly],
+      selected: { gcpId: 'b', side: 'image' },
+      hits: [{ gcpId: 'a', side: 'map', distance: 3 }],
+      onImage: true,
+    })
+    expect(labels(entries)).toEqual(['Match point on map', 'Remove point'])
   })
 
   it('also offers matching for a selected side of a complete pair', () => {

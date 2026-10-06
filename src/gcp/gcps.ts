@@ -39,24 +39,21 @@ export interface MenuInput {
 const other = (side: Side): Side => (side === 'image' ? 'map' : 'image')
 
 /**
- * Context menu entries for a right-click in georeferencing mode. "Match" appears when the
- * opposite side of a GCP is selected and sets (or replaces) the side at the click.
+ * Context menu entries for a right-click in georeferencing mode. Points are marked in
+ * turns: while one side of a GCP is selected, the only way on is to match it on the other
+ * side, which sets (or replaces) that side at the click. Removing stays possible.
  */
 export function gcpMenu({ gcps, selected, hits, onImage }: MenuInput): MenuEntry[] {
   const hasLayer = gcps !== undefined
   const sel = selected && gcps?.some((g) => g.id === selected.gcpId) ? selected : undefined
-  const entries: MenuEntry[] = [
-    sel?.side === 'map'
-      ? {
-          label: 'Match point on image',
-          action: { kind: 'match', side: 'image', gcpId: sel.gcpId },
-          enabled: onImage,
-        }
-      : { label: 'Mark point on image', action: { kind: 'mark', side: 'image' }, enabled: hasLayer && onImage },
-    sel?.side === 'image'
-      ? { label: 'Match point on map', action: { kind: 'match', side: 'map', gcpId: sel.gcpId }, enabled: true }
-      : { label: 'Mark point on map', action: { kind: 'mark', side: 'map' }, enabled: hasLayer },
-  ]
+  const entries: MenuEntry[] = !sel
+    ? [
+        { label: 'Mark point on image', action: { kind: 'mark', side: 'image' }, enabled: hasLayer && onImage },
+        { label: 'Mark point on map', action: { kind: 'mark', side: 'map' }, enabled: hasLayer },
+      ]
+    : sel.side === 'map'
+      ? [{ label: 'Match point on image', action: { kind: 'match', side: 'image', gcpId: sel.gcpId }, enabled: onImage }]
+      : [{ label: 'Match point on map', action: { kind: 'match', side: 'map', gcpId: sel.gcpId }, enabled: true }]
   const nearest = [...hits].sort((a, b) => a.distance - b.distance)[0]
   if (nearest) {
     const sides = new Set(hits.filter((h) => h.gcpId === nearest.gcpId).map((h) => h.side))
