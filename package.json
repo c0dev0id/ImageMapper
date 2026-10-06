@@ -12,13 +12,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@tesseract.js-data/deu": "^1.0.0",
     "fflate": "^0.8.3",
     "idb-keyval": "^6.3.0",
     "maplibre-gl": "^6.12.0",
-    "solid-js": "^1.9.15",
-    "tesseract.js": "^7.0.0",
-    "tesseract.js-core": "^7.0.0"
+    "solid-js": "^1.9.15"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.16",
