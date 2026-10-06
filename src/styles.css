@@ -808,16 +808,39 @@ input[type='search'] {
   resize: vertical;
 }
 
-/* Town names side by side, two per row. */
-.town-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
+/* Town rows: the name, the pin to pick its place, and the picked place or a search below. */
+.town-rows {
   margin: 10px 0;
+  padding: 0;
+  list-style: none;
 }
 
-.town-fields input {
+.town-rows > li + li {
+  margin-top: 6px;
+}
+
+.dialog .town-rows input {
   margin-top: 0;
+}
+
+.row.picked-place {
+  min-height: 0;
+  margin-top: 2px;
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.picked-place span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-search {
+  margin-top: 4px;
+  padding: 6px;
+  border-radius: 6px;
+  background: #f1f3f5;
 }
 
 .dialog [role='status'] {

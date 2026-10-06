@@ -13,6 +13,12 @@ import { readWords, type ReadStage } from './ocr.ts'
 import { describeSolution, townPairs } from './report.ts'
 import { solveTowns, type TownSolution } from './solve.ts'
 
+/** A name as printed on the image, and its place on the map if the user picked it. */
+export interface TownInput {
+  name: string
+  at?: LngLat
+}
+
 export interface MatchProgress {
   /** Text recognition; undefined once the words are read. */
   reading?: { stage: ReadStage; share?: number }
@@ -22,16 +28,16 @@ export interface MatchProgress {
 
 /**
  * Places a layer's image by towns printed on it. The image's words are read while the
- * names are looked up as settlements (near the visible area, if zoomed in); then each
- * town gets one printed name and one map place so that as many as possible agree. With
- * two or more, the image is placed by the best fit and the towns become point pairs, as
- * one undo step, and the view moves to the image. The note below the layer says what
- * happened.
+ * names without a picked place are looked up as settlements (near the visible area, if
+ * zoomed in); a picked place is taken as it is. Then each town gets one printed name and
+ * one map place so that as many as possible agree. With two or more, the image is placed
+ * by the best fit and the towns become point pairs, as one undo step, and the view moves
+ * to the image. The note below the layer says what happened.
  */
 export async function matchTowns(
   map: MapLibreMap,
   layerId: string,
-  names: readonly string[],
+  towns: readonly TownInput[],
   onProgress: (progress: MatchProgress) => void,
   signal: AbortSignal,
 ): Promise<TownSolution> {
@@ -39,7 +45,8 @@ export async function matchTowns(
   const image = layer && imageBlob(layer.id, layer.mime)
   if (!layer || !image) throw new Error('The image of this layer is not available.')
 
-  let progress: MatchProgress = { reading: { stage: 'loading' }, lookedUp: 0, total: names.length }
+  const unpicked = towns.filter((t) => !t.at).map((t) => t.name)
+  let progress: MatchProgress = { reading: { stage: 'loading' }, lookedUp: 0, total: unpicked.length }
   const report = (change: Partial<MatchProgress>) => {
     progress = { ...progress, ...change }
     onProgress(progress)
@@ -50,12 +57,17 @@ export async function matchTowns(
       report({ reading: undefined })
       return words
     }),
-    lookUp(names, searchViewbox(map), () => report({ lookedUp: progress.lookedUp + 1 }), signal),
+    lookUp(unpicked, searchViewbox(map), () => report({ lookedUp: progress.lookedUp + 1 }), signal),
   ])
   signal.throwIfAborted()
 
+  const found = new Map(unpicked.map((name, i) => [name, places[i]]))
   const solution = solveTowns(
-    names.map((name, i) => ({ name, image: findName(name, words).map((hit) => hit.at), map: places[i] })),
+    towns.map(({ name, at }) => ({
+      name,
+      image: findName(name, words).map((hit) => hit.at),
+      map: at ? [at] : (found.get(name) ?? []),
+    })),
     layer.width,
     layer.height,
   )
