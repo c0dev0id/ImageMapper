@@ -10,7 +10,7 @@ import { setLayerNote } from '../state/ui.ts'
 import { placementOf } from './fit.ts'
 import { findName } from './names.ts'
 import { readWords, type ReadStage } from './ocr.ts'
-import { describeSolution, townPairs } from './report.ts'
+import { describeSolution, replaceTownPairs } from './report.ts'
 import { solveTowns, type TownSolution } from './solve.ts'
 
 /** A name as printed on the image, with where it is printed and its place on the map if the user picked them. */
@@ -39,8 +39,9 @@ export interface MatchOptions {
  * town was picked on the image) while the names without a picked place are looked up as
  * settlements; picked spots and places are taken as they are. Then each town gets one
  * printed name and one map place so that as many as possible agree. With two or more,
- * the image is placed by the best fit and the towns become point pairs, as one undo step,
- * and the view moves to the image. The note below the layer says what happened.
+ * the image is placed by the best fit and the towns become point pairs in place of those
+ * the previous match made, as one undo step, and the view moves to the image. The note
+ * below the layer says what happened.
  */
 export async function matchTowns(
   map: MapLibreMap,
@@ -93,8 +94,8 @@ export async function matchTowns(
   if (!solution.fit || !current) return solution
 
   const placement = placementOf(solution.fit, current.width, current.height)
-  const gcps = unwrap(current.gcps)
-  placeLayer(current.id, placement, [...gcps, ...townPairs(solution.matches, gcps, () => crypto.randomUUID())], 'Match towns')
+  const gcps = replaceTownPairs(unwrap(current.gcps), solution.matches, () => crypto.randomUUID())
+  placeLayer(current.id, placement, gcps, 'Match towns')
   const warp = warpOf(current.id)
   if (warp) flyToImage(map, warp)
   setLayerNote({ layerId, ...describeSolution(solution) })

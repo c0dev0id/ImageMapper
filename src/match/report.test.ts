@@ -1,22 +1,30 @@
 import { describe, expect, it } from 'vitest'
 import type { Gcp } from '../state/schema.ts'
-import { describeMisses, describeSolution, listNames, townPairs } from './report.ts'
+import { describeMisses, describeSolution, listNames, replaceTownPairs } from './report.ts'
 import type { TownMatch, TownMiss } from './solve.ts'
 
 const match = (name: string, image: [number, number], map: [number, number]): TownMatch => ({ index: 0, name, image, map })
 const miss = (name: string, reason: TownMiss['reason']): TownMiss => ({ index: 0, name, reason })
 const fit = { c: 1e-6, s: 0, tx: 0.5, ty: 0.3 }
 
-describe('townPairs', () => {
-  it('rounds like the other point pairs and skips names pinned before', () => {
+describe('replaceTownPairs', () => {
+  it('replaces the pairs of the previous match, keeps pairs pinned by hand and marks the new ones', () => {
     let next = 0
-    const existing: Gcp[] = [{ id: 'old', image: [888.12, 271.5], map: [7.82, 50.66] }]
-    const pairs = townPairs(
-      [match('Hachenburg', [888.123456, 271.5], [7.82, 50.66]), match('Westerburg', [1172.3333, 546.6666], [7.9712345678, 50.5598765432])],
-      existing,
-      () => `new-${next++}`,
-    )
-    expect(pairs).toEqual([{ id: 'new-0', image: [1172.33, 546.67], map: [7.9712346, 50.5598765] }])
+    const gcps: Gcp[] = [
+      { id: 'hand', image: [10, 10], map: [7, 50] },
+      { id: 'old', image: [880, 260], map: [7.82, 50.66], town: 'Hachenburg' },
+      // A pair of the previous match with its image side removed by the user.
+      { id: 'half', map: [7.97, 50.56], town: 'Westerburg' },
+    ]
+    const matches = [
+      match('Hachenburg', [888.123456, 271.5], [7.82, 50.66]),
+      match('Westerburg', [1172.3333, 546.6666], [7.9712345678, 50.5598765432]),
+    ]
+    expect(replaceTownPairs(gcps, matches, () => `new-${next++}`)).toEqual([
+      { id: 'hand', image: [10, 10], map: [7, 50] },
+      { id: 'new-0', image: [888.12, 271.5], map: [7.82, 50.66], town: 'Hachenburg' },
+      { id: 'new-1', image: [1172.33, 546.67], map: [7.9712346, 50.5598765], town: 'Westerburg' },
+    ])
   })
 })
 

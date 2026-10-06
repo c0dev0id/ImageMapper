@@ -144,6 +144,11 @@ describe('applyGcpAction', () => {
     expect(result.selected).toEqual({ gcpId: 'a', side: 'image' })
   })
 
+  it('keeps what else the point carries when removing one side', () => {
+    const result = applyGcpAction([{ ...paired, town: 'Kleve' }], { kind: 'remove', side: 'map', gcpId: 'a' }, at, ids)
+    expect(result.gcps).toEqual([{ id: 'a', image: [10, 10], town: 'Kleve' }])
+  })
+
   it('deletes the point when its last side is removed', () => {
     const result = applyGcpAction([paired, imageOnly], { kind: 'remove', side: 'image', gcpId: 'b' }, at, ids)
     expect(result.gcps).toEqual([paired])

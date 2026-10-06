@@ -1,5 +1,4 @@
 import { roundImagePoint, roundMapPoint } from '../gcp/gcps.ts'
-import type { Px } from '../geo/types.ts'
 import type { Gcp } from '../state/schema.ts'
 import type { TownMatch, TownMiss, TownSolution } from './solve.ts'
 
@@ -11,14 +10,15 @@ export interface MatchNote {
 }
 
 /**
- * Point pairs for the matched towns, at the precision of other point pairs. Towns already
- * pinned at the same printed name (an earlier match) are not added twice.
+ * A layer's point pairs after a match: the pairs the previous match created, edited or
+ * not, give way to one pair per matched town, marked with its name and at the precision
+ * of other point pairs. Pairs pinned by hand stay.
  */
-export function townPairs(matches: readonly TownMatch[], existing: readonly Gcp[], makeId: () => string): Gcp[] {
-  const pinned = (at: Px) => existing.some((g) => g.image && Math.hypot(g.image[0] - at[0], g.image[1] - at[1]) < 1)
-  return matches
-    .filter((m) => !pinned(m.image))
-    .map((m) => ({ id: makeId(), image: roundImagePoint(m.image), map: roundMapPoint(m.map) }))
+export function replaceTownPairs(gcps: readonly Gcp[], matches: readonly TownMatch[], makeId: () => string): Gcp[] {
+  return [
+    ...gcps.filter((g) => g.town === undefined),
+    ...matches.map((m) => ({ id: makeId(), image: roundImagePoint(m.image), map: roundMapPoint(m.map), town: m.name })),
+  ]
 }
 
 /** "A", "A and B", "A, B and C". */

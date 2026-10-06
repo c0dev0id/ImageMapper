@@ -138,7 +138,8 @@ export function applyGcpAction(
       if (gcp[remaining] === undefined) {
         return { gcps: gcps.filter((g) => g.id !== gcp.id), selected: undefined }
       }
-      const kept: Gcp = { id: gcp.id, [remaining]: gcp[remaining] }
+      const kept: Gcp = { ...gcp }
+      delete kept[action.side]
       return {
         gcps: gcps.map((g) => (g.id === gcp.id ? kept : g)),
         selected: { gcpId: gcp.id, side: remaining },
