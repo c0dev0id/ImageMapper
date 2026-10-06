@@ -101,6 +101,24 @@ describe('Warp', () => {
     expect(flipped).toBeLessThan(total)
   })
 
+  it('takes the pixel on top where the image folds over itself', () => {
+    const folded: Pair[] = [
+      ...affinePairs,
+      { image: [1000, 1500], map: rotated([3000, 1500]) },
+      { image: [3000, 1500], map: rotated([1000, 1500]) },
+    ]
+    const warp = new Warp(folded, W, H)
+    // The middle of the fold shows three layers of the image; the renderer draws the grid
+    // row by row, left to right, so the right-hand layer comes last and lies on top.
+    const spot = rotated([2000, 1500])
+    const [x, y] = warp.mapToImage(spot)!
+    expect(x).toBeGreaterThan(2500)
+    expect(y).toBeCloseTo(1500, -1)
+    const [lng, lat] = warp.imageToMap([x, y])
+    expect(lng).toBeCloseTo(spot[0], 9)
+    expect(lat).toBeCloseTo(spot[1], 9)
+  })
+
   it('outlines the image border as a closed ring through the corners', () => {
     const warp = new Warp(affinePairs, W, H, 8)
     const ring = warp.outline()

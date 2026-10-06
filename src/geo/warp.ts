@@ -79,14 +79,18 @@ export class Warp {
     return fromMercator(this.imageToMercator(px))
   }
 
-  /** Maps a map position to the image pixel drawn there, or undefined outside the image. */
+  /**
+   * Maps a map position to the image pixel drawn there, or undefined outside the image.
+   * Where the image folds over itself, several pixels lie on the spot; the one drawn last,
+   * which is the one on top, is the one seen there.
+   */
   mapToImage(lngLat: LngLat): Px | undefined {
     const [mx, my] = toMercator(lngLat)
     const [minX, minY, maxX, maxY] = this.bounds
     if (mx < minX || mx > maxX || my < minY || my > maxY) return undefined
     const pos = this.positions
     const eps = 1e-9
-    for (let t = 0; t < this.indices.length; t += 3) {
+    for (let t = this.indices.length - 3; t >= 0; t -= 3) {
       const i0 = 2 * this.indices[t]
       const i1 = 2 * this.indices[t + 1]
       const i2 = 2 * this.indices[t + 2]

@@ -47,6 +47,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   happen inside `render()` so MapLibre's cached GL state stays valid.
 - **Inverse mapping through the drawn mesh.** A click is converted to image pixels by
   finding the mesh triangle under it, so the result is exactly the pixel on screen.
+  Where a skew folds the image over itself, several triangles lie under the click; the
+  search starts from the one drawn last, which is the one on top and the one seen.
 - **GCP model.** A GCP has an optional image side and an optional map side. Selection is
   one side of one GCP of the active layer. "Match" sets or replaces the opposite side of
   the selected GCP; "remove" removes one side and selects the remaining one. Sides are
