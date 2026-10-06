@@ -1,4 +1,5 @@
 import { NOMINATIM_URL, SEARCH_MIN_INTERVAL_MS, SEARCH_TIMEOUT_MS } from '../config.ts'
+import type { Bounds } from '../geo/bounds.ts'
 import type { LngLat } from '../geo/types.ts'
 
 export interface Place {
@@ -11,8 +12,8 @@ export interface Place {
   bounds?: [number, number, number, number]
 }
 
-/** Area as [west, south, east, north]. */
-export type Viewbox = [number, number, number, number]
+/** Area to search in, as [west, south, east, north]. */
+export type Viewbox = Bounds
 
 export interface SearchOptions {
   /** Area to prefer; results elsewhere are still returned. */
