@@ -13,8 +13,12 @@ It runs entirely in the browser; nothing is uploaded anywhere.
 
 1. Move the map to the area of the tour: search for a place or address at the top of the
    panel, or use the locate button below the zoom buttons.
-2. **Add images** (JPEG, PNG, WebP). Each image becomes a layer; the active layer is the
-   one you are working on. Layers can be reordered, hidden and made transparent.
+2. **Add images** (JPEG, PNG, WebP). Each image becomes a layer. Layers can be reordered,
+   hidden and made transparent. The active layer is the one you are working on: marking
+   points and moving always apply to its image, also where other images lie on top of it.
+   **Move, rotate, resize** in the active layer's row lines the image up with the map by
+   hand: drag the image to move it, a corner to resize it and the round handle to rotate
+   it. Optional, but matching points is easier when the image is roughly in place.
 3. Right-click (or long-press on a touch screen) a feature on the image and choose
    **Mark point on image**, then do the same on the feature on the map and choose
    **Match point on map** (or the other way round).
@@ -32,10 +36,13 @@ joined by a dashed line until a skew makes them coincide. Right-clicking a point
 to remove it; removing one side of a pair selects the other side so it can be matched
 again.
 
-**Undo** and **Redo** (the arrows next to Save/Open/New, or Ctrl+Z and Ctrl+Shift+Z) step
-through the edits of the current session: images, points, skews, routes and names. The
-map view, the satellite layer and layer visibility and opacity are not part of it, and
-opening a file, starting a new project or reloading starts a new history.
+**Undo** and **Redo** (the arrows next to the title, or Ctrl+Z and Ctrl+Shift+Z) step
+through the edits of the current session: images, placements, points, skews, routes and
+names. The map view, the satellite layer and layer visibility and opacity are not part
+of it, and opening a file, starting a new project or reloading starts a new history.
+
+On a phone the panel sits below the map; the arrow next to undo and redo folds it away
+to give the map more room.
 
 ## Saving
 

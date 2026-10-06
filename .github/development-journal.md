@@ -65,6 +65,23 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   click that may follow the lifting finger, and a long-press menu only reacts to a new
   tap. Draggable waypoint markers block MapLibre's long press, so they detect their own
   with pointer events (touch and pen only).
+- **Placing an image by hand.** Move, rotate and resize change the map side of the
+  placement pairs by a similarity transform in Web Mercator. The TPS is linear in its
+  targets, so the warped image, bends included, moves as a whole and the GCPs stay as
+  they are; a later skew starts again from the GCPs. Rotation and scaling pivot on the
+  image centre and scaling is uniform, because stretching is what GCPs are for. Each
+  gesture records one undo step when it starts. A press on the image arrives as a
+  MapLibre layer event on a transparent fill of the image's footprint; preventing it
+  keeps the map's pan, pinch and long press out of that gesture, and a second finger
+  hands the gesture back to the map.
+- **The active layer is the target.** Every image interaction (marking points, moving,
+  resizing, rotating) applies to the active layer's image, also where other images are
+  drawn over it. Hit tests run against the active image's warp or footprint only, never
+  against the rendered stack, so overlapping images cannot intercept or block a gesture.
+  The dashed frame, handles and point markers are drawn above all images.
+- **Phones.** Below 720 px the panel moves under the map (at most 45 % of the height)
+  and can be folded to its title row. Coarse pointers get larger buttons, markers and
+  handles, and 16 px inputs so iOS does not zoom in on focus.
 - **Finding the area.** Locating uses MapLibre's GeolocateControl (one shot, no tracking).
   Search uses Nominatim on explicit submit only, since its policy forbids
   search-as-you-type; requests are spaced one second apart, identical requests cached,
@@ -94,9 +111,11 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with order, visibility,
   opacity and an active layer.
+- Move, rotate and resize an image by hand on the map.
 - Context-menu driven GCP editing (right-click or long press) and "skew image to map"
   with fold/mirror checks.
 - Undo/redo of content edits.
 - Draw route mode: append, drag and remove waypoints; per-route OSRM profile.
 - GPX export of all routes as tracks.
 - Project save/open/new; automatic persistence in IndexedDB including map view.
+- Layout for phones and touch screens.
