@@ -96,7 +96,10 @@ export async function matchTowns(
   return solution
 }
 
-/** Map places per name, best first; the shared search keeps Nominatim's request spacing. */
+/**
+ * Map places per name, best first: settlements, or any kind of place (a pass, a peak) when
+ * no settlement has the name. The shared search keeps Nominatim's request spacing.
+ */
 async function lookUp(
   names: readonly string[],
   viewbox: Viewbox | undefined,
@@ -106,7 +109,11 @@ async function lookUp(
   const found: LngLat[][] = []
   for (const name of names) {
     signal.throwIfAborted()
-    const places = await searchPlaces(name, { viewbox, settlement: true })
+    let places = await searchPlaces(name, { viewbox, settlement: true })
+    if (places.length === 0) {
+      signal.throwIfAborted()
+      places = await searchPlaces(name, { viewbox })
+    }
     found.push(places.map((place) => place.center))
     onEach()
   }
