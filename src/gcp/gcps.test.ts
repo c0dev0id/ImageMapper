@@ -2,7 +2,17 @@ import { describe, expect, it } from 'vitest'
 import { fromMercator, toMercator } from '../geo/mercator.ts'
 import type { LngLat, Px } from '../geo/types.ts'
 import type { Gcp } from '../state/schema.ts'
-import { applyGcpAction, countPairs, gcpMenu, hitTest, moveGcpSide, prepareSkew, type MenuEntry } from './gcps.ts'
+import {
+  applyGcpAction,
+  countPairs,
+  gcpMenu,
+  hitTest,
+  moveGcpSide,
+  pinAction,
+  pinEnabled,
+  prepareSkew,
+  type MenuEntry,
+} from './gcps.ts'
 
 const labels = (entries: MenuEntry[]) => entries.map((e) => `${e.label}${e.enabled ? '' : ' (disabled)'}`)
 
@@ -142,6 +152,21 @@ describe('applyGcpAction', () => {
     const gcps = [paired]
     applyGcpAction(gcps, { kind: 'remove', side: 'map', gcpId: 'a' }, at, ids)
     expect(gcps).toEqual([{ id: 'a', image: [10, 10], map: [11, 48] }])
+  })
+})
+
+describe('pin tools', () => {
+  it('start a new point on either side when nothing waits', () => {
+    expect(pinEnabled('map', undefined) && pinEnabled('image', undefined)).toBe(true)
+    expect(pinAction('map', undefined)).toEqual({ kind: 'mark', side: 'map' })
+    expect(pinAction('image', undefined)).toEqual({ kind: 'mark', side: 'image' })
+  })
+
+  it('only complete a waiting point on the other side', () => {
+    const waiting = { gcpId: 'c', side: 'map' } as const
+    expect(pinEnabled('map', waiting)).toBe(false)
+    expect(pinEnabled('image', waiting)).toBe(true)
+    expect(pinAction('image', waiting)).toEqual({ kind: 'match', side: 'image', gcpId: 'c' })
   })
 })
 

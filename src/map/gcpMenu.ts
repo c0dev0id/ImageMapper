@@ -1,11 +1,12 @@
 import type { LngLat as MapLibreLngLat, Map as MapLibreMap } from 'maplibre-gl'
 import { unwrap } from 'solid-js/store'
-import { applyGcpAction, gcpMenu, hitTest, type SideRef } from '../gcp/gcps.ts'
+import { applyGcpAction, gcpMenu, hitTest, pinAction, pinEnabled, type SideRef } from '../gcp/gcps.ts'
 import type { LngLat, Px } from '../geo/types.ts'
 import type { Warp } from '../geo/warp.ts'
 import { warpOf } from '../state/derived.ts'
 import { activeLayer, setLayerGcps } from '../state/project.ts'
-import { selection, setMenu, setSelection } from '../state/ui.ts'
+import type { Side } from '../state/schema.ts'
+import { selection, setMenu, setSelection, setTool } from '../state/ui.ts'
 
 const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits
 
@@ -18,6 +19,29 @@ export function gcpPointAt(lngLat: MapLibreLngLat, warp: Warp | undefined): { ma
   const map: LngLat = [round(wrapped.lng, 7), round(wrapped.lat, 7)]
   const pixel = warp?.mapToImage(map)
   return { map, image: pixel && [round(pixel[0], 2), round(pixel[1], 2)] }
+}
+
+/**
+ * Places a point with a pin tool: it completes the selected point if that waits for this
+ * side, or starts a new one. The pin of the other side is picked next, so pairs are
+ * pinned in turns. Image pins need a place on the active, visible image.
+ */
+export function placePin(side: Side, lngLat: MapLibreLngLat): void {
+  const layer = activeLayer()
+  if (!layer) return
+  const at = gcpPointAt(lngLat, layer.visible ? warpOf(layer.id) : undefined)
+  if (side === 'image' && !at.image) return
+  const sel = selection()
+  const selected =
+    sel && sel.layerId === layer.id && layer.gcps.some((g) => g.id === sel.gcpId)
+      ? { gcpId: sel.gcpId, side: sel.side }
+      : undefined
+  if (!pinEnabled(side, selected)) return
+  const action = pinAction(side, selected)
+  const result = applyGcpAction(unwrap(layer.gcps), action, at, () => crypto.randomUUID())
+  setLayerGcps(layer.id, result.gcps, `${action.kind === 'match' ? 'Match' : 'Mark'} point on ${side}`)
+  setSelection(result.selected && { layerId: layer.id, ...result.selected })
+  setTool(side === 'map' ? 'pin-image' : 'pin-map')
 }
 
 /** Opens the georeferencing context menu for a right-click at `point` / `lngLat`. */

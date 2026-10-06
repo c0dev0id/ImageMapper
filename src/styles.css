@@ -295,20 +295,7 @@ input[type='range'] {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
 }
 
-/* Menus opened from the panel are popovers: fixed, above everything, never clipped. */
-.popup-menu {
-  inset: auto;
-  margin: 0;
-  padding: 4px 0;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: #fff;
-  color: #212529;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-}
-
-.context-menu button,
-.popup-menu button {
+.context-menu button {
   display: block;
   width: 100%;
   padding: 6px 12px;
@@ -318,8 +305,7 @@ input[type='range'] {
   text-align: left;
 }
 
-.context-menu button:hover:not(:disabled),
-.popup-menu button:hover:not(:disabled) {
+.context-menu button:hover:not(:disabled) {
   background: #e7f5ff;
 }
 
@@ -416,6 +402,11 @@ button.icon svg {
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
+}
+
+/* While a tool waits for a tap, the map shows a crosshair instead of the grab hand. */
+.tool-active .maplibregl-canvas-container.maplibregl-interactive {
+  cursor: crosshair;
 }
 
 /* The toolbar floats over the map, above the scale bar and the attribution. */
@@ -639,8 +630,7 @@ input[type='search'] {
     width: 240px;
   }
 
-  .context-menu button,
-  .popup-menu button {
+  .context-menu button {
     padding: 11px 14px;
   }
 

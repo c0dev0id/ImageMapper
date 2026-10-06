@@ -76,6 +76,16 @@ export function gcpMenu({ gcps, selected, hits, onImage }: MenuInput): MenuEntry
   return entries
 }
 
+/** A pin tool can be used unless its side is the one waiting for a partner. */
+export function pinEnabled(side: Side, selected: SideRef | undefined): boolean {
+  return selected?.side !== side
+}
+
+/** What a pin tool does: match the selected point on its side, or start a new point. */
+export function pinAction(side: Side, selected: SideRef | undefined): GcpAction {
+  return selected && selected.side !== side ? { kind: 'match', side, gcpId: selected.gcpId } : { kind: 'mark', side }
+}
+
 export interface ActionResult {
   gcps: Gcp[]
   selected: SideRef | undefined

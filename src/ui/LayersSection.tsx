@@ -1,24 +1,10 @@
-import type { Map as MapLibreMap } from 'maplibre-gl'
 import { For, Show } from 'solid-js'
-import { unwrap } from 'solid-js/store'
-import { countPairs, prepareSkew } from '../gcp/gcps.ts'
-import type { Warp } from '../geo/warp.ts'
+import { countPairs } from '../gcp/gcps.ts'
 import { useMapAccessor } from '../map/context.ts'
-import { flyToImage, moveImageHere } from '../map/navigate.ts'
-import { warpOf } from '../state/derived.ts'
-import {
-  moveLayer,
-  project,
-  removeLayer,
-  setActiveLayer,
-  setLayerOpacity,
-  setLayerPlacement,
-  setLayerVisible,
-} from '../state/project.ts'
+import { moveLayer, project, removeLayer, setActiveLayer, setLayerOpacity, setLayerVisible } from '../state/project.ts'
 import type { ImageLayer } from '../state/schema.ts'
-import { mode, setSkewNote, skewNote, startTransform, stopTransform } from '../state/ui.ts'
+import { skewNote } from '../state/ui.ts'
 import { addImages, IMAGE_TYPES } from './addImages.ts'
-import { CrosshairIcon } from './icons.tsx'
 
 export function LayersSection() {
   const map = useMapAccessor()
@@ -83,7 +69,6 @@ function LayerRow(props: { layer: ImageLayer }) {
         <span class="grow name" title={layer.name} onClick={() => setActiveLayer(layer.id)}>
           {layer.name}
         </span>
-        <FindImage layer={layer} />
         <button
           class="icon"
           title="Move up"
@@ -122,6 +107,7 @@ function LayerRow(props: { layer: ImageLayer }) {
   )
 }
 
+/** Point pairs of the active layer and the outcome of its last skew (the tools are on the map). */
 function GeorefStatus(props: { layer: ImageLayer }) {
   const layer = props.layer
   const counts = () => countPairs(layer.gcps)
@@ -129,84 +115,15 @@ function GeorefStatus(props: { layer: ImageLayer }) {
     const n = skewNote()
     return n?.layerId === layer.id ? n : undefined
   }
-  const skew = () => {
-    const result = prepareSkew(unwrap(layer.gcps), layer.width, layer.height)
-    if (!result.ok) {
-      setSkewNote({ layerId: layer.id, kind: 'error', text: result.error })
-      return
-    }
-    setLayerPlacement(layer.id, result.pairs, 'Skew image to map')
-    setSkewNote(result.warning ? { layerId: layer.id, kind: 'warning', text: result.warning } : undefined)
-  }
-  const transforming = () => mode() === 'transform'
   return (
     <>
-      <div class="row">
-        <span class="grow muted">Position by hand</span>
-        <button
-          classList={{ primary: transforming() }}
-          title="Drag the image, its corners or its rotate handle on the map"
-          disabled={!layer.visible}
-          onClick={() => (transforming() ? stopTransform() : startTransform())}
-        >
-          {transforming() ? 'Done' : 'Move, rotate, resize'}
-        </button>
-      </div>
       <div class="row">
         <span class="grow muted">
           {counts().complete} {counts().complete === 1 ? 'pair' : 'pairs'}
           {counts().unmatched > 0 ? `, ${counts().unmatched} unmatched` : ''}
         </span>
-        <button class="primary" disabled={counts().complete < 3} onClick={skew}>
-          Skew image to map
-        </button>
       </div>
       <Show when={note()}>{(n) => <p class={`note ${n().kind}`}>{n().text}</p>}</Show>
-    </>
-  )
-}
-
-/** Brings an image that is far off into view: the view to the image, or the image here. */
-function FindImage(props: { layer: ImageLayer }) {
-  const map = useMapAccessor()
-  const layer = props.layer
-  const id = `find-image-${layer.id}`
-  let button!: HTMLButtonElement
-  let popup!: HTMLDivElement
-
-  // A popover lies above everything, so the panel cannot clip it; it opens beside the
-  // button, below it or (lower on the screen, as on phones) above it.
-  const place = (e: ToggleEvent) => {
-    if (e.newState !== 'open') return
-    const r = button.getBoundingClientRect()
-    const below = r.bottom < innerHeight / 2
-    popup.style.top = below ? `${r.bottom + 4}px` : 'auto'
-    popup.style.bottom = below ? 'auto' : `${innerHeight - r.top + 4}px`
-    popup.style.right = `${innerWidth - r.right}px`
-  }
-  const run = (action: (m: MapLibreMap, warp: Warp) => void) => {
-    popup.hidePopover()
-    const m = map()
-    const warp = warpOf(layer.id)
-    if (m && warp) action(m, warp)
-  }
-
-  return (
-    <>
-      <button
-        ref={button}
-        class="icon"
-        title="Find this image on the map"
-        aria-label="Find image"
-        popovertarget={id}
-        disabled={!map()}
-      >
-        <CrosshairIcon />
-      </button>
-      <div ref={popup} id={id} popover class="popup-menu" onBeforeToggle={place}>
-        <button onClick={() => run(flyToImage)}>Fly to image</button>
-        <button onClick={() => run((m, warp) => moveImageHere(m, layer, warp))}>Move image here</button>
-      </div>
     </>
   )
 }

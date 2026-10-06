@@ -2,9 +2,19 @@ import type { MapMouseEvent } from 'maplibre-gl'
 import { onCleanup } from 'solid-js'
 import { roundLngLat } from '../routing/legs.ts'
 import { appendPoint, redo, undo } from '../state/project.ts'
-import { editingRouteId, menu, mode, setMenu, setSelection, stopDrawing, stopTransform } from '../state/ui.ts'
+import {
+  editingRouteId,
+  menu,
+  mode,
+  setMenu,
+  setSelection,
+  setTool,
+  stopDrawing,
+  stopTransform,
+  tool,
+} from '../state/ui.ts'
 import { useMap } from './context.ts'
-import { openGcpMenu } from './gcpMenu.ts'
+import { openGcpMenu, placePin } from './gcpMenu.ts'
 import { fromMarker } from './markers.ts'
 
 /** Mouse and keyboard handling on the map that depends on the current mode. */
@@ -36,10 +46,12 @@ export function Interactions() {
     if (fromMarker(e.originalEvent)) return
     setMenu(undefined)
     const routeId = editingRouteId()
+    const t = tool()
     if (mode() === 'route' && routeId) {
       const { lng, lat } = e.lngLat.wrap()
       appendPoint(routeId, roundLngLat([lng, lat]))
-    } else setSelection(undefined)
+    } else if (t === 'pin-map' || t === 'pin-image') placePin(t === 'pin-map' ? 'map' : 'image', e.lngLat)
+    else setSelection(undefined)
   }
   const onMoveStart = () => setMenu(undefined)
   const onKeyDown = (e: KeyboardEvent) => {
@@ -56,6 +68,7 @@ export function Interactions() {
     if (menu()) setMenu(undefined)
     else if (mode() === 'route') stopDrawing()
     else if (mode() === 'transform') stopTransform()
+    else if (tool()) setTool(undefined)
     else setSelection(undefined)
   }
 

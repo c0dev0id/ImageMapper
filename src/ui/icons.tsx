@@ -48,6 +48,47 @@ export const RedoIcon = () => (
   </Icon>
 )
 
+/** Pin a point on the map (the map side of a pair is a dot). */
+export const PinMapIcon = () => (
+  <Icon>
+    <path d="M8 14.5s-4.5-4.4-4.5-8a4.5 4.5 0 0 1 9 0c0 3.6-4.5 8-4.5 8z" />
+    <circle cx="8" cy="6.5" r="1.5" fill="currentColor" />
+  </Icon>
+)
+
+/** Pin a point on the image (the image side of a pair is a ring). */
+export const PinImageIcon = () => (
+  <Icon>
+    <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" />
+    <circle cx="8" cy="8" r="2.5" />
+  </Icon>
+)
+
+/** Move, rotate and resize: a frame with corner handles. */
+export const TransformIcon = () => (
+  <Icon>
+    <rect x="3.5" y="3.5" width="9" height="9" stroke-dasharray="2 1.5" />
+    <path d="M1.5 1.5h3v3h-3zM11.5 1.5h3v3h-3zM11.5 11.5h3v3h-3zM1.5 11.5h3v3h-3z" fill="currentColor" stroke="none" />
+  </Icon>
+)
+
+/** Skew the image to its point pairs. */
+export const SkewIcon = () => (
+  <Icon>
+    <path d="M5 3h9l-3 10H2z" />
+    <circle cx="6" cy="6" r="1" fill="currentColor" stroke="none" />
+    <circle cx="10" cy="10" r="1" fill="currentColor" stroke="none" />
+  </Icon>
+)
+
+/** Bring into view: a picture between the corners of the view. */
+export const MoveHereIcon = () => (
+  <Icon>
+    <path d="M1.5 5V1.5H5M11 1.5h3.5V5M14.5 11v3.5H11M5 14.5H1.5V11" />
+    <rect x="5.5" y="5.5" width="5" height="5" rx="1" />
+  </Icon>
+)
+
 /** The map pin of a waypoint; its tip marks the place. */
 export function WaypointPin() {
   return (

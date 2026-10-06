@@ -1,7 +1,7 @@
 import { Match, Switch } from 'solid-js'
 import { gcpNumber } from '../gcp/gcps.ts'
 import { activeLayer, routeById } from '../state/project.ts'
-import { editingRouteId, mode, selection, stopDrawing, stopTransform } from '../state/ui.ts'
+import { editingRouteId, mode, selection, stopDrawing, stopTransform, tool } from '../state/ui.ts'
 
 /** A short instruction for the current state, shown over the map. */
 export function HintBar() {
@@ -10,13 +10,16 @@ export function HintBar() {
     const layer = activeLayer()
     if (!layer) return undefined
     const sel = selection()
+    const t = tool()
     if (sel && sel.layerId === layer.id) {
       const n = gcpNumber(layer.gcps, sel.gcpId)
-      return sel.side === 'image'
-        ? `Image point ${n} selected: right-click or long-press the same place on the map and choose "Match point on map".`
-        : `Map point ${n} selected: right-click or long-press the same place on the image and choose "Match point on image".`
+      const other = sel.side === 'image' ? 'map' : 'image'
+      const how = t ? 'tap' : 'pin, right-click or long-press'
+      return `${sel.side === 'image' ? 'Image' : 'Map'} point ${n} selected: ${how} the same place on the ${other}.`
     }
-    return 'Right-click or long-press a feature on the image, then the same feature on the map. Skew the image with 3 or more pairs.'
+    if (t === 'pin-map') return 'Tap a feature on the map to pin it, then the same feature on the image.'
+    if (t === 'pin-image') return 'Tap a feature on the image to pin it, then the same feature on the map.'
+    return 'Pin a feature on the image and the same feature on the map (toolbar, right-click or long-press), then skew with 3 or more pairs.'
   }
   const drawing = () => (mode() === 'route' ? routeById(editingRouteId()) : undefined)
   return (

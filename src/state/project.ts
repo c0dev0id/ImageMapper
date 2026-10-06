@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js'
 import { createStore, reconcile, unwrap } from 'solid-js/store'
 import type { LngLat, Pair } from '../geo/types.ts'
+import { prepareSkew } from '../gcp/gcps.ts'
 import * as edit from '../routing/routeEdit.ts'
 import { History, withCurrentDisplay } from './history.ts'
 import {
@@ -199,6 +200,19 @@ export function setLayerPlacement(id: string, placement: Pair[], label?: string)
   if (label) recordEdit(label)
   setProject('layers', index, 'placement', placement)
   onChange()
+}
+
+/** Fits a layer's image to its complete point pairs; problems are shown as its skew note. */
+export function skewImageToMap(layerId: string): void {
+  const layer = layerById(layerId)
+  if (!layer) return
+  const result = prepareSkew(unwrap(layer.gcps), layer.width, layer.height)
+  if (!result.ok) {
+    setSkewNote({ layerId, kind: 'error', text: result.error })
+    return
+  }
+  setLayerPlacement(layerId, result.pairs, 'Skew image to map')
+  setSkewNote(result.warning ? { layerId, kind: 'warning', text: result.warning } : undefined)
 }
 
 /** Records the current project as one undo step for a gesture made of several edits. */
