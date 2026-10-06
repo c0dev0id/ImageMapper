@@ -1,6 +1,7 @@
 import { roundImagePoint, roundMapPoint } from '../gcp/gcps.ts'
 import { toMercator } from '../geo/mercator.ts'
-import type { Pair } from '../geo/types.ts'
+import type { Pair, Px } from '../geo/types.ts'
+import type { Place } from '../search/nominatim.ts'
 import type { Gcp } from '../state/schema.ts'
 import { fitScale, fitSimilarity, toImage, type Correspondence, type Fit } from './fit.ts'
 
@@ -91,4 +92,38 @@ export function replaceTownPairs(gcps: readonly Gcp[], towns: readonly TownPair[
     ...gcps.filter((g) => g.town === undefined),
     ...towns.map((t) => ({ id: makeId(), image: roundImagePoint(t.image), map: roundMapPoint(t.map), town: t.name })),
   ]
+}
+
+/**
+ * A town as the user picks it in the Match Towns dialog: the search for it, the place
+ * picked from the results, its spot on the image, and whether the last match left it out.
+ */
+export interface TownRow {
+  term: string
+  place?: Place
+  image?: Px
+  misfit?: boolean
+}
+
+/** The towns of the rows that have both a place and a spot, with the positions of those rows. */
+export function completeTowns(rows: readonly TownRow[]): { towns: TownPair[]; rows: number[] } {
+  const towns: TownPair[] = []
+  const at: number[] = []
+  rows.forEach((row, i) => {
+    if (!row.place || !row.image) return
+    towns.push({ name: row.place.name, image: row.image, map: row.place.center })
+    at.push(i)
+  })
+  return { towns, rows: at }
+}
+
+/**
+ * What a row the user has started still needs: its place, its spot on the image, or a
+ * check because the last match left it out. Undefined for untouched and finished rows.
+ */
+export function rowNote(row: TownRow): 'place' | 'image' | 'fit' | undefined {
+  if (!row.term.trim() && !row.place && !row.image) return undefined
+  if (!row.place) return 'place'
+  if (!row.image) return 'image'
+  return row.misfit ? 'fit' : undefined
 }

@@ -1,29 +1,17 @@
 import { createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
-import { createStore, unwrap } from 'solid-js/store'
-import type { Px } from '../geo/types.ts'
+import { createStore, produce, unwrap } from 'solid-js/store'
 import { useMap } from '../map/context.ts'
 import { newPointWarp } from '../map/gcpMenu.ts'
 import { searchViewbox } from '../map/navigate.ts'
 import { searchPlaces, type Place } from '../search/nominatim.ts'
 import { layerById } from '../state/project.ts'
-import { cancelTapRequest, errorMessage, requestTap, tapRequest } from '../state/ui.ts'
+import { cancelTapRequest, errorMessage, requestTap, tapRequest, type TapRequest } from '../state/ui.ts'
 import { PinImageIcon } from '../ui/icons.tsx'
 import { PlaceResults } from '../ui/PlaceResults.tsx'
 import { matchTowns } from './matchTowns.ts'
 import './MatchTowns.css'
 import type { MatchNote } from './report.ts'
-import type { TownPair } from './towns.ts'
-
-/**
- * A town as the user picks it: the search for it, the place picked from the results, its
- * spot on the image, and why the last match could not use it.
- */
-interface TownRow {
-  term: string
-  place?: Place
-  image?: Px
-  miss?: 'place' | 'image' | 'fit'
-}
+import { completeTowns, rowNote, type TownRow } from './towns.ts'
 
 const ROWS = 4
 
@@ -91,19 +79,23 @@ export function MatchTownsDialog() {
 
 function TownForm(props: { layerId: string; onClose: () => void }) {
   const map = useMap()
-  // Searches prefer what was in view when the dialog opened, so searching again for a
-  // name after the view moved asks the same question, which the search has cached.
-  const viewbox = searchViewbox(map)
   const [rows, setRows] = createStore<TownRow[]>(
     structuredClone(rowsByLayer.get(props.layerId) ?? Array.from({ length: ROWS }, () => ({ term: '' }))),
   )
   const [message, setMessage] = createSignal<MatchNote>()
-  /** The row waiting for a tap on the image. */
-  const [picking, setPicking] = createSignal<number>()
+  /** Whether Match was pressed: from then on, rows say what they still need. */
+  const [tried, setTried] = createSignal(false)
   /** The row whose search is running. */
   const [searching, setSearching] = createSignal<number>()
   /** The row whose search results are shown, with the places found or why the search failed. */
   const [found, setFound] = createSignal<{ row: number; places?: Place[]; error?: string }>()
+  /** This form's last tap request; the row it is for waits for a tap while it is open. */
+  let pick: { row: number; request: TapRequest } | undefined
+  const picking = () => {
+    // Read first, so that whoever asks always tracks the request, even before the first pick.
+    const open = tapRequest()
+    return open && open === pick?.request ? pick.row : undefined
+  }
   let firstInput!: HTMLInputElement
   onMount(() => firstInput.focus())
   // The form goes when the dialog closes or turns to another layer; its pick goes with
@@ -121,7 +113,7 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
     setSearching(i)
     setFound(undefined)
     try {
-      setFound({ row: i, places: await searchPlaces(q, { viewbox }) })
+      setFound({ row: i, places: await searchPlaces(q, { viewbox: searchViewbox(map) }) })
     } catch (error) {
       setFound({ row: i, error: errorMessage(error) })
     } finally {
@@ -138,7 +130,7 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
       setMessage({ kind: 'warning', text: SHOW_IMAGE })
       return
     }
-    requestTap({
+    const request: TapRequest = {
       hint: `Tap where ${nameOf(i)} is on the image.`,
       onTap: (lngLat) => {
         const layer = layerById(props.layerId)
@@ -148,30 +140,24 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
           setMessage({ kind: 'warning', text })
           return false
         }
-        setPicking(undefined)
         setMessage(undefined)
-        setRows(i, { image: at, miss: undefined })
+        setRows(i, { image: at, misfit: undefined })
       },
-      onCancel: () => setPicking(undefined),
-    })
-    setPicking(i)
+    }
+    pick = { row: i, request }
+    requestTap(request)
   }
 
   const submit = () => {
     if (picking() !== undefined) cancelTapRequest()
     setFound(undefined)
-    // Rows the user started; those with a place and a spot are matched, by their position here.
-    const used = unwrap(rows).flatMap((row, index) => (row.term.trim() || row.place || row.image ? [{ row, index }] : []))
-    const complete = used.flatMap(({ row, index }) =>
-      row.place && row.image ? [{ index, town: { name: row.place.name, image: row.image, map: row.place.center } }] : [],
-    )
-    for (const { row, index } of used) setRows(index, 'miss', !row.place ? 'place' : !row.image ? 'image' : undefined)
-    if (complete.length < 2) {
+    setTried(true)
+    const complete = completeTowns(unwrap(rows))
+    if (complete.towns.length < 2) {
       setMessage({ kind: 'warning', text: 'Pick at least two towns, each with its place and its spot on the image.' })
       return
     }
-    const towns: TownPair[] = complete.map((c) => c.town)
-    const result = matchTowns(map, props.layerId, towns)
+    const result = matchTowns(map, props.layerId, complete.towns)
     if (!result) {
       setMessage({
         kind: 'warning',
@@ -179,8 +165,15 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
       })
       return
     }
-    for (const town of result.misfits) setRows(complete[town].index, 'miss', 'fit')
-    if (complete.length === used.length && result.misfits.length === 0) props.onClose()
+    const left = new Set(result.misfits.map((town) => complete.rows[town]))
+    setRows(
+      produce((list) =>
+        list.forEach((row, i) => {
+          row.misfit = left.has(i) || undefined
+        }),
+      ),
+    )
+    if (rows.every((row) => !rowNote(row))) props.onClose()
     else setMessage(result.note)
   }
 
@@ -210,7 +203,7 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
                   placeholder={`Town ${i() + 1}`}
                   autocomplete="off"
                   value={row.term}
-                  onInput={(e) => setRows(i(), { term: e.currentTarget.value, miss: undefined })}
+                  onInput={(e) => setRows(i(), 'term', e.currentTarget.value)}
                   onKeyDown={(e) => {
                     // Enter searches instead of matching; Esc closes this row's results first.
                     if (e.key === 'Enter') {
@@ -224,7 +217,7 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
                 />
                 <button
                   type="button"
-                  disabled={searching() !== undefined}
+                  disabled={searching() !== undefined || !row.term.trim()}
                   aria-label={`Search for town ${i() + 1}`}
                   onClick={() => void search(i())}
                 >
@@ -255,7 +248,7 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
                           places={places()}
                           empty="Nothing found. Change the search and try again."
                           onPick={(place) => {
-                            setRows(i(), { place, miss: undefined })
+                            setRows(i(), { place, misfit: undefined })
                             setFound(undefined)
                           }}
                         />
@@ -266,47 +259,28 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
               </Show>
               <Show when={row.place}>
                 {(place) => (
-                  <div class="row picked">
-                    <span class="grow name" title={place().label}>
-                      {place().label}
-                    </span>
-                    <button
-                      type="button"
-                      class="icon"
-                      title="Forget this place"
-                      aria-label={`Forget the place of ${nameOf(i())}`}
-                      onClick={() => setRows(i(), 'place', undefined)}
-                    >
-                      ×
-                    </button>
-                  </div>
+                  <Picked
+                    text={place().label}
+                    forget={`Forget the place of ${nameOf(i())}`}
+                    onForget={() => setRows(i(), { place: undefined, misfit: undefined })}
+                  />
                 )}
               </Show>
               <Show when={row.image}>
-                <div class="row picked">
-                  <span class="grow">Spot picked on the image</span>
-                  <button
-                    type="button"
-                    class="icon"
-                    title="Forget this spot"
-                    aria-label={`Forget the spot of ${nameOf(i())}`}
-                    onClick={() => setRows(i(), 'image', undefined)}
-                  >
-                    ×
-                  </button>
-                </div>
+                <Picked
+                  text="Spot picked on the image"
+                  forget={`Forget the spot of ${nameOf(i())}`}
+                  onForget={() => setRows(i(), { image: undefined, misfit: undefined })}
+                />
               </Show>
-              <Show when={row.miss}>
-                {(reason) => (
+              <Show when={tried() && rowNote(row)}>
+                {(note) => (
                   <p class="row-note">
-                    <Show when={reason() === 'place'}>Search for it and pick the place from the results.</Show>
-                    <Show when={reason() === 'image'}>
-                      No spot on the image yet.{' '}
-                      <button type="button" class="link" onClick={() => pickOnImage(i())}>
-                        Tap it on the image
-                      </button>
-                    </Show>
-                    <Show when={reason() === 'fit'}>Does not fit the others: check the place and the spot.</Show>
+                    {note() === 'place'
+                      ? 'Search for it and pick the place from the results.'
+                      : note() === 'image'
+                        ? 'No spot on the image yet: tap it with the image pin.'
+                        : 'Does not fit the others: check the place and the spot.'}
                   </p>
                 )}
               </Show>
@@ -324,6 +298,20 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
         </button>
       </div>
     </form>
+  )
+}
+
+/** Something a row has picked, with a button to forget it. */
+function Picked(props: { text: string; forget: string; onForget: () => void }) {
+  return (
+    <div class="row picked">
+      <span class="grow name" title={props.text}>
+        {props.text}
+      </span>
+      <button type="button" class="icon" title={props.forget} aria-label={props.forget} onClick={() => props.onForget()}>
+        ×
+      </button>
+    </div>
   )
 }
 

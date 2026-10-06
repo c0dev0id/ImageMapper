@@ -45,16 +45,6 @@
 }
 
 /* More specific than the shared button rules, which this file comes before in the bundle. */
-.town-rows button.link {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--accent);
-  font-size: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 .town-rows button.icon.active {
   border-radius: 4px;
   background: var(--accent);

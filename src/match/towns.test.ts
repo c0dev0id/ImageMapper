@@ -3,7 +3,7 @@ import { fromMercator } from '../geo/mercator.ts'
 import type { LngLat, Px } from '../geo/types.ts'
 import { toImage, toMap, type Fit } from './fit.ts'
 import type { Gcp } from '../state/schema.ts'
-import { fitTowns, replaceTownPairs, type TownPair } from './towns.ts'
+import { completeTowns, fitTowns, replaceTownPairs, rowNote, type TownPair, type TownRow } from './towns.ts'
 
 const W = 1500
 const H = 900
@@ -93,5 +93,32 @@ describe('replaceTownPairs', () => {
       { id: 'new-0', image: [888.12, 271.5], map: [7.82, 50.66], town: 'Hachenburg' },
       { id: 'new-1', image: [1172.33, 546.67], map: [7.9712346, 50.5598765], town: 'Westerburg' },
     ])
+  })
+})
+
+describe('town rows', () => {
+  const kleve = { name: 'Kleve', label: 'Kleve, Nordrhein-Westfalen, Deutschland', center: [6.14, 51.79] as LngLat }
+  const goch = { name: 'Goch', label: 'Goch, Nordrhein-Westfalen, Deutschland', center: [6.16, 51.68] as LngLat }
+  const rows: TownRow[] = [
+    { term: 'Kleve', place: kleve, image: [120, 80] },
+    { term: '' },
+    { term: 'Goch', place: goch },
+    { term: 'Goch', place: goch, image: [130, 300], misfit: true },
+  ]
+
+  it('takes the towns of rows with a place and a spot, with their row positions', () => {
+    expect(completeTowns(rows)).toEqual({
+      towns: [
+        { name: 'Kleve', image: [120, 80], map: [6.14, 51.79] },
+        { name: 'Goch', image: [130, 300], map: [6.16, 51.68] },
+      ],
+      rows: [0, 3],
+    })
+  })
+
+  it('says what a started row still needs', () => {
+    expect(rows.map(rowNote)).toEqual([undefined, undefined, 'image', 'fit'])
+    expect(rowNote({ term: 'Xanten' })).toBe('place')
+    expect(rowNote({ term: '', image: [5, 5] })).toBe('place')
   })
 })

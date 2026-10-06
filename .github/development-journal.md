@@ -169,9 +169,10 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   waiting. The dialog does not block the map, so the image can be panned, zoomed and
   tapped while it is open; it is dragged by its title, stays partly on screen and keeps
   its position, and it stays open while a row is incomplete or left out, saying per row
-  what is missing. Its searches prefer the area that was in view when it opened, so
-  repeating a search is answered from the cache. Everything lives in `src/match/`, its
-  styles included, so the feature can be taken out in one piece.
+  what is missing. Its searches prefer the visible area, as the panel's search does.
+  What a row still needs is worked out from the row itself (`rowNote`); only "does not
+  fit" is stored, by the match. Everything lives in `src/match/`, its styles included,
+  so the feature can be taken out in one piece.
   Text recognition was tried first and dropped. tesseract.js (German model, self-hosted,
   about 5 MB) read the whole image, typed names were matched against the words read, and
   settlement searches found the map side automatically. On real tour maps it missed or
