@@ -17,6 +17,7 @@ import {
   SkewIcon,
   TransformIcon,
   UndoIcon,
+  WaypointIcon,
 } from '../ui/icons.tsx'
 import { useMap } from './context.ts'
 import { flyToImage, moveImageHere } from './navigate.ts'
@@ -180,7 +181,13 @@ function RouteTools() {
     <div class="toolbar-group">
       {button('append', 'Append points', 'Tap the map to add points at the end of the route', <AppendIcon />)}
       {button('insert', 'Insert point', 'Tap the route line to insert a point there', <InsertIcon />)}
-      {button('delete', 'Delete point', 'Tap a route point to delete it', <DeleteIcon />)}
+      {button(
+        'waypoint',
+        'Add waypoint',
+        'Tap the map to place a waypoint: a named place of its own, such as a viewpoint or a warning',
+        <WaypointIcon />,
+      )}
+      {button('delete', 'Delete', 'Tap a route point or a waypoint to delete it', <DeleteIcon />)}
     </div>
   )
 }

@@ -6,7 +6,8 @@ import { editingRouteId, mode, selection, stopDrawing, stopTransform, tool, type
 const ROUTE_HINTS: Partial<Record<Tool, string>> = {
   append: 'tap the map to add points at the end, drag points to move them.',
   insert: 'tap the route line to insert a point there.',
-  delete: 'tap a route point to delete it.',
+  waypoint: 'tap the map to place a waypoint; right-click or long-press one to edit it.',
+  delete: 'tap a route point or a waypoint to delete it.',
 }
 
 /** A short instruction for the current state, shown over the map. */

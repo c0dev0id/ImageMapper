@@ -9,6 +9,7 @@ import {
   setMenu,
   setSelection,
   setTool,
+  setWaypointDraft,
   stopDrawing,
   stopTransform,
   tool,
@@ -51,6 +52,7 @@ export function Interactions() {
     if (mode() === 'route' && routeId) {
       const { lng, lat } = e.lngLat.wrap()
       if (t === 'insert') insertPointOnLine(map, routeId, [e.point.x, e.point.y], pointerType === 'mouse' ? 10 : 24)
+      else if (t === 'waypoint') setWaypointDraft({ lngLat: roundLngLat([lng, lat]), name: '', description: '' })
       else if (t === 'append' || t === undefined) appendPoint(routeId, roundLngLat([lng, lat]))
     } else if (t === 'pin-map' || t === 'pin-image') placePin(t === 'pin-map' ? 'map' : 'image', e.lngLat)
     else setSelection(undefined)

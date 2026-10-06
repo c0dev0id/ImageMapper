@@ -92,7 +92,7 @@ input[type='range'] {
   width: 90px;
 }
 
-:where(.panel, .context-menu, .hint-bar) button.icon {
+:where(.panel, .context-menu, .hint-bar, .dialog) button.icon {
   padding: 0 6px;
   border: none;
   background: none;
@@ -101,7 +101,7 @@ input[type='range'] {
   line-height: 1;
 }
 
-:where(.panel, .context-menu, .hint-bar) button.icon:disabled {
+:where(.panel, .context-menu, .hint-bar, .dialog) button.icon:disabled {
   opacity: 0.3;
   cursor: default;
 }
@@ -143,7 +143,7 @@ input[type='range'] {
 }
 
 .button,
-:where(.panel, .context-menu, .hint-bar) button:not(.icon) {
+:where(.panel, .context-menu, .hint-bar, .dialog) button:not(.icon) {
   display: inline-block;
   padding: 3px 10px;
   border: 1px solid #ced4da;
@@ -155,23 +155,23 @@ input[type='range'] {
 }
 
 .button:hover,
-:where(.panel, .context-menu, .hint-bar) button:not(.icon):hover:not(:disabled) {
+:where(.panel, .context-menu, .hint-bar, .dialog) button:not(.icon):hover:not(:disabled) {
   background: #e9ecef;
 }
 
 .button.disabled,
-:where(.panel, .context-menu, .hint-bar) button:disabled {
+:where(.panel, .context-menu, .hint-bar, .dialog) button:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
-:where(.panel, .context-menu, .hint-bar) button.primary {
+:where(.panel, .context-menu, .hint-bar, .dialog) button.primary {
   border-color: var(--accent);
   background: var(--accent);
   color: #fff;
 }
 
-:where(.panel, .context-menu, .hint-bar) button.primary:hover:not(:disabled) {
+:where(.panel, .context-menu, .hint-bar, .dialog) button.primary:hover:not(:disabled) {
   background: #1971c2;
 }
 
@@ -373,6 +373,11 @@ button.icon svg {
 /* Waypoints: a pin whose tip marks the place, with the name beside its head. */
 .waypoint-marker {
   pointer-events: none;
+  cursor: grab;
+}
+
+.map[data-tool='delete'] .waypoint-marker {
+  cursor: pointer;
 }
 
 .waypoint {
@@ -604,19 +609,20 @@ input[type='search'] {
 
 /* Touch screens: larger targets, and 16px inputs so iOS does not zoom in on focus. */
 @media (pointer: coarse) {
-  :where(.panel, .context-menu, .hint-bar) button,
+  :where(.panel, .context-menu, .hint-bar, .dialog) button,
   input,
   select,
+  textarea,
   .button {
     font-size: 16px;
   }
 
-  :where(.panel, .context-menu, .hint-bar) button:not(.icon),
+  :where(.panel, .context-menu, .hint-bar, .dialog) button:not(.icon),
   .button {
     padding: 6px 12px;
   }
 
-  :where(.panel, .context-menu, .hint-bar) button.icon {
+  :where(.panel, .context-menu, .hint-bar, .dialog) button.icon {
     min-width: 34px;
     min-height: 34px;
   }
@@ -673,4 +679,40 @@ input[type='search'] {
     width: 26px;
     height: 26px;
   }
+}
+
+/* Dialogs use the browser's modal <dialog>. */
+.dialog {
+  width: min(360px, calc(100vw - 32px));
+  padding: 16px;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.dialog h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.dialog label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.dialog input,
+.dialog textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
+  font: inherit;
+}
+
+.dialog textarea {
+  resize: vertical;
 }

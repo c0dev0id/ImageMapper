@@ -1,4 +1,5 @@
 import { createSignal } from 'solid-js'
+import type { LngLat } from '../geo/types.ts'
 import type { Side } from './schema.ts'
 
 /**
@@ -58,6 +59,16 @@ export interface MenuItem {
  * opened by a long press (`touch`) ignores the lifting finger until it is tapped again.
  */
 export const [menu, setMenu] = createSignal<{ x: number; y: number; touch: boolean; items: MenuItem[] }>()
+
+/** A waypoint being created (no id) or edited in the waypoint dialog. */
+export interface WaypointDraft {
+  id?: string
+  lngLat: LngLat
+  name: string
+  description: string
+}
+
+export const [waypointDraft, setWaypointDraft] = createSignal<WaypointDraft>()
 
 /** Result of the last "skew image to map" on a layer, shown in its panel row. */
 export const [skewNote, setSkewNote] = createSignal<{

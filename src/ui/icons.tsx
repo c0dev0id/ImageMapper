@@ -105,6 +105,14 @@ export const InsertIcon = () => (
   </Icon>
 )
 
+/** Add a waypoint: a flag. */
+export const WaypointIcon = () => (
+  <Icon>
+    <path d="M3.5 14.5v-13" />
+    <path d="M3.5 2h8.5l-2 3 2 3H3.5" />
+  </Icon>
+)
+
 /** Delete: a bin. */
 export const DeleteIcon = () => (
   <Icon>

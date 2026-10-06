@@ -16,6 +16,7 @@ import { Waypoints } from './map/Waypoints.tsx'
 import { initPersistence } from './state/persistence.ts'
 import { errorMessage, notify } from './state/ui.ts'
 import { Panel } from './ui/Panel.tsx'
+import { WaypointDialog } from './ui/WaypointDialog.tsx'
 
 export function App() {
   const [loaded, setLoaded] = createSignal(false)
@@ -55,6 +56,7 @@ export function App() {
             </Show>
           </main>
         </div>
+        <WaypointDialog />
       </MapContext.Provider>
     </Show>
   )
