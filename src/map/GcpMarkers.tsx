@@ -12,8 +12,11 @@ import { useMap } from './context.ts'
 import { gcpPointAt, openGcpMenu } from './gcpMenu.ts'
 import { MarkerHandle, onMarkerMenu } from './markers.ts'
 
-/** The active layer while georeferencing; GCP markers are hidden in route mode. */
-const georefLayer = () => (mode() === 'georef' ? activeLayer() : undefined)
+/**
+ * The active layer while georeferencing or placing the image by hand, where the image
+ * points visibly travel with the image; GCP markers are hidden in route mode.
+ */
+const georefLayer = () => (mode() !== 'route' ? activeLayer() : undefined)
 
 /** Draggable markers for both sides of every GCP of the active layer. */
 export function GcpMarkers() {

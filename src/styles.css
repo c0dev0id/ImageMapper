@@ -494,6 +494,12 @@ button.icon svg {
   pointer-events: none !important;
 }
 
+/* While the image is moved, rotated or resized, its points only show where they go: the
+   rings travel with the image, the dots stay on the map. */
+.map[data-mode='transform'] .gcp-marker {
+  pointer-events: none !important;
+}
+
 /*
  * The toolbar floats over the map, above the scale bar and the attribution. Each group of
  * tools is a box of its own; on narrow screens the boxes wrap onto a second row.

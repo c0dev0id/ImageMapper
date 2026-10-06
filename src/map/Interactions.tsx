@@ -26,11 +26,14 @@ import { fromMarker } from './markers.ts'
 export function Interactions() {
   const map = useMap()
 
-  // What the next tap does, for the cursor over the map and for the markers (styles.css).
+  // What the next tap does, and the mode, for the cursor over the map and for the markers (styles.css).
   createEffect(() => {
     const next = tapRequest() ? 'tap' : tool()
     if (next) map.getContainer().dataset.tool = next
     else delete map.getContainer().dataset.tool
+  })
+  createEffect(() => {
+    map.getContainer().dataset.mode = mode()
   })
 
   // MapLibre turns a touch held for 500 ms into a contextmenu event. The browser may still
