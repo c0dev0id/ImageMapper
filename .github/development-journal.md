@@ -184,7 +184,11 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   candidates. The fit is a similarity rather than the thin plate spline because text
   recognition finds the label, which sits beside the town; exact interpolation would
   bend the image toward the labels. The towns become ordinary point pairs for the user
-  to correct before skewing, in one undo step with the new placement. Words read are
+  to correct before skewing, in one undo step with the new placement. Each carries the
+  name of its town (`Gcp.town`), and the next match replaces all such pairs, edited or
+  not, while pairs pinned by hand stay: a corrected namesake or a dragged ring cannot
+  leave a stale pair or a second one for the same town. The marker is project data, not
+  session memory, so undo, reloads and project files keep it consistent. Words read are
   kept per layer for the session. The image goes to the worker as PNG, encoded while
   the worker loads: JPEG was smaller and faster to decode but lost a printed name on the
   Allgäu sample. The engine, worker and model (about 5 MB) are files of

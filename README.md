@@ -38,7 +38,9 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      stays open until every town is matched and says what is missing for each; it does
      not block the map, so the image can be zoomed and tapped, and it can be dragged
      aside by its title. The rings sit on the printed names, not on the towns, so drag
-     them onto the towns before skewing. Clearly printed names work best. Reading a
+     them onto the towns before skewing. Matching again replaces the pairs of the
+     previous match, also ones you dragged (Undo brings them back); pairs you pinned
+     yourself stay. Clearly printed names work best. Reading a
      large image takes a few seconds, and the first use loads about 5 MB for the text
      recognition.
    - **Skew Image** (three or more pairs) fits the image to its pairs. Three pairs rotate,
