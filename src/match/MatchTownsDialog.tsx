@@ -1,43 +1,42 @@
 import { createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js'
 import { createStore, unwrap } from 'solid-js/store'
-import type { LngLat, Px } from '../geo/types.ts'
-import { useMapAccessor } from '../map/context.ts'
+import type { Px } from '../geo/types.ts'
+import { useMap } from '../map/context.ts'
 import { searchViewbox } from '../map/navigate.ts'
-import { searchPlaces, type Place } from '../search/nominatim.ts'
+import { searchPlaces, type Place, type Viewbox } from '../search/nominatim.ts'
 import { warpOf } from '../state/derived.ts'
 import { imageBlob } from '../state/images.ts'
 import { layerById } from '../state/project.ts'
-import { cancelTapRequest, errorMessage, requestTap, tapRequest, type TapRequest } from '../state/ui.ts'
+import { cancelTapRequest, errorMessage, requestTap, tapRequest } from '../state/ui.ts'
 import { PinImageIcon, PinMapIcon } from '../ui/icons.tsx'
+import { PlaceResults } from '../ui/PlaceResults.tsx'
 import { matchTowns, type MatchProgress, type TownInput } from './matchTowns.ts'
+import './MatchTowns.css'
 import { labelAt } from './names.ts'
-import { readWords } from './ocr.ts'
-import { describeSolution } from './report.ts'
+import { knownWords, readWords } from './ocr.ts'
+import { describeSolution, type MatchNote } from './report.ts'
 import type { TownMiss } from './solve.ts'
 
-/** A name as printed on the image, with where it is printed and its place on the map if the user picked them. */
+/**
+ * A town as the user gave it: the name as printed on the image, where it is printed and
+ * its place on the map if picked by hand, and why the last match left it out.
+ */
 interface TownRow {
   label: string
   image?: Px
   place?: Place
+  miss?: TownMiss['reason']
 }
 
 const ROWS = 4
+
+const SHOW_IMAGE = 'Show the image to pick a name on it.'
 
 /** The layer the dialog works on while it is open. */
 const [layerId, setLayerId] = createSignal<string>()
 
 /** Rows per layer in this session, so that a second try starts from the first. */
 const rowsByLayer = new Map<string, TownRow[]>()
-
-/** Work in progress (matching, or reading the image for a pick); closing the dialog cancels it. */
-let running: AbortController | undefined
-
-/** This dialog's request for a tap on the image, so that closing the dialog can withdraw it. */
-let ownTap: TapRequest | undefined
-
-/** Where the dialog was dragged to, for the next time it opens. */
-let position: { left: number; top: number } | undefined
 
 export function openMatchTowns(id: string): void {
   setLayerId(id)
@@ -52,20 +51,15 @@ export function openMatchTowns(id: string): void {
  * stops work in progress.
  */
 export function MatchTownsDialog() {
-  const map = useMapAccessor()
+  const map = useMap()
   let dialog!: HTMLDialogElement
+  const close = () => setLayerId(undefined)
 
-  const close = () => {
-    running?.abort()
-    running = undefined
-    if (ownTap && tapRequest() === ownTap) cancelTapRequest()
-    setLayerId(undefined)
-  }
   createEffect(() => {
     const open = layerId() !== undefined
     if (open && !dialog.open) {
       dialog.show()
-      placeDialog(dialog, map()?.getContainer().getBoundingClientRect())
+      placeDialog(dialog, map.getContainer().getBoundingClientRect())
     } else if (!open && dialog.open) dialog.close()
   })
   // The dialog belongs to its layer: deleting the layer closes it.
@@ -81,140 +75,143 @@ export function MatchTownsDialog() {
       aria-label="Match towns"
       onClose={close}
       onKeyDown={(e) => {
-        // Esc withdraws a tap request first; a search handles its own Esc. The map's keys
-        // leave alone what is handled here.
+        // Esc withdraws a pending pick first, then closes; a search under a row handles its
+        // own Esc. The map's key handling leaves alone what is handled here.
         if (e.key !== 'Escape' || e.defaultPrevented) return
         e.preventDefault()
         if (tapRequest()) cancelTapRequest()
         else close()
       }}
     >
+      <h2 class="dialog-handle" title="Drag to move" onPointerDown={(e) => dragDialog(e, dialog)}>
+        Match towns
+      </h2>
       <Show when={layerId()} keyed>
-        {(id) => <TownForm layerId={id} dialog={dialog} onClose={close} />}
+        {(id) => <TownForm layerId={id} onClose={close} />}
       </Show>
     </dialog>
   )
 }
 
-function TownForm(props: { layerId: string; dialog: HTMLDialogElement; onClose: () => void }) {
-  const map = useMapAccessor()
+function TownForm(props: { layerId: string; onClose: () => void }) {
+  const map = useMap()
+  // Towns are looked up near what was in view when the dialog opened, so a retry after the
+  // view has moved asks the same questions, which the search answers from its cache.
+  const viewbox = searchViewbox(map)
   const [rows, setRows] = createStore<TownRow[]>(
     structuredClone(rowsByLayer.get(props.layerId) ?? Array.from({ length: ROWS }, () => ({ label: '' }))),
   )
-  onCleanup(() => rowsByLayer.set(props.layerId, structuredClone(unwrap(rows))))
   const [progress, setProgress] = createSignal<MatchProgress>()
-  const [message, setMessage] = createSignal<{ kind: 'info' | 'warning'; text: string }>()
-  /** Why towns were left out by the last match, by name. */
-  const [misses, setMisses] = createSignal(new Map<string, TownMiss['reason']>())
+  const [message, setMessage] = createSignal<MatchNote>()
   /** The row whose place is being searched for on the map. */
   const [searching, setSearching] = createSignal<number>()
   /** The row waiting for a tap on the image. */
   const [picking, setPicking] = createSignal<number>()
+  /** Work in progress: matching, or reading the image for a pick. */
+  let running: AbortController | undefined
   const busy = () => progress() !== undefined
   let firstInput!: HTMLInputElement
   onMount(() => firstInput.focus())
-
-  const missOf = (row: TownRow) => misses().get(row.label.trim())
-  const forgetMiss = (row: TownRow) => {
-    const next = new Map(misses())
-    next.delete(row.label.trim())
-    setMisses(next)
-  }
+  // The form goes when the dialog closes or turns to another layer; its work and its pick
+  // go with it, and its rows are kept for the next time.
+  onCleanup(() => {
+    running?.abort()
+    if (picking() !== undefined) cancelTapRequest()
+    rowsByLayer.set(props.layerId, unwrap(rows))
+  })
 
   const pickOnImage = (i: number) => {
-    const layer = layerById(props.layerId)
-    if (!layer || busy()) return
+    if (busy()) return
     if (picking() === i) {
       cancelTapRequest()
       return
     }
-    if (!layer.visible) {
-      setMessage({ kind: 'warning', text: 'Show the image to pick a name on it.' })
+    if (!layerById(props.layerId)?.visible) {
+      setMessage({ kind: 'warning', text: SHOW_IMAGE })
       return
     }
     setSearching(undefined)
     const name = rows[i].label.trim()
-    ownTap = {
-      hint: name ? `Tap where “${name}” is printed on the image.` : `Tap a name printed on the image.`,
+    requestTap({
+      hint: name ? `Tap where “${name}” is printed on the image.` : 'Tap a name printed on the image.',
       onTap: (lngLat) => {
+        const layer = layerById(props.layerId)
+        const at = layer?.visible ? warpOf(layer.id)?.mapToImage(lngLat) : undefined
+        if (!at) {
+          const text = layer?.visible ? 'That was beside the image: tap where the name is printed on it.' : SHOW_IMAGE
+          setMessage({ kind: 'warning', text })
+          return false
+        }
         setPicking(undefined)
-        void readAt(i, lngLat)
+        void readAt(i, at)
       },
       onCancel: () => setPicking(undefined),
-    }
-    requestTap(ownTap)
+    })
     setPicking(i)
   }
 
-  /** Takes the tapped spot for the row; an empty row also takes the name read there. */
-  const readAt = async (i: number, lngLat: LngLat) => {
-    const layer = layerById(props.layerId)
-    const at = layer && warpOf(layer.id)?.mapToImage(lngLat)
-    if (!layer || !at) {
-      setMessage({ kind: 'warning', text: 'That was beside the image: tap where the name is printed on it.' })
-      pickOnImage(i)
-      return
-    }
+  /**
+   * Takes the tapped spot for the row, centred on the name printed there when the image's
+   * words are known. An empty row also takes that name, so its image is read if need be.
+   */
+  const readAt = async (i: number, at: Px) => {
     setMessage(undefined)
-    let label: { text: string; at: Px } | undefined
-    const image = imageBlob(layer.id, layer.mime)
-    const controller = new AbortController()
-    running = controller
-    try {
-      if (image) {
-        const words = await readWords(
-          layer.id,
-          image,
-          (stage, share) => setProgress({ reading: { stage, share }, lookedUp: 0, total: 0 }),
-          controller.signal,
-        )
-        label = labelAt(words, at)
+    let words = knownWords(props.layerId)
+    if (!words && !rows[i].label.trim()) {
+      const layer = layerById(props.layerId)
+      const image = layer && imageBlob(layer.id, layer.mime)
+      const controller = new AbortController()
+      running = controller
+      try {
+        if (image) {
+          words = await readWords(
+            props.layerId,
+            image,
+            (stage, share) => setProgress({ reading: { stage, share }, lookedUp: 0, total: 0 }),
+            controller.signal,
+          )
+        }
+      } catch (error) {
+        if (controller.signal.aborted) return
+        setMessage({ kind: 'warning', text: errorMessage(error) })
+      } finally {
+        running = undefined
+        setProgress(undefined)
       }
-    } catch (error) {
-      if (controller.signal.aborted) return
-      setMessage({ kind: 'warning', text: errorMessage(error) })
-    } finally {
-      if (running === controller) running = undefined
-      setProgress(undefined)
     }
-    forgetMiss(rows[i])
+    const label = words && labelAt(words, at)
     const name = rows[i].label.trim() || label?.text || ''
-    setRows(i, { label: name, image: label?.at ?? at })
+    setRows(i, { label: name, image: label?.at ?? at, miss: undefined })
     if (!name) setMessage({ kind: 'warning', text: 'No name was read there: type it as it is printed.' })
   }
 
   const submit = async () => {
-    const m = map()
-    if (!m || running) return
-    if (tapRequest() === ownTap) cancelTapRequest()
-    const towns: TownInput[] = []
-    for (const row of rows) {
-      const name = row.label.trim()
-      if (name && !towns.some((t) => t.name === name)) {
-        towns.push({ name, image: row.image && [row.image[0], row.image[1]], at: row.place?.center })
-      }
-    }
-    if (towns.length < 2) {
+    if (running) return
+    if (picking() !== undefined) cancelTapRequest()
+    // The rows with a name; the match refers to them by their position in this list.
+    const named = unwrap(rows).flatMap((row, index) => (row.label.trim() ? [{ row, index }] : []))
+    if (named.length < 2) {
       setMessage({ kind: 'warning', text: 'Name at least two towns.' })
       return
     }
     setSearching(undefined)
     setMessage(undefined)
+    const towns: TownInput[] = named.map(({ row }) => ({ name: row.label.trim(), image: row.image, at: row.place?.center }))
     const controller = new AbortController()
     running = controller
     try {
-      const solution = await matchTowns(m, props.layerId, towns, {
-        viewbox: searchViewbox(m),
+      const solution = await matchTowns(map, props.layerId, towns, {
+        viewbox,
         onProgress: setProgress,
         signal: controller.signal,
       })
-      setMisses(new Map(solution.misses.map((miss) => [miss.name, miss.reason])))
+      named.forEach(({ index }, town) => setRows(index, 'miss', solution.misses.find((m) => m.index === town)?.reason))
       if (solution.fit && solution.misses.length === 0) props.onClose()
       else setMessage(describeSolution(solution))
     } catch (error) {
       if (!controller.signal.aborted) setMessage({ kind: 'warning', text: errorMessage(error) })
     } finally {
-      if (running === controller) running = undefined
+      running = undefined
       setProgress(undefined)
     }
   }
@@ -236,9 +233,6 @@ function TownForm(props: { layerId: string; dialog: HTMLDialogElement; onClose: 
         void submit()
       }}
     >
-      <h2 class="dialog-handle" title="Drag to move" onPointerDown={(e) => dragDialog(e, props.dialog)}>
-        Match towns
-      </h2>
       <p class="muted hint">
         Name towns printed on the image, spelled as printed and far apart. They are looked for on the image and the
         map, and the image is placed by them. Where that fails, pick a town by hand: on the image (an empty row takes
@@ -261,7 +255,7 @@ function TownForm(props: { layerId: string; dialog: HTMLDialogElement; onClose: 
                     autocomplete="off"
                     value={row.label}
                     disabled={busy()}
-                    onInput={(e) => setRows(i(), 'label', e.currentTarget.value)}
+                    onInput={(e) => setRows(i(), { label: e.currentTarget.value, miss: undefined })}
                   />
                   <button
                     type="button"
@@ -290,9 +284,9 @@ function TownForm(props: { layerId: string; dialog: HTMLDialogElement; onClose: 
                 <Show when={searching() === i()}>
                   <PlaceSearch
                     term={row.label}
+                    viewbox={viewbox}
                     onPick={(place) => {
-                      forgetMiss(row)
-                      setRows(i(), 'place', place)
+                      setRows(i(), { place, miss: undefined })
                       setSearching(undefined)
                     }}
                     onClose={() => setSearching(undefined)}
@@ -316,7 +310,7 @@ function TownForm(props: { layerId: string; dialog: HTMLDialogElement; onClose: 
                 <Show when={row.place}>
                   {(place) => (
                     <div class="row picked">
-                      <span class="grow" title={place().label}>
+                      <span class="grow name" title={place().label}>
                         {place().label}
                       </span>
                       <button
@@ -332,7 +326,7 @@ function TownForm(props: { layerId: string; dialog: HTMLDialogElement; onClose: 
                     </div>
                   )}
                 </Show>
-                <Show when={missOf(row)}>
+                <Show when={row.miss}>
                   {(reason) => (
                     <p class="row-note">
                       <Show when={reason() === 'image'}>
@@ -358,7 +352,13 @@ function TownForm(props: { layerId: string; dialog: HTMLDialogElement; onClose: 
           }}
         </For>
       </ol>
-      <Show when={status()}>{(text) => <p role="status">{text()}</p>}</Show>
+      <Show when={status()}>
+        {(text) => (
+          <p class="muted hint" role="status">
+            {text()}
+          </p>
+        )}
+      </Show>
       <Show when={message()}>{(m) => <p class={`note ${m().kind}`}>{m().text}</p>}</Show>
       <div class="row end">
         <button type="button" onClick={() => props.onClose()}>
@@ -377,27 +377,30 @@ function TownForm(props: { layerId: string; dialog: HTMLDialogElement; onClose: 
  * changed until the right place comes up. Unlike the automatic lookup it finds any kind
  * of place. Esc closes it without closing the dialog.
  */
-function PlaceSearch(props: { term: string; onPick: (place: Place) => void; onClose: () => void }) {
-  const map = useMapAccessor()
+function PlaceSearch(props: {
+  term: string
+  viewbox: Viewbox | undefined
+  onPick: (place: Place) => void
+  onClose: () => void
+}) {
   const [term, setTerm] = createSignal(props.term.trim())
   const [results, setResults] = createSignal<Place[]>()
-  const [searchingNow, setSearchingNow] = createSignal(false)
+  const [searching, setSearching] = createSignal(false)
   const [error, setError] = createSignal<string>()
   let input!: HTMLInputElement
 
   const search = async () => {
     const q = term().trim()
-    const m = map()
-    if (!q || searchingNow()) return
-    setSearchingNow(true)
+    if (!q || searching()) return
+    setSearching(true)
     setError(undefined)
     try {
-      setResults(await searchPlaces(q, { viewbox: m && searchViewbox(m) }))
+      setResults(await searchPlaces(q, { viewbox: props.viewbox }))
     } catch (err) {
       setResults(undefined)
       setError(errorMessage(err))
     } finally {
-      setSearchingNow(false)
+      setSearching(false)
     }
   }
   onMount(() => {
@@ -427,34 +430,17 @@ function PlaceSearch(props: { term: string; onPick: (place: Place) => void; onCl
             }
           }}
         />
-        <button type="button" disabled={searchingNow()} onClick={() => void search()}>
+        <button type="button" disabled={searching()} onClick={() => void search()}>
           Search
         </button>
       </div>
-      <Show when={searchingNow()}>
+      <Show when={searching()}>
         <p class="muted hint">Searching…</p>
       </Show>
       <Show when={error()}>{(text) => <p class="note error">{text()}</p>}</Show>
-      <Show when={!searchingNow() && results()}>
+      <Show when={!searching() && results()}>
         {(list) => (
-          <Show
-            when={list().length > 0}
-            fallback={<p class="muted hint">Nothing found. Change the search and try again.</p>}
-          >
-            <ul class="search-results">
-              <For each={list()}>
-                {(place) => (
-                  <li>
-                    <button type="button" class="result" onClick={() => props.onPick(place)}>
-                      <strong>{place.name}</strong>
-                      <span class="muted">{place.label}</span>
-                    </button>
-                  </li>
-                )}
-              </For>
-            </ul>
-            <p class="muted credit">Search by Nominatim · © OpenStreetMap contributors</p>
-          </Show>
+          <PlaceResults places={list()} empty="Nothing found. Change the search and try again." onPick={props.onPick} />
         )}
       </Show>
     </div>
@@ -463,27 +449,22 @@ function PlaceSearch(props: { term: string; onPick: (place: Place) => void; onCl
 
 /** Moves the dialog, keeping enough of its title on screen to drag it back. */
 function moveDialog(dialog: HTMLDialogElement, left: number, top: number): void {
-  const width = dialog.offsetWidth
-  position = {
-    left: Math.min(Math.max(left, 80 - width), window.innerWidth - 80),
-    top: Math.min(Math.max(top, 0), window.innerHeight - 40),
-  }
-  dialog.style.left = `${position.left}px`
-  dialog.style.top = `${position.top}px`
+  dialog.style.left = `${Math.min(Math.max(left, 80 - dialog.offsetWidth), window.innerWidth - 80)}px`
+  dialog.style.top = `${Math.min(Math.max(top, 0), window.innerHeight - 40)}px`
 }
 
 /** Where the dialog opens: where it was left, else beside the map's buttons (on phones, at the top). */
-function placeDialog(dialog: HTMLDialogElement, map: DOMRect | undefined): void {
-  if (position) {
-    moveDialog(dialog, position.left, position.top)
+function placeDialog(dialog: HTMLDialogElement, map: DOMRect): void {
+  if (dialog.style.left) {
+    const { left, top } = dialog.getBoundingClientRect()
+    moveDialog(dialog, left, top)
     return
   }
-  const area = map ?? new DOMRect(0, 0, window.innerWidth, window.innerHeight)
-  const wide = area.width > 720
+  const wide = map.width > 720
   moveDialog(
     dialog,
-    wide ? area.right - dialog.offsetWidth - 60 : area.left + (area.width - dialog.offsetWidth) / 2,
-    area.top + (wide ? 60 : 8),
+    wide ? map.right - dialog.offsetWidth - 60 : map.left + (map.width - dialog.offsetWidth) / 2,
+    map.top + (wide ? 60 : 8),
   )
 }
 

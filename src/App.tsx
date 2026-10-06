@@ -58,7 +58,9 @@ export function App() {
           </main>
         </div>
         <WaypointDialog />
-        <MatchTownsDialog />
+        <Show when={map()}>
+          <MatchTownsDialog />
+        </Show>
       </MapContext.Provider>
     </Show>
   )
