@@ -225,13 +225,23 @@ input[type='range'] {
   color: #8f5f00;
 }
 
-/* Ground control point markers: image side = ring, map side = dot; matched pairs nest. */
+/* Ground control point markers: image side = ring, map side = dot; matched pairs nest.
+   Dots lie above rings, so in a nested pair the centre grabs the map point and the ring
+   the image point. */
 .gcp-marker {
-  cursor: pointer;
+  cursor: grab;
 }
 
-.gcp-marker.selected {
+.gcp-marker-map {
+  z-index: 1;
+}
+
+.gcp-marker-image.selected {
   z-index: 2;
+}
+
+.gcp-marker-map.selected {
+  z-index: 3;
 }
 
 .gcp {

@@ -125,6 +125,11 @@ export function applyGcpAction(
   }
 }
 
+/** Moves one existing side of a GCP, as when its marker is dragged; the other side stays. */
+export function moveGcpSide(gcps: readonly Gcp[], gcpId: string, side: Side, value: Px | LngLat): Gcp[] {
+  return gcps.map((g) => (g.id === gcpId && g[side] ? { ...g, [side]: value } : g))
+}
+
 /** GCP sides within `radius` CSS pixels of a click. */
 export function hitTest(
   points: readonly (SideRef & { x: number; y: number })[],

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { fromMercator, toMercator } from '../geo/mercator.ts'
 import type { LngLat, Px } from '../geo/types.ts'
 import type { Gcp } from '../state/schema.ts'
-import { applyGcpAction, countPairs, gcpMenu, hitTest, prepareSkew, type MenuEntry } from './gcps.ts'
+import { applyGcpAction, countPairs, gcpMenu, hitTest, moveGcpSide, prepareSkew, type MenuEntry } from './gcps.ts'
 
 const labels = (entries: MenuEntry[]) => entries.map((e) => `${e.label}${e.enabled ? '' : ' (disabled)'}`)
 
@@ -142,6 +142,20 @@ describe('applyGcpAction', () => {
     const gcps = [paired]
     applyGcpAction(gcps, { kind: 'remove', side: 'map', gcpId: 'a' }, at, ids)
     expect(gcps).toEqual([{ id: 'a', image: [10, 10], map: [11, 48] }])
+  })
+})
+
+describe('moveGcpSide', () => {
+  it('moves one side and leaves the partner and other points alone', () => {
+    const gcps = [paired, imageOnly]
+    const moved = moveGcpSide(gcps, 'a', 'map', [11.2, 48.2])
+    expect(moved[0]).toEqual({ id: 'a', image: [10, 10], map: [11.2, 48.2] })
+    expect(moved[1]).toBe(imageOnly)
+    expect(moveGcpSide(gcps, 'a', 'image', [12, 13])[0]).toEqual({ id: 'a', image: [12, 13], map: [11, 48] })
+  })
+
+  it('does not add a side that is missing', () => {
+    expect(moveGcpSide([imageOnly], 'b', 'map', [1, 1])).toEqual([imageOnly])
   })
 })
 

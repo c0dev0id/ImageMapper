@@ -1,19 +1,21 @@
 import type { GeoJSONSource } from 'maplibre-gl'
 import type { Feature, LineString } from 'geojson'
 import { createEffect, createMemo, For, onCleanup } from 'solid-js'
-import { gcpNumber } from '../gcp/gcps.ts'
+import { unwrap } from 'solid-js/store'
+import { gcpNumber, moveGcpSide } from '../gcp/gcps.ts'
 import type { LngLat } from '../geo/types.ts'
 import { warpOf } from '../state/derived.ts'
-import { activeLayer, layerById } from '../state/project.ts'
+import { activeLayer, layerById, setLayerGcps } from '../state/project.ts'
 import type { Side } from '../state/schema.ts'
-import { mode, selection, setSelection } from '../state/ui.ts'
+import { menu, mode, selection, setSelection } from '../state/ui.ts'
 import { useMap } from './context.ts'
-import { MarkerHandle } from './markers.ts'
+import { gcpPointAt, openGcpMenu } from './gcpMenu.ts'
+import { MarkerHandle, onMarkerMenu } from './markers.ts'
 
 /** The active layer while georeferencing; GCP markers are hidden in route mode. */
 const georefLayer = () => (mode() === 'georef' ? activeLayer() : undefined)
 
-/** Markers for both sides of every GCP of the active layer. */
+/** Draggable markers for both sides of every GCP of the active layer. */
 export function GcpMarkers() {
   const keys = createMemo(
     () => {
@@ -66,11 +68,34 @@ function GcpMarker(props: { layerId: string; gcpId: string; side: Side }) {
       {number()}
     </div>
   ) as HTMLElement
-  const handle = new MarkerHandle(map, content, { className: `gcp-marker gcp-marker-${side}` })
-  handle.root.addEventListener('click', () => setSelection({ layerId, gcpId, side }))
+  const handle = new MarkerHandle(map, content, { className: `gcp-marker gcp-marker-${side}`, draggable: true })
+  // A finger lifted after a long press may still click; the menu it opened gets that tap.
+  handle.root.addEventListener('click', () => {
+    if (!menu()) setSelection({ layerId, gcpId, side })
+  })
   createEffect(() => handle.setPosition(position()))
   createEffect(() => handle.root.classList.toggle('selected', selected()))
-  onCleanup(() => handle.remove())
+
+  // Dragging corrects the point: a map point takes the new place, an image point the image
+  // pixel there. Dropped beside the image, an image point goes back.
+  handle.marker.on('dragend', () => {
+    const l = layer()
+    const at = gcpPointAt(handle.marker.getLngLat(), warpOf(layerId))
+    const value = side === 'map' ? at.map : at.image
+    if (l && value) {
+      setLayerGcps(layerId, moveGcpSide(unwrap(l.gcps), gcpId, side, value), `Move ${side} point`)
+    }
+    handle.setPosition(position())
+  })
+  const stopMenu = onMarkerMenu(handle, (clientX, clientY, touch) => {
+    const rect = map.getContainer().getBoundingClientRect()
+    const point = { x: clientX - rect.left, y: clientY - rect.top }
+    openGcpMenu(map, point, map.unproject([point.x, point.y]), touch)
+  })
+  onCleanup(() => {
+    stopMenu()
+    handle.remove()
+  })
   return null
 }
 
