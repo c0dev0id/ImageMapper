@@ -11,8 +11,8 @@ import { PinImageIcon } from '../ui/icons.tsx'
 import { PlaceResults } from '../ui/PlaceResults.tsx'
 import { matchTowns } from './matchTowns.ts'
 import './MatchTowns.css'
-import { describeMatch, type MatchNote } from './report.ts'
-import type { TownPair } from './solve.ts'
+import type { MatchNote } from './report.ts'
+import type { TownPair } from './towns.ts'
 
 /**
  * A town as the user picks it: the search for it, the place picked from the results, its
@@ -171,17 +171,17 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
       return
     }
     const towns: TownPair[] = complete.map((c) => c.town)
-    const { fit, misfits } = matchTowns(map, props.layerId, towns)
-    if (!fit) {
+    const result = matchTowns(map, props.layerId, towns)
+    if (!result) {
       setMessage({
         kind: 'warning',
         text: 'The image could not be placed: pick spots farther apart on the image, and check the places.',
       })
       return
     }
-    for (const town of misfits) setRows(complete[town].index, 'miss', 'fit')
-    if (complete.length === used.length && misfits.length === 0) props.onClose()
-    else setMessage(describeMatch(towns, misfits))
+    for (const town of result.misfits) setRows(complete[town].index, 'miss', 'fit')
+    if (complete.length === used.length && result.misfits.length === 0) props.onClose()
+    else setMessage(result.note)
   }
 
   return (

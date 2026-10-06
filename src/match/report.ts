@@ -1,24 +1,8 @@
-import { roundImagePoint, roundMapPoint } from '../gcp/gcps.ts'
-import type { Gcp } from '../state/schema.ts'
-import type { TownPair } from './solve.ts'
-
 /** What a match did, for the note below the layer and in the dialog. */
 export interface MatchNote {
   /** A warning when something needs a closer look. */
   kind: 'info' | 'warning'
   text: string
-}
-
-/**
- * A layer's point pairs after a match: the pairs the previous match created, edited or
- * not, give way to the towns', marked with their names and at the precision of other
- * point pairs. Pairs pinned by hand stay.
- */
-export function replaceTownPairs(gcps: readonly Gcp[], towns: readonly TownPair[], makeId: () => string): Gcp[] {
-  return [
-    ...gcps.filter((g) => g.town === undefined),
-    ...towns.map((t) => ({ id: makeId(), image: roundImagePoint(t.image), map: roundMapPoint(t.map), town: t.name })),
-  ]
 }
 
 /** "A", "A and B", "A, B and C". */
@@ -30,9 +14,7 @@ export function listNames(names: readonly string[]): string {
  * Which towns placed the image and which were left out. Towns left out, and a placement
  * by only two towns (which nothing checks), make it a warning.
  */
-export function describeMatch(towns: readonly TownPair[], misfits: readonly number[]): MatchNote {
-  const placed = towns.filter((_, i) => !misfits.includes(i)).map((t) => t.name)
-  const left = misfits.map((i) => towns[i].name)
+export function describeMatch(placed: readonly string[], left: readonly string[]): MatchNote {
   const sentences = [`Placed by ${listNames(placed)}.`]
   if (left.length === 1) sentences.push(`${left[0]} does not fit the others and was left out.`)
   if (left.length > 1) sentences.push(`${listNames(left)} do not fit the others and were left out.`)

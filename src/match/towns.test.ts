@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { fromMercator } from '../geo/mercator.ts'
 import type { LngLat, Px } from '../geo/types.ts'
 import { toImage, toMap, type Fit } from './fit.ts'
-import { fitTowns, type TownPair } from './solve.ts'
+import type { Gcp } from '../state/schema.ts'
+import { fitTowns, replaceTownPairs, type TownPair } from './towns.ts'
 
 const W = 1500
 const H = 900
@@ -71,5 +72,26 @@ describe('fitTowns', () => {
     // 10,000 km apart they do not.
     expect(fitTowns([town('A', [0, 450], [8, 50]), town('B', [1500, 450], [8.014, 50])], W, H).fit).toBeDefined()
     expect(fitTowns([town('A', [0, 450], [-100, 40]), town('B', [1500, 450], [100, 40])], W, H).fit).toBeUndefined()
+  })
+})
+
+describe('replaceTownPairs', () => {
+  it('replaces the pairs of the previous match, keeps pairs pinned by hand and marks the new ones', () => {
+    let next = 0
+    const gcps: Gcp[] = [
+      { id: 'hand', image: [10, 10], map: [7, 50] },
+      { id: 'old', image: [880, 260], map: [7.82, 50.66], town: 'Hachenburg' },
+      // A pair of the previous match with its image side removed by the user.
+      { id: 'half', map: [7.97, 50.56], town: 'Westerburg' },
+    ]
+    const towns = [
+      town('Hachenburg', [888.123456, 271.5], [7.82, 50.66]),
+      town('Westerburg', [1172.3333, 546.6666], [7.9712345678, 50.5598765432]),
+    ]
+    expect(replaceTownPairs(gcps, towns, () => `new-${next++}`)).toEqual([
+      { id: 'hand', image: [10, 10], map: [7, 50] },
+      { id: 'new-0', image: [888.12, 271.5], map: [7.82, 50.66], town: 'Hachenburg' },
+      { id: 'new-1', image: [1172.33, 546.67], map: [7.9712346, 50.5598765], town: 'Westerburg' },
+    ])
   })
 })

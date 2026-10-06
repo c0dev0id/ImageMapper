@@ -1,5 +1,7 @@
+import { roundImagePoint, roundMapPoint } from '../gcp/gcps.ts'
 import { toMercator } from '../geo/mercator.ts'
 import type { Pair } from '../geo/types.ts'
+import type { Gcp } from '../state/schema.ts'
 import { fitScale, fitSimilarity, toImage, type Correspondence, type Fit } from './fit.ts'
 
 /** A town as the user picked it: its spot on the image and its place on the map. */
@@ -39,13 +41,13 @@ interface Proposal {
 export function fitTowns(towns: readonly TownPair[], width: number, height: number): TownFit {
   const diagonal = Math.hypot(width, height)
   const pairs: Correspondence[] = towns.map((t) => ({ image: t.image, map: toMercator(t.map) }))
-  const residual = (fit: Fit, { image, map }: Correspondence) => {
-    const [x, y] = toImage(fit, map)
-    return Math.hypot(x - image[0], y - image[1])
-  }
   const propose = (fit: Fit): Proposal => {
-    const members = pairs.flatMap((pair, i) => (residual(fit, pair) <= TOLERANCE * diagonal ? [i] : []))
-    const rms = Math.sqrt(members.reduce((sum, i) => sum + residual(fit, pairs[i]) ** 2, 0) / members.length)
+    const residuals = pairs.map(({ image, map }) => {
+      const [x, y] = toImage(fit, map)
+      return Math.hypot(x - image[0], y - image[1])
+    })
+    const members = residuals.flatMap((residual, i) => (residual <= TOLERANCE * diagonal ? [i] : []))
+    const rms = Math.sqrt(members.reduce((sum, i) => sum + residuals[i] ** 2, 0) / members.length)
     return { fit, members, rms }
   }
 
@@ -62,7 +64,6 @@ export function fitTowns(towns: readonly TownPair[], width: number, height: numb
         const again = propose(refit)
         if (again.members.length >= proposal.members.length) proposal = again
       }
-      if (proposal.members.length < 2) continue
       const better =
         !best ||
         proposal.members.length > best.members.length ||
@@ -78,4 +79,16 @@ export function fitTowns(towns: readonly TownPair[], width: number, height: numb
 function plausible(fit: Fit, width: number): boolean {
   const span = fitScale(fit) * width
   return span >= MIN_WIDTH && span <= MAX_WIDTH
+}
+
+/**
+ * A layer's point pairs after a match: the pairs the previous match created, edited or
+ * not, give way to the towns', marked with their names and at the precision of other
+ * point pairs. Pairs pinned by hand stay.
+ */
+export function replaceTownPairs(gcps: readonly Gcp[], towns: readonly TownPair[], makeId: () => string): Gcp[] {
+  return [
+    ...gcps.filter((g) => g.town === undefined),
+    ...towns.map((t) => ({ id: makeId(), image: roundImagePoint(t.image), map: roundMapPoint(t.map), town: t.name })),
+  ]
 }
