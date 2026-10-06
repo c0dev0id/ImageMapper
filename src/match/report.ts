@@ -1,23 +1,24 @@
+import { roundImagePoint, roundMapPoint } from '../gcp/gcps.ts'
 import type { Px } from '../geo/types.ts'
 import type { Gcp } from '../state/schema.ts'
 import type { TownMatch, TownMiss, TownSolution } from './solve.ts'
 
-const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits
+/** What a match did, for the note below the layer and in the dialog. */
+export interface MatchNote {
+  /** A warning when something needs a closer look. */
+  kind: 'info' | 'warning'
+  text: string
+}
 
 /**
- * Point pairs for the matched towns, at the GCP precision used elsewhere (2 decimals for
- * pixels, 7 for degrees). Towns already pinned at the same printed name (an earlier match)
- * are not added twice.
+ * Point pairs for the matched towns, at the precision of other point pairs. Towns already
+ * pinned at the same printed name (an earlier match) are not added twice.
  */
 export function townPairs(matches: readonly TownMatch[], existing: readonly Gcp[], makeId: () => string): Gcp[] {
   const pinned = (at: Px) => existing.some((g) => g.image && Math.hypot(g.image[0] - at[0], g.image[1] - at[1]) < 1)
   return matches
     .filter((m) => !pinned(m.image))
-    .map((m) => ({
-      id: makeId(),
-      image: [round(m.image[0], 2), round(m.image[1], 2)],
-      map: [round(m.map[0], 7), round(m.map[1], 7)],
-    }))
+    .map((m) => ({ id: makeId(), image: roundImagePoint(m.image), map: roundMapPoint(m.map) }))
 }
 
 /** "A", "A and B", "A, B and C". */
@@ -40,22 +41,32 @@ export function describeMisses(misses: readonly TownMiss[]): string[] {
   return sentences
 }
 
-/** What a match did, for the note below the layer; or why it could not place the image. */
-export function describeSolution(solution: TownSolution): string {
+/**
+ * What a match did, or why it could not place the image. Missed towns, and a fit on only
+ * two towns (which nothing checks), make it a warning.
+ */
+export function describeSolution(solution: TownSolution): MatchNote {
   const misses = describeMisses(solution.misses)
   if (!solution.fit) {
-    return [
-      'The image could not be placed.',
-      ...misses,
-      'At least two towns must be read on the image and found on the map.',
-    ].join(' ')
+    return {
+      kind: 'warning',
+      text: [
+        'The image could not be placed.',
+        ...misses,
+        'At least two towns must be read on the image and found on the map.',
+      ].join(' '),
+    }
   }
-  return [
-    `Placed by ${listNames(solution.matches.map((m) => m.name))}.`,
-    ...misses,
-    solution.matches.length === 2 ? 'Two towns cannot be checked against each other, so look closely.' : '',
-    'The rings sit on the printed names: drag each onto its town, then skew.',
-  ]
-    .filter(Boolean)
-    .join(' ')
+  const unchecked = solution.matches.length < 3
+  return {
+    kind: misses.length > 0 || unchecked ? 'warning' : 'info',
+    text: [
+      `Placed by ${listNames(solution.matches.map((m) => m.name))}.`,
+      ...misses,
+      unchecked ? 'Two towns cannot be checked against each other, so look closely.' : '',
+      'The rings sit on the printed names: drag each onto its town, then skew.',
+    ]
+      .filter(Boolean)
+      .join(' '),
+  }
 }

@@ -7,20 +7,12 @@ export interface TextWord {
   box: [number, number, number, number]
 }
 
-/** A place on the image where a name may be printed: the centre of the word. */
-export interface TextHit {
-  at: Px
-  /** Edit distance between the word and the name; 0 is an exact read. */
-  distance: number
-}
-
 /** Lower case letters only, accents dropped and ß as ss: "Höhn (Ww.)" becomes "hohnww". */
 export function normalizeName(text: string): string {
   return text
     .toLowerCase()
     .replace(/ß/g, 'ss')
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z]/g, '')
 }
 
@@ -54,16 +46,19 @@ function tolerance(length: number): number {
   return length <= 3 ? 0 : length <= 6 ? 1 : 2
 }
 
+/** Reads of one name kept as candidates; the solver tries every combination of them. */
+const MAX_READS = 3
+
 /**
- * Where the name is printed on the image, best reads first. Text recognition on maps
- * drops or swaps letters, so words within a few edits count; a label read together with
- * the word after it ("Neustadt(Wied)") counts as well.
+ * Where the name is printed on the image (the centres of the words), best reads first.
+ * Text recognition on maps drops or swaps letters, so words within a few edits count; a
+ * label read together with the word after it ("Neustadt(Wied)") counts as well.
  */
-export function findName(name: string, words: readonly TextWord[], limit = 3): TextHit[] {
+export function findName(name: string, words: readonly TextWord[]): Px[] {
   const key = keyWord(name)
   if (!key) return []
   const allowed = tolerance(key.length)
-  const hits: TextHit[] = []
+  const hits: { at: Px; distance: number }[] = []
   for (const word of words) {
     const text = normalizeName(word.text)
     let distance = Math.abs(text.length - key.length) <= allowed ? editDistance(text, key) : Infinity
@@ -72,7 +67,10 @@ export function findName(name: string, words: readonly TextWord[], limit = 3): T
     const [left, top, right, bottom] = word.box
     hits.push({ at: [(left + right) / 2, (top + bottom) / 2], distance })
   }
-  return hits.sort((a, b) => a.distance - b.distance).slice(0, limit)
+  return hits
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, MAX_READS)
+    .map((hit) => hit.at)
 }
 
 /** A word with letters in it, with stray punctuation at its ends removed ("‚Maulsbach:" → "Maulsbach"). */

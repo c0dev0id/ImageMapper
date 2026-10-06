@@ -9,15 +9,17 @@ export interface TownCandidates {
   map: LngLat[]
 }
 
+/** A town placed by the fit; `index` is its position in the towns given to the solver. */
 export interface TownMatch {
+  index: number
   name: string
   image: Px
   map: LngLat
-  /** Image pixels between the printed name and where the fit puts the town. */
-  residual: number
 }
 
+/** A town the fit leaves out, and why; `index` as for a match. */
 export interface TownMiss {
+  index: number
   name: string
   /** Not read on the image, not found on the map, or found but not fitting the others. */
   reason: 'image' | 'map' | 'fit'
@@ -40,10 +42,18 @@ const MAX_WIDTH = 0.25
 /** Rotations up to this many degrees count as upright when nothing else decides. */
 const UPRIGHT_DEGREES = 20
 
-interface Choice {
+/** One way to place a town: one of its printed names and one of its map places. */
+interface Option {
   town: number
-  image: number
-  map: number
+  image: Px
+  map: Merc
+  lngLat: LngLat
+  /** How far down both candidate lists this option is; 0 for the best read and place. */
+  rank: number
+}
+
+interface Choice extends Option {
+  /** Image pixels between the printed name and where the fit puts the place. */
   residual: number
 }
 
@@ -63,67 +73,53 @@ interface Hypothesis {
  */
 export function solveTowns(towns: readonly TownCandidates[], width: number, height: number): TownSolution {
   const diagonal = Math.hypot(width, height)
-  const mercs = towns.map((t) => t.map.map(toMercator))
-  const usable = towns.map((_, i) => i).filter((i) => towns[i].image.length > 0 && towns[i].map.length > 0)
+  const options: Option[][] = towns.map((town, index) =>
+    town.image.flatMap((image, i) =>
+      town.map.map((lngLat, m) => ({ town: index, image, map: toMercator(lngLat), lngLat, rank: i + m })),
+    ),
+  )
 
   const evaluate = (fit: Fit): Hypothesis => {
     const choices: Choice[] = []
-    for (const town of usable) {
+    for (const list of options) {
       let best: Choice | undefined
-      towns[town].image.forEach((at, image) => {
-        mercs[town].forEach((m, map) => {
-          const [x, y] = toImage(fit, m)
-          const residual = Math.hypot(x - at[0], y - at[1])
-          if (!best || residual < best.residual) best = { town, image, map, residual }
-        })
-      })
+      for (const option of list) {
+        const [x, y] = toImage(fit, option.map)
+        const residual = Math.hypot(x - option.image[0], y - option.image[1])
+        if (!best || residual < best.residual) best = { ...option, residual }
+      }
       if (best && best.residual <= TOLERANCE * diagonal) choices.push(best)
     }
-    const kept = distinct(choices, towns, mercs)
+    const kept = distinct(choices)
     return { fit, choices: kept, rms: rms(kept) }
   }
 
   let best: Hypothesis | undefined
-  for (let a = 0; a < usable.length; a++) {
-    for (let b = a + 1; b < usable.length; b++) {
-      const [i, j] = [usable[a], usable[b]]
-      for (const imageI of towns[i].image) {
-        for (const imageJ of towns[j].image) {
-          if (Math.hypot(imageI[0] - imageJ[0], imageI[1] - imageJ[1]) < MIN_SPREAD * diagonal) continue
-          for (const mapI of mercs[i]) {
-            for (const mapJ of mercs[j]) {
-              const fit = fitSimilarity([
-                { image: imageI, map: mapI },
-                { image: imageJ, map: mapJ },
-              ])
-              if (!fit || !plausible(fit, width)) continue
-              let hypothesis = evaluate(fit)
-              if (hypothesis.choices.length < 2) continue
-              const refit = fitSimilarity(
-                hypothesis.choices.map((c) => ({ image: towns[c.town].image[c.image], map: mercs[c.town][c.map] })),
-              )
-              if (refit && plausible(refit, width)) {
-                const again = evaluate(refit)
-                if (again.choices.length >= hypothesis.choices.length) hypothesis = again
-              }
-              if (!best || better(hypothesis, best)) best = hypothesis
-            }
+  for (let a = 0; a < options.length; a++) {
+    for (let b = a + 1; b < options.length; b++) {
+      for (const p of options[a]) {
+        for (const q of options[b]) {
+          if (Math.hypot(p.image[0] - q.image[0], p.image[1] - q.image[1]) < MIN_SPREAD * diagonal) continue
+          const fit = fitSimilarity([p, q])
+          if (!fit || !plausible(fit, width)) continue
+          let hypothesis = evaluate(fit)
+          if (hypothesis.choices.length < 2) continue
+          const refit = fitSimilarity(hypothesis.choices)
+          if (refit && plausible(refit, width)) {
+            const again = evaluate(refit)
+            if (again.choices.length >= hypothesis.choices.length) hypothesis = again
           }
+          if (!best || better(hypothesis, best)) best = hypothesis
         }
       }
     }
   }
   const choices = best?.choices ?? []
-  const matches = choices.map((c) => ({
-    name: towns[c.town].name,
-    image: towns[c.town].image[c.image],
-    map: towns[c.town].map[c.map],
-    residual: c.residual,
-  }))
+  const matches = choices.map((c) => ({ index: c.town, name: towns[c.town].name, image: c.image, map: c.lngLat }))
   const misses: TownMiss[] = []
-  towns.forEach((t, i) => {
-    if (choices.some((c) => c.town === i)) return
-    misses.push({ name: t.name, reason: t.image.length === 0 ? 'image' : t.map.length === 0 ? 'map' : 'fit' })
+  towns.forEach((t, index) => {
+    if (choices.some((c) => c.town === index)) return
+    misses.push({ index, name: t.name, reason: t.image.length === 0 ? 'image' : t.map.length === 0 ? 'map' : 'fit' })
   })
   return { fit: best?.fit, matches, misses }
 }
@@ -137,17 +133,13 @@ function rms(choices: readonly Choice[]): number {
   return choices.length ? Math.sqrt(choices.reduce((sum, c) => sum + c.residual ** 2, 0) / choices.length) : 0
 }
 
+const same = (a: readonly number[], b: readonly number[]) => a[0] === b[0] && a[1] === b[1]
+
 /** One printed name or one map place cannot stand for two towns; the worse fitting one goes. */
-function distinct(choices: Choice[], towns: readonly TownCandidates[], mercs: readonly Merc[][]): Choice[] {
+function distinct(choices: readonly Choice[]): Choice[] {
   const kept: Choice[] = []
   for (const c of [...choices].sort((a, b) => a.residual - b.residual)) {
-    const image = towns[c.town].image[c.image]
-    const map = mercs[c.town][c.map]
-    const clash = kept.some((k) => {
-      const [ki, km] = [towns[k.town].image[k.image], mercs[k.town][k.map]]
-      return (ki[0] === image[0] && ki[1] === image[1]) || (km[0] === map[0] && km[1] === map[1])
-    })
-    if (!clash) kept.push(c)
+    if (!kept.some((k) => same(k.image, c.image) || same(k.map, c.map))) kept.push(c)
   }
   return kept.sort((a, b) => a.town - b.town)
 }
@@ -158,7 +150,7 @@ function better(a: Hypothesis, b: Hypothesis): boolean {
   const tilt = (h: Hypothesis) => Math.abs(fitAngle(h.fit)) * (180 / Math.PI)
   const upright = (h: Hypothesis) => tilt(h) <= UPRIGHT_DEGREES
   if (upright(a) !== upright(b)) return upright(a)
-  const rank = (h: Hypothesis) => h.choices.reduce((sum, c) => sum + c.image + c.map, 0)
+  const rank = (h: Hypothesis) => h.choices.reduce((sum, c) => sum + c.rank, 0)
   if (rank(a) !== rank(b)) return rank(a) < rank(b)
   return tilt(a) < tilt(b)
 }

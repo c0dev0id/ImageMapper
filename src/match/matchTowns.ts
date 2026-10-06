@@ -74,7 +74,7 @@ export async function matchTowns(
   const solution = solveTowns(
     towns.map((town) => ({
       name: town.name,
-      image: town.image ? [town.image] : findName(town.name, words).map((hit) => hit.at),
+      image: town.image ? [town.image] : findName(town.name, words),
       map: town.at ? [town.at] : (found.get(town.name) ?? []),
     })),
     layer.width,
@@ -88,11 +88,7 @@ export async function matchTowns(
   placeLayer(current.id, placement, [...gcps, ...townPairs(solution.matches, gcps, () => crypto.randomUUID())], 'Match towns')
   const bounds = boundsOf(placement.map((p) => p.map))
   if (bounds) showBounds(map, bounds)
-  setLayerNote({
-    layerId,
-    kind: solution.misses.length > 0 || solution.matches.length < 3 ? 'warning' : 'info',
-    text: describeSolution(solution),
-  })
+  setLayerNote({ layerId, ...describeSolution(solution) })
   return solution
 }
 

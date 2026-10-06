@@ -38,8 +38,8 @@ describe('findName', () => {
   it('finds exact and slightly misread words, best first, at the centre of the word', () => {
     const words = [word('Montabalr', 100, 200), word('Montabaur', 300, 400), word('Wirges', 500, 50)]
     expect(findName('Montabaur', words)).toEqual([
-      { at: [320, 405], distance: 0 },
-      { at: [120, 205], distance: 1 },
+      [320, 405],
+      [120, 205],
     ])
   })
 
@@ -52,16 +52,18 @@ describe('findName', () => {
   })
 
   it('finds a name read together with the next word', () => {
-    expect(findName('Neustadt (Wied)', [word('Neustadt(Wied)')])).toEqual([{ at: [20, 5], distance: 2 }])
+    expect(findName('Neustadt (Wied)', [word('Neustadt(Wied)')])).toEqual([[20, 5]])
     // Short names only match whole words: "Hof" is not "Hofheim".
     expect(findName('Hof', [word('Hofheim')])).toHaveLength(0)
   })
 
   it('keeps the best three reads', () => {
     const words = ['Wesel', 'Wesel', 'Wesal', 'Wese1', 'Wesel'].map((t, i) => word(t, i * 50))
-    const hits = findName('Wesel', words)
-    expect(hits).toHaveLength(3)
-    expect(hits.every((h) => h.distance === 0)).toBe(true)
+    expect(findName('Wesel', words)).toEqual([
+      [20, 5],
+      [70, 5],
+      [220, 5],
+    ])
   })
 })
 

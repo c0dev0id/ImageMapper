@@ -206,7 +206,7 @@ function TownForm(props: { layerId: string; dialog: HTMLDialogElement; onClose: 
       const solution = await matchTowns(m, props.layerId, towns, setProgress, controller.signal)
       setMisses(new Map(solution.misses.map((miss) => [miss.name, miss.reason])))
       if (solution.fit && solution.misses.length === 0) props.onClose()
-      else setMessage({ kind: solution.fit ? 'info' : 'warning', text: describeSolution(solution) })
+      else setMessage(describeSolution(solution))
     } catch (error) {
       if (!controller.signal.aborted) setMessage({ kind: 'warning', text: errorMessage(error) })
     } finally {

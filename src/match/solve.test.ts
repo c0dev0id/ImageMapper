@@ -41,7 +41,7 @@ describe('solveTowns', () => {
       ['Montabaur', montabaur],
       ['Neustadt', neustadt],
     ])
-    expect(solution.matches.every((m) => m.residual < 30)).toBe(true)
+    expect(solution.matches.map((m) => m.map)).toEqual([at([870, 255]), at([1160, 560]), at([905, 830]), at([95, 300])])
     expect(fitAngle(solution.fit!)).toBeCloseTo(angle, 1)
   })
 
@@ -61,9 +61,9 @@ describe('solveTowns', () => {
     )
     expect(solution.matches.map((m) => m.name)).toEqual(['Hachenburg', 'Westerburg', 'Montabaur'])
     expect(solution.misses).toEqual([
-      { name: 'Marienberg', reason: 'fit' },
-      { name: 'Selters', reason: 'image' },
-      { name: 'Atlantis', reason: 'map' },
+      { index: 3, name: 'Marienberg', reason: 'fit' },
+      { index: 4, name: 'Selters', reason: 'image' },
+      { index: 5, name: 'Atlantis', reason: 'map' },
     ])
   })
 
@@ -90,8 +90,12 @@ describe('solveTowns', () => {
       W,
       H,
     )
-    expect(solution.matches.map((m) => m.name)).toEqual(['Merenberg', 'Hachenburg', 'Westerburg'])
-    expect(solution.misses).toEqual([{ name: 'Marienberg', reason: 'fit' }])
+    expect(solution.matches.map((m) => [m.index, m.name])).toEqual([
+      [0, 'Merenberg'],
+      [2, 'Hachenburg'],
+      [3, 'Westerburg'],
+    ])
+    expect(solution.misses).toEqual([{ index: 1, name: 'Marienberg', reason: 'fit' }])
   })
 
   it('needs two towns that agree', () => {
@@ -99,8 +103,8 @@ describe('solveTowns', () => {
     expect(solution.fit).toBeUndefined()
     expect(solution.matches).toEqual([])
     expect(solution.misses).toEqual([
-      { name: 'Hachenburg', reason: 'fit' },
-      { name: 'Selters', reason: 'image' },
+      { index: 0, name: 'Hachenburg', reason: 'fit' },
+      { index: 1, name: 'Selters', reason: 'image' },
     ])
   })
 
