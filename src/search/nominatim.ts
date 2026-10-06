@@ -75,7 +75,14 @@ export function createPlaceSearch({ fetchFn, now, wait }: SearchDeps = browserDe
     lastStart = start
     const delay = start - now()
     if (delay > 0) await wait(delay)
-    const response = await fetchFn(url, { signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) })
+    let response: Response
+    try {
+      response = await fetchFn(url, { signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS) })
+    } catch {
+      // Offline, timed out, or refused: a busy service's answer reaches the browser as a
+      // network error, since it lacks the header that would let the page read it.
+      throw new Error('The search service could not be reached. Try again in a moment.')
+    }
     if (!response.ok) {
       throw new Error(
         response.status === 429

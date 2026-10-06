@@ -113,4 +113,13 @@ describe('createPlaceSearch', () => {
     await expect(setup(429).search('x')).rejects.toThrow(/busy/)
     await expect(setup(503).search('y')).rejects.toThrow(/status 503/)
   })
+
+  it('says so when the service cannot be reached', async () => {
+    const search = createPlaceSearch({
+      fetchFn: () => Promise.reject(new TypeError('Failed to fetch')),
+      now: () => Date.now(),
+      wait: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+    })
+    await expect(search('z')).rejects.toThrow(/could not be reached/)
+  })
 })
