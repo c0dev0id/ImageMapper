@@ -1,3 +1,4 @@
+import { panelCollapsed } from '../state/ui.ts'
 import { BaseMapSection } from './BaseMapSection.tsx'
 import { Footer } from './Footer.tsx'
 import { LayersSection } from './LayersSection.tsx'
@@ -8,7 +9,7 @@ import { SearchSection } from './SearchSection.tsx'
 
 export function Panel() {
   return (
-    <aside class="panel">
+    <aside class="panel" classList={{ collapsed: panelCollapsed() }}>
       <ProjectSection />
       <Notices />
       <SearchSection />

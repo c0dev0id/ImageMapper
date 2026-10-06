@@ -32,7 +32,7 @@ export function openGcpMenu(map: MapLibreMap, point: Point, lngLat: MapLibreLngL
   const entries = gcpMenu({
     gcps: layer && unwrap(layer.gcps),
     selected: sel && sel.layerId === layer?.id ? { gcpId: sel.gcpId, side: sel.side } : undefined,
-    hits: hitTest(sides, point.x, point.y),
+    hits: hitTest(sides, point.x, point.y, touch ? 22 : 10),
     onImage: pixel !== undefined,
   })
 

@@ -52,8 +52,16 @@ select {
 }
 
 .section h1 {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 18px;
+}
+
+.title-row {
+  margin-bottom: 4px;
+}
+
+.panel-toggle {
+  display: none;
 }
 
 .section h2 {
@@ -89,7 +97,7 @@ input[type='range'] {
   width: 90px;
 }
 
-button.icon {
+:where(.panel, .context-menu, .hint-bar) button.icon {
   padding: 0 6px;
   border: none;
   background: none;
@@ -98,7 +106,7 @@ button.icon {
   line-height: 1;
 }
 
-button.icon:disabled {
+:where(.panel, .context-menu, .hint-bar) button.icon:disabled {
   opacity: 0.3;
   cursor: default;
 }
@@ -140,7 +148,7 @@ button.icon:disabled {
 }
 
 .button,
-button:not(.icon) {
+:where(.panel, .context-menu, .hint-bar) button:not(.icon) {
   display: inline-block;
   padding: 3px 10px;
   border: 1px solid #ced4da;
@@ -152,23 +160,23 @@ button:not(.icon) {
 }
 
 .button:hover,
-button:not(.icon):hover:not(:disabled) {
+:where(.panel, .context-menu, .hint-bar) button:not(.icon):hover:not(:disabled) {
   background: #e9ecef;
 }
 
 .button.disabled,
-button:disabled {
+:where(.panel, .context-menu, .hint-bar) button:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
-button.primary {
+:where(.panel, .context-menu, .hint-bar) button.primary {
   border-color: var(--accent);
   background: var(--accent);
   color: #fff;
 }
 
-button.primary:hover:not(:disabled) {
+:where(.panel, .context-menu, .hint-bar) button.primary:hover:not(:disabled) {
   background: #1971c2;
 }
 
@@ -413,4 +421,95 @@ button.icon.history {
 
 input[type='search'] {
   min-width: 0;
+}
+
+/* Phones: the map on top, the panel below it as a scrollable, collapsible area. */
+@media (max-width: 720px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .map-wrap {
+    grid-row: 1;
+  }
+
+  .panel {
+    grid-row: 2;
+    max-height: 45vh;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  .panel-toggle {
+    display: inline-block;
+  }
+
+  .panel.collapsed > :not(.panel-header),
+  .panel.collapsed .panel-header > :not(.title-row) {
+    display: none;
+  }
+
+  .panel.collapsed .title-row {
+    margin-bottom: 0;
+  }
+
+  .hint-bar {
+    font-size: 12px;
+  }
+}
+
+/* Touch screens: larger targets, and 16px inputs so iOS does not zoom in on focus. */
+@media (pointer: coarse) {
+  :where(.panel, .context-menu, .hint-bar) button,
+  input,
+  select,
+  .button {
+    font-size: 16px;
+  }
+
+  :where(.panel, .context-menu, .hint-bar) button:not(.icon),
+  .button {
+    padding: 6px 12px;
+  }
+
+  :where(.panel, .context-menu, .hint-bar) button.icon {
+    min-width: 34px;
+    min-height: 34px;
+  }
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    width: 20px;
+    height: 20px;
+  }
+
+  .row {
+    min-height: 38px;
+  }
+
+  .context-menu {
+    width: 240px;
+  }
+
+  .context-menu button {
+    padding: 11px 14px;
+  }
+
+  .gcp-image {
+    width: 38px;
+    height: 38px;
+  }
+
+  .gcp-map {
+    width: 24px;
+    height: 24px;
+  }
+
+  .waypoint {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
 }

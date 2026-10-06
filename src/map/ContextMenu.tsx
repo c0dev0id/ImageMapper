@@ -1,9 +1,6 @@
-import { For, onCleanup, Show } from 'solid-js'
+import { For, onCleanup, onMount, Show } from 'solid-js'
 import { menu, setMenu } from '../state/ui.ts'
 import { useMap } from './context.ts'
-
-const WIDTH = 210
-const ITEM_HEIGHT = 32
 
 /** The map's context menu, kept inside the map container. */
 export function ContextMenu() {
@@ -16,25 +13,26 @@ export function ContextMenu() {
   document.addEventListener('pointerdown', onPointerDown, true)
   onCleanup(() => document.removeEventListener('pointerdown', onPointerDown, true))
 
-  const position = (m: { x: number; y: number; items: unknown[] }) => {
-    const container = map.getContainer()
-    const height = m.items.length * ITEM_HEIGHT + 8
-    return {
-      left: `${Math.max(0, Math.min(m.x, container.clientWidth - WIDTH))}px`,
-      top: `${Math.max(0, Math.min(m.y, container.clientHeight - height))}px`,
-    }
-  }
-
   return (
     <Show when={menu()} keyed>
       {(m) => {
         // A long-press menu opens under the finger; only a new tap may choose an item.
         let armed = !m.touch
+        let element!: HTMLUListElement
+        // Keep the menu inside the map, using its rendered size (larger on touch screens).
+        onMount(() => {
+          const container = map.getContainer()
+          element.style.left = `${Math.max(0, Math.min(m.x, container.clientWidth - element.offsetWidth))}px`
+          element.style.top = `${Math.max(0, Math.min(m.y, container.clientHeight - element.offsetHeight))}px`
+        })
         return (
           <ul
-            ref={list}
+            ref={(el) => {
+              element = el
+              list = el
+            }}
             class="context-menu"
-            style={position(m)}
+            style={{ left: `${m.x}px`, top: `${m.y}px` }}
             onContextMenu={(e) => e.preventDefault()}
             onPointerDown={() => (armed = true)}
           >

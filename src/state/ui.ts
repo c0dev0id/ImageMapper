@@ -20,6 +20,8 @@ export const [mode, setMode] = createSignal<Mode>('georef')
 export const [editingRouteId, setEditingRouteId] = createSignal<string>()
 export const [selection, setSelection] = createSignal<Selection>()
 export const [notices, setNotices] = createSignal<Notice[]>([])
+/** On phones the panel can shrink to its title row to give the map more room. */
+export const [panelCollapsed, setPanelCollapsed] = createSignal(false)
 
 let nextNoticeId = 1
 

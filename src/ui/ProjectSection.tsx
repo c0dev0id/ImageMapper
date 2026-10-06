@@ -5,7 +5,7 @@ import { adoptProject } from '../state/persistence.ts'
 import { project, redo, redoLabel, setProjectName, undo, undoLabel } from '../state/project.ts'
 import { decodeProjectFile, encodeProjectFile } from '../state/projectFile.ts'
 import { emptyProject } from '../state/schema.ts'
-import { errorMessage, notify } from '../state/ui.ts'
+import { errorMessage, notify, panelCollapsed, setPanelCollapsed } from '../state/ui.ts'
 import { downloadBlob, fileBaseName } from './download.ts'
 
 const hasContent = () => project.layers.length > 0 || project.routes.length > 0
@@ -39,8 +39,36 @@ export function ProjectSection() {
   }
 
   return (
-    <header class="section">
-      <h1>mappic</h1>
+    <header class="section panel-header">
+      <div class="row title-row">
+        <h1 class="grow">mappic</h1>
+        <button
+          class="icon history"
+          title={undoLabel() ? `Undo: ${undoLabel()} (Ctrl+Z)` : 'Nothing to undo'}
+          aria-label="Undo"
+          disabled={!undoLabel()}
+          onClick={undo}
+        >
+          ↶
+        </button>
+        <button
+          class="icon history"
+          title={redoLabel() ? `Redo: ${redoLabel()} (Ctrl+Shift+Z)` : 'Nothing to redo'}
+          aria-label="Redo"
+          disabled={!redoLabel()}
+          onClick={redo}
+        >
+          ↷
+        </button>
+        <button
+          class="icon panel-toggle"
+          aria-label={panelCollapsed() ? 'Show panel' : 'Hide panel'}
+          aria-expanded={!panelCollapsed()}
+          onClick={() => setPanelCollapsed((c) => !c)}
+        >
+          {panelCollapsed() ? '▴' : '▾'}
+        </button>
+      </div>
       <input
         class="project-name"
         aria-label="Project name"
@@ -66,25 +94,6 @@ export function ProjectSection() {
           />
         </label>
         <button onClick={() => void startNew()}>New</button>
-        <span class="grow" />
-        <button
-          class="icon history"
-          title={undoLabel() ? `Undo: ${undoLabel()} (Ctrl+Z)` : 'Nothing to undo'}
-          aria-label="Undo"
-          disabled={!undoLabel()}
-          onClick={undo}
-        >
-          ↶
-        </button>
-        <button
-          class="icon history"
-          title={redoLabel() ? `Redo: ${redoLabel()} (Ctrl+Shift+Z)` : 'Nothing to redo'}
-          aria-label="Redo"
-          disabled={!redoLabel()}
-          onClick={redo}
-        >
-          ↷
-        </button>
       </div>
     </header>
   )
