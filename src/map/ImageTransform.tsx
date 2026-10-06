@@ -1,4 +1,4 @@
-import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl'
+import type { GeoJSONSource, Map as MapLibreMap, MapMouseEvent, MapTouchEvent, Point } from 'maplibre-gl'
 import { createEffect, createMemo, onCleanup, Show } from 'solid-js'
 import { unwrap } from 'solid-js/store'
 import { toMercator } from '../geo/mercator.ts'
@@ -9,7 +9,7 @@ import { activeLayer, layerById, recordUndoStep, setLayerPlacement } from '../st
 import { mode, stopTransform } from '../state/ui.ts'
 import { useMap } from './context.ts'
 import { fromMarker, MarkerHandle } from './markers.ts'
-import { EMPTY_COLLECTION } from './style.ts'
+import { EMPTY_COLLECTION, IMAGE_HIT_LAYER } from './style.ts'
 
 /** The image being transformed: the active layer while in transform mode. */
 function target() {
@@ -28,7 +28,8 @@ const MAX_SCALE = 20
 /**
  * Move, rotate and resize the active image: drag the image itself to move it, a corner
  * handle to resize it (uniformly, around its centre) and the round handle to rotate it.
- * Every gesture is one undo step; the point pairs of the layer are not touched.
+ * Only the active layer's image reacts, also where other images are drawn over it. Every
+ * gesture is one undo step; the point pairs of the layer are not touched.
  */
 export function ImageTransform() {
   const map = useMap()
@@ -38,12 +39,13 @@ export function ImageTransform() {
     if (mode() === 'transform' && !activeLayer()?.visible) stopTransform()
   })
 
+  // The footprint of the image as drawn: a dashed frame, and the hit area for moving it.
   createEffect(() => {
     const layer = target()
     const warp = layer && warpOf(layer.id)
     void map.getSource<GeoJSONSource>('image-frame')?.setData(
       warp
-        ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: warp.outline() } }
+        ? { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [warp.outline()] } }
         : EMPTY_COLLECTION,
     )
   })
@@ -57,78 +59,79 @@ export function ImageTransform() {
   )
 }
 
-/** Dragging the image moves it; elsewhere the map pans as usual. */
+/**
+ * Dragging the image moves it. The press arrives as a MapLibre layer event on the hit
+ * layer, which holds only the active image: it is found even below other images, and
+ * preventing the event keeps the map's own pan, pinch and long press out of the gesture.
+ * Elsewhere the map pans as usual.
+ */
 function useBodyDrag(map: MapLibreMap) {
-  const container = map.getCanvasContainer()
   const canvas = map.getCanvas()
-  let drag:
-    | { layerId: string; pointerId: number; x: number; y: number; start: Merc; pairs: Pair[]; moving: boolean }
-    | undefined
+  let drag: { layerId: string; point: Point; start: Merc; pairs: Pair[]; moving: boolean } | undefined
+  const mercatorAt = (e: MapMouseEvent | MapTouchEvent): Merc => toMercator([e.lngLat.lng, e.lngLat.lat])
 
-  const lngLatAt = (e: PointerEvent): LngLat => {
-    const rect = container.getBoundingClientRect()
-    const { lng, lat } = map.unproject([e.clientX - rect.left, e.clientY - rect.top])
-    return [lng, lat]
-  }
-  const imageAt = (e: PointerEvent) => {
+  const onPress = (e: MapMouseEvent | MapTouchEvent) => {
     const layer = target()
-    return layer && warpOf(layer.id)?.mapToImage(lngLatAt(e)) ? layer : undefined
-  }
-
-  const endDrag = () => {
-    drag = undefined
-    map.dragPan.enable()
-  }
-  const onPointerDown = (e: PointerEvent) => {
-    // A second finger makes it a pinch of the map; the image stays where the first one left it.
-    if (drag) return endDrag()
-    if (!e.isPrimary || e.button !== 0 || fromMarker(e)) return
-    const layer = imageAt(e)
-    if (!layer) return
-    // Runs before MapLibre sees the press, so this gesture moves the image, not the map.
-    map.dragPan.disable()
+    if (!layer || fromMarker(e.originalEvent)) return
+    // A pinch or another mouse button stays with the map.
+    if ('points' in e ? e.points.length !== 1 : e.originalEvent.button !== 0) return
+    e.preventDefault()
     drag = {
       layerId: layer.id,
-      pointerId: e.pointerId,
-      x: e.clientX,
-      y: e.clientY,
-      start: toMercator(lngLatAt(e)),
+      point: e.point,
+      start: mercatorAt(e),
       pairs: structuredClone(unwrap(layer.placement)),
       moving: false,
     }
   }
-  const onHover = (e: PointerEvent) => {
-    if (!drag && e.pointerType === 'mouse' && target()) canvas.style.cursor = imageAt(e) ? 'move' : ''
-  }
-  const onPointerMove = (e: PointerEvent) => {
-    if (!drag || e.pointerId !== drag.pointerId || target()?.id !== drag.layerId) return
+  const onMove = (e: MapMouseEvent | MapTouchEvent) => {
+    if (!drag) return
+    // A second finger hands the gesture to the map; a button released off the map ends it.
+    const ended = 'points' in e ? e.points.length !== 1 : e.originalEvent.buttons === 0
+    if (ended || target()?.id !== drag.layerId) {
+      drag = undefined
+      return
+    }
     if (!drag.moving) {
-      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < MOVE_THRESHOLD) return
+      if (e.point.dist(drag.point) < MOVE_THRESHOLD) return
       drag.moving = true
       recordUndoStep('Move image')
     }
-    const [x, y] = toMercator(lngLatAt(e))
+    const [x, y] = mercatorAt(e)
     setLayerPlacement(drag.layerId, transformPlacement(drag.pairs, { translate: [x - drag.start[0], y - drag.start[1]] }))
   }
-  const onPointerUp = (e: PointerEvent) => {
-    if (drag && e.pointerId === drag.pointerId) endDrag()
+  const onRelease = () => {
+    drag = undefined
+  }
+  const onEnter = () => {
+    canvas.style.cursor = 'move'
+  }
+  const onLeave = () => {
+    canvas.style.cursor = ''
   }
 
-  container.addEventListener('pointerdown', onPointerDown, true)
-  container.addEventListener('pointermove', onHover)
-  window.addEventListener('pointermove', onPointerMove)
-  window.addEventListener('pointerup', onPointerUp)
-  window.addEventListener('pointercancel', onPointerUp)
+  map.on('mousedown', IMAGE_HIT_LAYER, onPress)
+  map.on('touchstart', IMAGE_HIT_LAYER, onPress)
+  map.on('mousemove', onMove)
+  map.on('touchmove', onMove)
+  map.on('mouseup', onRelease)
+  map.on('touchend', onRelease)
+  map.on('touchcancel', onRelease)
+  map.on('mouseenter', IMAGE_HIT_LAYER, onEnter)
+  map.on('mouseleave', IMAGE_HIT_LAYER, onLeave)
   createEffect(() => {
     if (!target()) canvas.style.cursor = ''
   })
   onCleanup(() => {
-    container.removeEventListener('pointerdown', onPointerDown, true)
-    container.removeEventListener('pointermove', onHover)
-    window.removeEventListener('pointermove', onPointerMove)
-    window.removeEventListener('pointerup', onPointerUp)
-    window.removeEventListener('pointercancel', onPointerUp)
-    if (drag) map.dragPan.enable()
+    map.off('mousedown', IMAGE_HIT_LAYER, onPress)
+    map.off('touchstart', IMAGE_HIT_LAYER, onPress)
+    map.off('mousemove', onMove)
+    map.off('touchmove', onMove)
+    map.off('mouseup', onRelease)
+    map.off('touchend', onRelease)
+    map.off('touchcancel', onRelease)
+    map.off('mouseenter', IMAGE_HIT_LAYER, onEnter)
+    map.off('mouseleave', IMAGE_HIT_LAYER, onLeave)
     canvas.style.cursor = ''
   })
 }

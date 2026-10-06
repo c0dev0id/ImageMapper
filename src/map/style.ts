@@ -9,6 +9,9 @@ export const EMPTY_COLLECTION: FeatureCollection = { type: 'FeatureCollection', 
 /** Image layers are inserted directly below this layer, so routes are always drawn on top. */
 export const FIRST_OVERLAY_LAYER = 'routes-casing'
 
+/** Transparent footprint of the image being moved; pointer events on it start a move. */
+export const IMAGE_HIT_LAYER = 'image-hit'
+
 const round = { 'line-join': 'round', 'line-cap': 'round' } as const
 
 export function baseStyle(): StyleSpecification {
@@ -68,6 +71,12 @@ export function baseStyle(): StyleSpecification {
         type: 'line',
         source: 'gcp-links',
         paint: { 'line-color': '#e8590c', 'line-width': 1.5, 'line-dasharray': [3, 2] },
+      },
+      {
+        id: IMAGE_HIT_LAYER,
+        type: 'fill',
+        source: 'image-frame',
+        paint: { 'fill-opacity': 0 },
       },
       {
         id: 'image-frame',
