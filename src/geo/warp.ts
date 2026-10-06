@@ -1,4 +1,5 @@
 import { fromMercator, mercatorPerPixel, toMercator } from './mercator.ts'
+import { transformPlacement } from './similarity.ts'
 import { fitThinPlateSpline } from './tps.ts'
 import type { LngLat, Merc, Pair, Px } from './types.ts'
 
@@ -161,6 +162,9 @@ export class Warp {
   }
 }
 
+/** Share of the canvas an image covers when it is placed in the view. */
+const VIEW_FILL = 0.6
+
 /**
  * Placement for a newly added image: north-up, centred on the view, scaled so it covers
  * `fill` of the canvas. Uses centre and zoom rather than the visible bounds, which reach
@@ -173,7 +177,7 @@ export function initialPlacement(
   zoom: number,
   canvasWidth: number,
   canvasHeight: number,
-  fill = 0.6,
+  fill = VIEW_FILL,
 ): Pair[] {
   const screenPerImagePx = fill * Math.min(canvasWidth / width, canvasHeight / height)
   const scale = screenPerImagePx * mercatorPerPixel(zoom)
@@ -188,4 +192,24 @@ export function initialPlacement(
     image,
     map: fromMercator([cx + (image[0] - width / 2) * scale, cy + (image[1] - height / 2) * scale]),
   }))
+}
+
+/**
+ * Moves a placed image to the centre of the view and scales it to cover `fill` of the
+ * canvas, like a new image, but keeps its rotation and bends.
+ */
+export function placementInView(
+  pairs: readonly Pair[],
+  warp: Pick<Warp, 'center' | 'bounds'>,
+  center: LngLat,
+  zoom: number,
+  canvasWidth: number,
+  canvasHeight: number,
+  fill = VIEW_FILL,
+): Pair[] {
+  const [minX, minY, maxX, maxY] = warp.bounds
+  const perPixel = mercatorPerPixel(zoom)
+  const scale = fill * Math.min((canvasWidth * perPixel) / (maxX - minX), (canvasHeight * perPixel) / (maxY - minY))
+  const [x, y] = toMercator(center)
+  return transformPlacement(pairs, { pivot: warp.center, scale, translate: [x - warp.center[0], y - warp.center[1]] })
 }

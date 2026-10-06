@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { fromMercator, mercatorPerPixel, toMercator } from './mercator.ts'
 import type { LngLat, Pair, Px } from './types.ts'
-import { initialPlacement, Warp } from './warp.ts'
+import { transformPlacement } from './similarity.ts'
+import { initialPlacement, placementInView, Warp } from './warp.ts'
 
 const W = 4000
 const H = 3000
@@ -137,5 +138,28 @@ describe('initialPlacement', () => {
     const right = toMercator(pairs[1].map)
     expect((right[0] - left[0]) / mercatorPerPixel(12)).toBeCloseTo(600, 6)
     expect(right[1]).toBeCloseTo(left[1], 12)
+  })
+})
+
+describe('placementInView', () => {
+  it('brings a far-away image into the view at the size of a new one, keeping its rotation', () => {
+    const far = initialPlacement(W, H, [2.35, 48.85], 6, 1000, 800)
+    const rotated = transformPlacement(far, { angle: Math.PI / 6, pivot: new Warp(far, W, H).center })
+    const before = new Warp(rotated, W, H)
+    const center: LngLat = [11.58, 48.14]
+    const after = new Warp(placementInView(rotated, before, center, 13, 1000, 800), W, H)
+
+    const [lng, lat] = after.imageToMap([W / 2, H / 2])
+    expect(lng).toBeCloseTo(center[0], 9)
+    expect(lat).toBeCloseTo(center[1], 9)
+    const [minX, minY, maxX, maxY] = after.bounds
+    const perPixel = mercatorPerPixel(13)
+    expect(Math.max((maxX - minX) / perPixel / 1000, (maxY - minY) / perPixel / 800)).toBeCloseTo(0.6, 9)
+    const topEdge = (w: Warp) => {
+      const [ax, ay] = toMercator(w.imageToMap([0, 0]))
+      const [bx, by] = toMercator(w.imageToMap([W, 0]))
+      return Math.atan2(by - ay, bx - ax)
+    }
+    expect(topEdge(after)).toBeCloseTo(topEdge(before), 9)
   })
 })
