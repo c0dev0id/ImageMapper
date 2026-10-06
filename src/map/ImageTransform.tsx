@@ -11,11 +11,9 @@ import { useMap } from './context.ts'
 import { fromMarker, MarkerHandle } from './markers.ts'
 import { EMPTY_COLLECTION, IMAGE_HIT_LAYER } from './style.ts'
 
-/** The image being transformed: the active layer while in transform mode. */
+/** The image being transformed: the active layer while in transform mode, hidden or not. */
 function target() {
-  if (mode() !== 'transform') return undefined
-  const layer = activeLayer()
-  return layer?.visible ? layer : undefined
+  return mode() === 'transform' ? activeLayer() : undefined
 }
 
 /** Movement in CSS pixels before a press on the image becomes a move. */
@@ -34,9 +32,9 @@ const MAX_SCALE = 20
 export function ImageTransform() {
   const map = useMap()
 
-  // Nothing to transform once the active layer is gone or hidden.
+  // Nothing to transform once the active layer is gone.
   createEffect(() => {
-    if (mode() === 'transform' && !activeLayer()?.visible) stopTransform()
+    if (mode() === 'transform' && !activeLayer()) stopTransform()
   })
 
   // The footprint of the image as drawn: a dashed frame, and the hit area for moving it.

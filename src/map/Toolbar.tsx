@@ -94,7 +94,7 @@ function ImageTools(props: { layer: ImageLayer }) {
     return s?.layerId === layer.id ? s : undefined
   }
   const pairs = () => countPairs(layer.gcps).complete
-  const usable = (side: Side) => pinEnabled(side, waiting()) && (side === 'map' || layer.visible)
+  const usable = (side: Side) => pinEnabled(side, waiting())
 
   // The picked pin always belongs to a side that can take the next point.
   createEffect(() => {
@@ -136,7 +136,6 @@ function ImageTools(props: { layer: ImageLayer }) {
           label="Move, rotate, resize"
           title="Move, rotate and resize the image by hand"
           active={mode() === 'transform'}
-          disabled={!layer.visible}
           onClick={() => (mode() === 'transform' ? stopTransform() : startTransform())}
         >
           <TransformIcon />

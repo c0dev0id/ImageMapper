@@ -57,7 +57,7 @@ export function openGcpMenu(
 
   const sides: (SideRef & { x: number; y: number })[] = []
   for (const g of layer?.gcps ?? []) {
-    if (g.image && layer?.visible && warp) {
+    if (g.image && warp) {
       const p = map.project(warp.imageToMap([g.image[0], g.image[1]]))
       sides.push({ gcpId: g.id, side: 'image', x: p.x, y: p.y })
     }

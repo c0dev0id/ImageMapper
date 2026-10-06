@@ -19,13 +19,17 @@ export function HintBar() {
     const sel = selection()
     const t = tool()
     if (sel && sel.layerId === layer.id) {
-      const n = gcpNumber(layer.gcps, sel.gcpId)
-      const other = sel.side === 'image' ? 'map' : 'image'
+      const what = `${sel.side === 'image' ? 'Image' : 'Map'} point ${gcpNumber(layer.gcps, sel.gcpId)} selected`
       const how = t ? 'tap' : 'pin, right-click or long-press'
-      return `${sel.side === 'image' ? 'Image' : 'Map'} point ${n} selected: ${how} the same place on the ${other}.`
+      if (sel.side === 'image') return `${what}: ${how} the same place on the map.`
+      return `${what}: ${layer.visible ? '' : 'show the image, then '}${how} the same place on the image.`
     }
     if (t === 'pin-map') return 'Tap a feature on the map to pin it, then the same feature on the image.'
-    if (t === 'pin-image') return 'Tap a feature on the image to pin it, then the same feature on the map.'
+    if (t === 'pin-image') {
+      return layer.visible
+        ? 'Tap a feature on the image to pin it, then the same feature on the map.'
+        : 'The image is hidden: show it to pin a feature on it.'
+    }
     return 'Pin a feature on the image and the same feature on the map; skew with 3 or more pairs.'
   }
   const drawing = () => (mode() === 'route' ? routeById(editingRouteId()) : undefined)

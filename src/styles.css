@@ -217,8 +217,9 @@ button.layer-select:hover:not(:disabled) {
   background: none;
 }
 
-.layer.hidden .layer-select {
-  opacity: 0.5;
+/* A hidden layer keeps its place and its active state; only the preview fades. */
+.layer.hidden .thumb {
+  opacity: 0.35;
 }
 
 .thumb {
