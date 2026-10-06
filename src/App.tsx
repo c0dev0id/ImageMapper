@@ -6,6 +6,7 @@ import { ContextMenu } from './map/ContextMenu.tsx'
 import { GcpLinks, GcpMarkers } from './map/GcpMarkers.tsx'
 import { HintBar } from './map/HintBar.tsx'
 import { ImageLayers } from './map/ImageLayers.tsx'
+import { ImageTransform } from './map/ImageTransform.tsx'
 import { Interactions } from './map/Interactions.tsx'
 import { RouteEditor } from './map/RouteEditor.tsx'
 import { RouteLayers } from './map/RouteLayers.tsx'
@@ -43,6 +44,7 @@ export function App() {
               <GcpLinks />
               <GcpMarkers />
               <RouteEditor />
+              <ImageTransform />
               <Interactions />
               <ContextMenu />
               <HintBar />

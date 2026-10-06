@@ -12,7 +12,7 @@ import {
   setLayerVisible,
 } from '../state/project.ts'
 import type { ImageLayer } from '../state/schema.ts'
-import { setSkewNote, skewNote } from '../state/ui.ts'
+import { mode, setSkewNote, skewNote, startTransform, stopTransform } from '../state/ui.ts'
 import { addImages, IMAGE_TYPES } from './addImages.ts'
 
 export function LayersSection() {
@@ -129,11 +129,23 @@ function GeorefStatus(props: { layer: ImageLayer }) {
       setSkewNote({ layerId: layer.id, kind: 'error', text: result.error })
       return
     }
-    setLayerPlacement(layer.id, result.pairs)
+    setLayerPlacement(layer.id, result.pairs, 'Skew image to map')
     setSkewNote(result.warning ? { layerId: layer.id, kind: 'warning', text: result.warning } : undefined)
   }
+  const transforming = () => mode() === 'transform'
   return (
     <>
+      <div class="row">
+        <span class="grow muted">Position by hand</span>
+        <button
+          classList={{ primary: transforming() }}
+          title="Drag the image, its corners or its rotate handle on the map"
+          disabled={!layer.visible}
+          onClick={() => (transforming() ? stopTransform() : startTransform())}
+        >
+          {transforming() ? 'Done' : 'Move, rotate, resize'}
+        </button>
+      </div>
       <div class="row">
         <span class="grow muted">
           {counts().complete} {counts().complete === 1 ? 'pair' : 'pairs'}

@@ -2,7 +2,7 @@ import type { MapMouseEvent } from 'maplibre-gl'
 import { onCleanup } from 'solid-js'
 import { roundLngLat } from '../routing/legs.ts'
 import { appendWaypoint, redo, undo } from '../state/project.ts'
-import { editingRouteId, menu, mode, setMenu, setSelection, stopDrawing } from '../state/ui.ts'
+import { editingRouteId, menu, mode, setMenu, setSelection, stopDrawing, stopTransform } from '../state/ui.ts'
 import { useMap } from './context.ts'
 import { openGcpMenu } from './gcpMenu.ts'
 import { fromMarker } from './markers.ts'
@@ -54,6 +54,7 @@ export function Interactions() {
     if (e.key !== 'Escape') return
     if (menu()) setMenu(undefined)
     else if (mode() === 'route') stopDrawing()
+    else if (mode() === 'transform') stopTransform()
     else setSelection(undefined)
   }
 

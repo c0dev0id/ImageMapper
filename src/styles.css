@@ -360,6 +360,38 @@ input[type='range'] {
   user-select: none;
 }
 
+/* Handles to resize (corners) and rotate (top edge) the active image; padding enlarges the target. */
+.transform-handle-marker {
+  z-index: 3;
+  padding: 6px;
+}
+
+.transform-handle {
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.transform-handle.nwse {
+  cursor: nwse-resize;
+}
+
+.transform-handle.nesw {
+  cursor: nesw-resize;
+}
+
+.transform-handle.rotate {
+  width: 18px;
+  height: 18px;
+  border-color: #fff;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: grab;
+}
+
 .hint-bar.interactive {
   pointer-events: auto;
 }
@@ -511,5 +543,19 @@ input[type='search'] {
     width: 28px;
     height: 28px;
     font-size: 12px;
+  }
+
+  .transform-handle-marker {
+    padding: 10px;
+  }
+
+  .transform-handle {
+    width: 22px;
+    height: 22px;
+  }
+
+  .transform-handle.rotate {
+    width: 26px;
+    height: 26px;
   }
 }

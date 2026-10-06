@@ -186,12 +186,21 @@ export function setLayerOpacity(id: string, opacity: number): void {
   onChange()
 }
 
-export function setLayerPlacement(id: string, placement: Pair[]): void {
+/**
+ * Sets the pairs a layer's warp is fitted on. With a label this is an undo step of its
+ * own; without one it continues a gesture that called `recordUndoStep` when it started.
+ */
+export function setLayerPlacement(id: string, placement: Pair[], label?: string): void {
   const index = layerIndex(id)
   if (index < 0) return
-  recordEdit('Skew image to map')
+  if (label) recordEdit(label)
   setProject('layers', index, 'placement', placement)
   onChange()
+}
+
+/** Records the current project as one undo step for a gesture made of several edits. */
+export function recordUndoStep(label: string): void {
+  recordEdit(label)
 }
 
 export function setLayerGcps(id: string, gcps: Gcp[], label: string): void {

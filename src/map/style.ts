@@ -31,6 +31,7 @@ export function baseStyle(): StyleSpecification {
       },
       routes: { type: 'geojson', data: EMPTY_COLLECTION },
       'gcp-links': { type: 'geojson', data: EMPTY_COLLECTION },
+      'image-frame': { type: 'geojson', data: EMPTY_COLLECTION },
     },
     layers: [
       { id: 'osm', type: 'raster', source: 'osm' },
@@ -67,6 +68,12 @@ export function baseStyle(): StyleSpecification {
         type: 'line',
         source: 'gcp-links',
         paint: { 'line-color': '#e8590c', 'line-width': 1.5, 'line-dasharray': [3, 2] },
+      },
+      {
+        id: 'image-frame',
+        type: 'line',
+        source: 'image-frame',
+        paint: { 'line-color': '#1c7ed6', 'line-width': 2, 'line-dasharray': [3, 2] },
       },
     ],
   }

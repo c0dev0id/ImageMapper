@@ -1,7 +1,7 @@
-import { Show } from 'solid-js'
+import { Match, Switch } from 'solid-js'
 import { gcpNumber } from '../gcp/gcps.ts'
 import { activeLayer, routeById } from '../state/project.ts'
-import { editingRouteId, mode, selection, stopDrawing } from '../state/ui.ts'
+import { editingRouteId, mode, selection, stopDrawing, stopTransform } from '../state/ui.ts'
 
 /** A short instruction for the current state, shown over the map. */
 export function HintBar() {
@@ -20,23 +20,29 @@ export function HintBar() {
   }
   const drawing = () => (mode() === 'route' ? routeById(editingRouteId()) : undefined)
   return (
-    <Show
-      when={drawing()}
-      fallback={
-        <Show when={text()}>
-          <div class="hint-bar">{text()}</div>
-        </Show>
-      }
-    >
-      {(route) => (
+    <Switch>
+      <Match when={drawing()}>
+        {(route) => (
+          <div class="hint-bar interactive">
+            <strong>{route().name}</strong>: click to add points, drag to move them, right-click or
+            long-press a point to remove it.{' '}
+            <button class="primary" onClick={stopDrawing}>
+              Done
+            </button>
+          </div>
+        )}
+      </Match>
+      <Match when={mode() === 'transform'}>
         <div class="hint-bar interactive">
-          <strong>{route().name}</strong>: click to add points, drag to move them, right-click or
-          long-press a point to remove it.{' '}
-          <button class="primary" onClick={stopDrawing}>
+          Drag the image to move it, a corner to resize it, the round handle to rotate it.{' '}
+          <button class="primary" onClick={stopTransform}>
             Done
           </button>
         </div>
-      )}
-    </Show>
+      </Match>
+      <Match when={text()}>
+        <div class="hint-bar">{text()}</div>
+      </Match>
+    </Switch>
   )
 }

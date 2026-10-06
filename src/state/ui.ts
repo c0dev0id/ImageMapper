@@ -1,8 +1,11 @@
 import { createSignal } from 'solid-js'
 import type { Side } from './schema.ts'
 
-/** Transient UI state; never persisted. */
-export type Mode = 'georef' | 'route'
+/**
+ * Transient UI state; never persisted. Modes: marking point pairs (`georef`), drawing a
+ * route (`route`) and moving/rotating/resizing the active image (`transform`).
+ */
+export type Mode = 'georef' | 'route' | 'transform'
 
 export interface Selection {
   layerId: string
@@ -68,4 +71,16 @@ export function stopDrawing(): void {
   setMenu(undefined)
   setEditingRouteId(undefined)
   setMode('georef')
+}
+
+/** Enters the move/rotate/resize mode for the active image layer. */
+export function startTransform(): void {
+  setSelection(undefined)
+  setMenu(undefined)
+  setEditingRouteId(undefined)
+  setMode('transform')
+}
+
+export function stopTransform(): void {
+  if (mode() === 'transform') setMode('georef')
 }
