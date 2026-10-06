@@ -21,6 +21,11 @@ export type ReadStage = 'loading' | 'reading'
 /** Words read so far per layer, for this session: a second try with other names is instant. */
 const wordsByLayer = new Map<string, TextWord[]>()
 
+/** The words of a layer's image, if they were read already in this session. */
+export function knownWords(layerId: string): TextWord[] | undefined {
+  return wordsByLayer.get(layerId)
+}
+
 /**
  * Reads the words printed on a layer's image with Tesseract (German model, sparse text,
  * since map labels are scattered rather than set in lines). Engine, worker and model
@@ -35,10 +40,7 @@ export async function readWords(
   const known = wordsByLayer.get(layerId)
   if (known) return known
   onProgress('loading')
-  const [{ createWorker, OEM, PSM }, page] = await abortable(
-    Promise.all([import('tesseract.js'), drawForReading(image)]),
-    signal,
-  )
+  const { createWorker, OEM, PSM } = await abortable(import('tesseract.js'), signal)
   // Tesseract.js leaves its promises pending when the worker fails (a model that does not
   // load, for one); its error handler is told, and turns that into an error here.
   let fail: (reason: Error) => void = () => undefined
@@ -60,16 +62,18 @@ export async function readWords(
     errorHandler: (error) => fail(new Error(`Text recognition failed: ${String(error)}`)),
   })
   try {
-    const worker = await until(starting)
+    // The worker loads while the image is prepared.
+    const [worker, page] = await until(Promise.all([starting, prepareForReading(image)]))
     // Tesseract's notes ("Estimating resolution as …") would otherwise land in the console as errors.
     await until(worker.setParameters({ tessedit_pageseg_mode: PSM.SPARSE_TEXT, debug_file: '/dev/null' }))
-    const { data } = await until(worker.recognize(page.canvas, {}, { blocks: true }))
+    const { data } = await until(worker.recognize(page.image, {}, { blocks: true }))
+    const { scale } = page
     const words: TextWord[] = []
     for (const block of data.blocks ?? []) {
       for (const paragraph of block.paragraphs) {
         for (const line of paragraph.lines) {
           for (const { text, bbox } of line.words) {
-            words.push({ text, box: [bbox.x0, bbox.y0, bbox.x1, bbox.y1].map((v) => v / page.scale) as TextWord['box'] })
+            words.push({ text, box: [bbox.x0 / scale, bbox.y0 / scale, bbox.x1 / scale, bbox.y1 / scale] })
           }
         }
       }
@@ -85,8 +89,12 @@ export async function readWords(
   }
 }
 
-/** The image upright (EXIF orientation applied, as everywhere in the app) at the size to read it at. */
-async function drawForReading(image: Blob): Promise<{ canvas: OffscreenCanvas; scale: number }> {
+/**
+ * The image upright (EXIF orientation applied, as everywhere in the app) at the size to
+ * read it at, encoded for the worker. PNG, not JPEG: compression artefacts cost names in
+ * small print (Bezau on the Allgäu sample).
+ */
+async function prepareForReading(image: Blob): Promise<{ image: Blob; scale: number }> {
   const bitmap = await createImageBitmap(image, { imageOrientation: 'from-image' })
   const longest = Math.max(bitmap.width, bitmap.height)
   const scale = longest < ENLARGE_BELOW ? 2 : Math.min(1, LONGEST_SIDE / longest)
@@ -96,7 +104,7 @@ async function drawForReading(image: Blob): Promise<{ canvas: OffscreenCanvas; s
   context.imageSmoothingQuality = 'high'
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
   bitmap.close()
-  return { canvas, scale }
+  return { image: await canvas.convertToBlob({ type: 'image/png' }), scale }
 }
 
 /** The worker loads its scripts from a blob URL, so every path it gets must be absolute. */
