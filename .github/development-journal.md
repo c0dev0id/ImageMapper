@@ -96,6 +96,13 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   in the top layer, so the scrolling panel cannot clip it, and closes on outside clicks
   and Esc by itself. It is placed next to its button by script (above it when the
   button is in the lower half of the screen, as in the phone layout).
+- **Names are text, not fields.** Route and project names show as text with a pencil
+  button; renaming swaps in a focused field in place (Enter or leaving it keeps the
+  name, Esc or an empty field drops the change). The panel shows no open text fields
+  apart from the search box.
+- **Bringing things into view** lives in `map/navigate.ts`: one `showBounds` (padding,
+  current rotation kept) behind place search, fly to image and fly to route. Fly to
+  route fits the joined route geometry, so routed detours stay in view.
 - **The active layer is the target.** Every image interaction (marking points, moving,
   resizing, rotating) applies to the active layer's image, also where other images are
   drawn over it. Hit tests run against the active image's warp or footprint only, never
@@ -138,7 +145,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Context-menu driven GCP editing (right-click or long press) and "skew image to map"
   with fold/mirror checks.
 - Undo/redo of content edits.
-- Draw route mode: append, drag and remove route points; per-route OSRM profile.
+- Draw route mode: append, drag and remove route points; per-route OSRM profile; fly
+  to a route.
 - Named route points (waypoints), shown on the map.
 - GPX export of all routes as tracks, with their waypoints.
 - Project save/open/new; automatic persistence in IndexedDB including map view.

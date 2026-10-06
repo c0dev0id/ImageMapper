@@ -35,7 +35,8 @@ It runs entirely in the browser; nothing is uploaded anywhere.
    point to remove it or to **change it to a waypoint**: a named place such as a pass or
    a café, asked for when you choose it. The same menu on a waypoint renames it or
    changes it back. Waypoints stay part of the route and keep their name label on the
-   map after drawing.
+   map after drawing. In a route's row, the pencil renames the route, the crosshair
+   flies to it and **Edit** continues drawing it.
 6. **Export GPX** writes all routes into one file, one track per route, with the
    waypoints of all routes as GPX waypoints.
 
@@ -57,11 +58,12 @@ to give the map more room.
 
 ## Saving
 
-The project is kept in the browser's IndexedDB and restored on the next visit. Clearing
-the browser's site data removes it, and Safari may delete it after seven days without a
-visit. **Save** downloads the whole project, images included, as a `.mappic` file (a
-plain ZIP archive with `project.json` and the original images); **Open** loads such a
-file again.
+The pencil next to the project name at the top of the panel renames the project; the
+name is used for the saved file and the GPX export. The project is kept in the browser's
+IndexedDB and restored on the next visit. Clearing the browser's site data removes it,
+and Safari may delete it after seven days without a visit. **Save** downloads the whole
+project, images included, as a `.mappic` file (a plain ZIP archive with `project.json`
+and the original images); **Open** loads such a file again.
 
 ## Services
 
