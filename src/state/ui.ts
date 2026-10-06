@@ -71,10 +71,10 @@ export interface WaypointDraft {
 
 export const [waypointDraft, setWaypointDraft] = createSignal<WaypointDraft>()
 
-/** Result of the last "skew image to map" on a layer, shown in its panel row. */
-export const [skewNote, setSkewNote] = createSignal<{
+/** Outcome of the last skew or town match on a layer, shown below the layer's settings. */
+export const [layerNote, setLayerNote] = createSignal<{
   layerId: string
-  kind: 'error' | 'warning'
+  kind: 'error' | 'warning' | 'info'
   text: string
 }>()
 

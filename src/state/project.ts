@@ -21,7 +21,7 @@ import {
   setMenu,
   setMode,
   setSelection,
-  setSkewNote,
+  setLayerNote,
   setTool,
   stopDrawing,
 } from './ui.ts'
@@ -84,7 +84,7 @@ function restore(state: Project | undefined): void {
   if (!state) return
   setSelection(undefined)
   setMenu(undefined)
-  setSkewNote(undefined)
+  setLayerNote(undefined)
   setProject(reconcile(withCurrentDisplay(state, unwrap(project)), { key: 'id', merge: false }))
   const routeId = editingRouteId()
   if (routeId && !routeById(routeId)) stopDrawing()
@@ -111,7 +111,7 @@ export function replaceProject(next: Project): void {
   setMode('georef')
   setTool(undefined)
   setMenu(undefined)
-  setSkewNote(undefined)
+  setLayerNote(undefined)
   setProject(reconcile(next, { key: 'id', merge: false }))
   history.clear()
   setHistoryVersion((v) => v + 1)
@@ -210,17 +210,17 @@ export function setLayerPlacement(id: string, placement: Pair[], label?: string)
   onChange()
 }
 
-/** Fits a layer's image to its complete point pairs; problems are shown as its skew note. */
+/** Fits a layer's image to its complete point pairs; problems are shown as its layer note. */
 export function skewImageToMap(layerId: string): void {
   const layer = layerById(layerId)
   if (!layer) return
   const result = prepareSkew(unwrap(layer.gcps), layer.width, layer.height)
   if (!result.ok) {
-    setSkewNote({ layerId, kind: 'error', text: result.error })
+    setLayerNote({ layerId, kind: 'error', text: result.error })
     return
   }
   setLayerPlacement(layerId, result.pairs, 'Skew image to map')
-  setSkewNote(result.warning ? { layerId, kind: 'warning', text: result.warning } : undefined)
+  setLayerNote(result.warning ? { layerId, kind: 'warning', text: result.warning } : undefined)
 }
 
 /** Records the current project as one undo step for a gesture made of several edits. */

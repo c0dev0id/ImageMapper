@@ -288,6 +288,11 @@ button.layer-select:hover:not(:disabled) {
   color: #8f5f00;
 }
 
+.note.info {
+  background: #e7f5ff;
+  color: #1864ab;
+}
+
 /* Ground control point markers: image side = ring, map side = dot; matched pairs nest.
    Dots lie above rings, so in a nested pair the centre grabs the map point and the ring
    the image point. */

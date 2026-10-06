@@ -12,7 +12,7 @@ import {
   setLayerVisible,
 } from '../state/project.ts'
 import type { BlendMode, ImageLayer } from '../state/schema.ts'
-import { skewNote } from '../state/ui.ts'
+import { layerNote } from '../state/ui.ts'
 import { addImages, IMAGE_TYPES } from './addImages.ts'
 import { BLEND_MODES } from './blendModes.ts'
 import { EyeIcon, EyeOffIcon, GripIcon } from './icons.tsx'
@@ -168,7 +168,7 @@ function ActiveLayer(props: { layer: ImageLayer }) {
   const blend = () => BLEND_MODES.find((m) => m.value === (layer.blend ?? 'normal')) ?? BLEND_MODES[0]
   const counts = () => countPairs(layer.gcps)
   const note = () => {
-    const n = skewNote()
+    const n = layerNote()
     return n?.layerId === layer.id ? n : undefined
   }
   return (
