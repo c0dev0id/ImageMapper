@@ -2,12 +2,15 @@ import { For, Show } from 'solid-js'
 import { unwrap } from 'solid-js/store'
 import { namedPoints, routeTracks, toGpx } from '../export/gpx.ts'
 import { decodePolyline } from '../routing/polyline.ts'
+import { useMapAccessor } from '../map/context.ts'
+import { flyToRoute } from '../map/navigate.ts'
 import { nextRouteColor } from '../routing/routeEdit.ts'
 import { failedLegs, lastError, pendingLegs, retryFailedLegs } from '../routing/service.ts'
 import { addRoute, project, removeRoute, renameRoute, setRouteProfile } from '../state/project.ts'
 import type { Profile, Route } from '../state/schema.ts'
 import { editingRouteId, startDrawing, stopDrawing } from '../state/ui.ts'
 import { downloadBlob, fileBaseName } from './download.ts'
+import { CrosshairIcon } from './icons.tsx'
 
 const PROFILES: { value: Profile; label: string }[] = [
   { value: 'car', label: 'Car' },
@@ -77,6 +80,7 @@ export function RoutesSection() {
 
 function RouteRow(props: { route: Route }) {
   const route = props.route
+  const map = useMapAccessor()
   const editing = () => editingRouteId() === route.id
   const named = () => route.waypoints.filter((w) => w.name).length
   return (
@@ -89,21 +93,17 @@ function RouteRow(props: { route: Route }) {
           value={route.name}
           onChange={(e) => renameRoute(route.id, e.currentTarget.value.trim() || route.name)}
         />
-        <select
-          aria-label="Routing profile"
-          value={route.profile}
-          onChange={(e) => setRouteProfile(route.id, e.currentTarget.value as Profile)}
+        <button
+          class="icon"
+          title="Fly to route"
+          aria-label="Fly to route"
+          disabled={!map() || route.waypoints.length === 0}
+          onClick={() => {
+            const m = map()
+            if (m) flyToRoute(m, route)
+          }}
         >
-          <For each={PROFILES}>{(p) => <option value={p.value}>{p.label}</option>}</For>
-        </select>
-      </div>
-      <div class="row">
-        <span class="grow muted">
-          {route.waypoints.length} {route.waypoints.length === 1 ? 'point' : 'points'}
-          {named() > 0 ? `, ${named()} ${named() === 1 ? 'waypoint' : 'waypoints'}` : ''}
-        </span>
-        <button onClick={() => (editing() ? stopDrawing() : startDrawing(route.id))}>
-          {editing() ? 'Done' : 'Edit'}
+          <CrosshairIcon />
         </button>
         <button
           class="icon"
@@ -114,6 +114,22 @@ function RouteRow(props: { route: Route }) {
           }}
         >
           ×
+        </button>
+      </div>
+      <div class="row">
+        <span class="grow muted">
+          {route.waypoints.length} {route.waypoints.length === 1 ? 'point' : 'points'}
+          {named() > 0 ? `, ${named()} ${named() === 1 ? 'waypoint' : 'waypoints'}` : ''}
+        </span>
+        <select
+          aria-label="Routing profile"
+          value={route.profile}
+          onChange={(e) => setRouteProfile(route.id, e.currentTarget.value as Profile)}
+        >
+          <For each={PROFILES}>{(p) => <option value={p.value}>{p.label}</option>}</For>
+        </select>
+        <button onClick={() => (editing() ? stopDrawing() : startDrawing(route.id))}>
+          {editing() ? 'Done' : 'Edit'}
         </button>
       </div>
     </li>
