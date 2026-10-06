@@ -18,14 +18,11 @@ export type Viewbox = Bounds
 export interface SearchOptions {
   /** Area to prefer; results elsewhere are still returned. */
   viewbox?: Viewbox
-  /** Only settlements: cities, towns, villages, hamlets and the like. */
-  settlement?: boolean
 }
 
-export function searchUrl(query: string, { viewbox, settlement }: SearchOptions = {}): string {
+export function searchUrl(query: string, { viewbox }: SearchOptions = {}): string {
   const params = new URLSearchParams({ q: query, format: 'jsonv2', limit: '5' })
   if (viewbox) params.set('viewbox', viewbox.map((v) => v.toFixed(2)).join(','))
-  if (settlement) params.set('featureType', 'settlement')
   return `${NOMINATIM_URL}/search?${params}`
 }
 
