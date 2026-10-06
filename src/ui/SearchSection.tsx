@@ -1,9 +1,10 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
-import { createSignal, For, Show } from 'solid-js'
+import { createSignal, Show } from 'solid-js'
 import { useMapAccessor } from '../map/context.ts'
 import { searchViewbox, showBounds } from '../map/navigate.ts'
 import { searchPlaces, type Place } from '../search/nominatim.ts'
 import { errorMessage } from '../state/ui.ts'
+import { PlaceResults } from './PlaceResults.tsx'
 
 function showPlace(map: MapLibreMap, place: Place): void {
   if (place.bounds) {
@@ -67,25 +68,7 @@ export function SearchSection() {
         </button>
       </form>
       <Show when={error()}>{(text) => <p class="note error">{text()}</p>}</Show>
-      <Show when={results()}>
-        {(list) => (
-          <Show when={list().length > 0} fallback={<p class="muted hint">Nothing found.</p>}>
-            <ul class="search-results">
-              <For each={list()}>
-                {(place) => (
-                  <li>
-                    <button class="result" onClick={() => choose(place)}>
-                      <strong>{place.name}</strong>
-                      <span class="muted">{place.label}</span>
-                    </button>
-                  </li>
-                )}
-              </For>
-            </ul>
-            <p class="muted credit">Search by Nominatim · © OpenStreetMap contributors</p>
-          </Show>
-        )}
-      </Show>
+      <Show when={results()}>{(list) => <PlaceResults places={list()} empty="Nothing found." onPick={choose} />}</Show>
     </section>
   )
 }
