@@ -51,10 +51,13 @@ export class History<T> {
 
 /**
  * A state from the history combined with the current display settings: the map view,
- * the satellite layer and each image layer's visibility and opacity are not undone.
+ * the satellite layer and each image layer's visibility, opacity and blend mode are not
+ * undone.
  */
 export function withCurrentDisplay(state: Project, current: Project): Project {
-  const display = new Map(current.layers.map((l) => [l.id, { visible: l.visible, opacity: l.opacity }]))
+  const display = new Map(
+    current.layers.map((l) => [l.id, { visible: l.visible, opacity: l.opacity, blend: l.blend ?? 'normal' }] as const),
+  )
   return {
     ...state,
     view: current.view,

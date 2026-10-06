@@ -71,15 +71,15 @@ describe('withCurrentDisplay', () => {
       name: 'new',
       view: { center: [11, 48], zoom: 12, bearing: 30, pitch: 40 },
       satellite: { visible: true, opacity: 0.4 },
-      layers: [layer('a', false, 0.3)],
+      layers: [{ ...layer('a', false, 0.3), blend: 'multiply' }],
     }
     const merged = withCurrentDisplay(state, current)
     expect(merged.name).toBe('old')
     expect(merged.view).toEqual(current.view)
     expect(merged.satellite).toEqual(current.satellite)
-    expect(merged.layers.map((l) => [l.id, l.visible, l.opacity])).toEqual([
-      ['a', false, 0.3],
-      ['deleted', true, 1],
+    expect(merged.layers.map((l) => [l.id, l.visible, l.opacity, l.blend])).toEqual([
+      ['a', false, 0.3, 'multiply'],
+      ['deleted', true, 1, undefined],
     ])
   })
 })

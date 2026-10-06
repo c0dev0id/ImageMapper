@@ -7,12 +7,14 @@ import {
   project,
   removeLayer,
   setActiveLayer,
+  setLayerBlend,
   setLayerOpacity,
   setLayerVisible,
 } from '../state/project.ts'
-import type { ImageLayer } from '../state/schema.ts'
+import type { BlendMode, ImageLayer } from '../state/schema.ts'
 import { skewNote } from '../state/ui.ts'
 import { addImages, IMAGE_TYPES } from './addImages.ts'
+import { BLEND_MODES } from './blendModes.ts'
 import { EyeIcon, EyeOffIcon, GripIcon } from './icons.tsx'
 import { reorderTarget } from './reorder.ts'
 import { thumbnailUrl } from './thumbnails.ts'
@@ -160,9 +162,10 @@ function dragToReorder(e: PointerEvent, layer: ImageLayer, entry: HTMLLIElement,
   handle.addEventListener('pointercancel', end)
 }
 
-/** Opacity, point pairs and the outcome of the last skew of the active layer. */
+/** Opacity, blend mode, point pairs and the outcome of the last skew of the active layer. */
 function ActiveLayer(props: { layer: ImageLayer }) {
   const layer = props.layer
+  const blend = () => BLEND_MODES.find((m) => m.value === (layer.blend ?? 'normal')) ?? BLEND_MODES[0]
   const counts = () => countPairs(layer.gcps)
   const note = () => {
     const n = skewNote()
@@ -183,6 +186,18 @@ function ActiveLayer(props: { layer: ImageLayer }) {
           onInput={(e) => setLayerOpacity(layer.id, e.currentTarget.valueAsNumber)}
         />
       </div>
+      <div class="row">
+        <span class="muted">Blend</span>
+        <select
+          class="grow"
+          aria-label={`Blend mode of ${layer.name}`}
+          value={blend().value}
+          onChange={(e) => setLayerBlend(layer.id, e.currentTarget.value as BlendMode)}
+        >
+          <For each={BLEND_MODES}>{(m) => <option value={m.value}>{m.label}</option>}</For>
+        </select>
+      </div>
+      <p class="muted hint">{blend().description}</p>
       <div class="row">
         <span class="grow muted">
           {counts().complete} {counts().complete === 1 ? 'pair' : 'pairs'}

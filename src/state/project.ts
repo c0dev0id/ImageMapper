@@ -5,6 +5,7 @@ import { prepareSkew } from '../gcp/gcps.ts'
 import * as edit from '../routing/routeEdit.ts'
 import { History, withCurrentDisplay } from './history.ts'
 import {
+  type BlendMode,
   emptyProject,
   type Gcp,
   type ImageLayer,
@@ -180,6 +181,13 @@ export function setLayerVisible(id: string, visible: boolean): void {
   const index = layerIndex(id)
   if (index < 0) return
   setProject('layers', index, 'visible', visible)
+  onChange()
+}
+
+export function setLayerBlend(id: string, blend: BlendMode): void {
+  const index = layerIndex(id)
+  if (index < 0) return
+  setProject('layers', index, 'blend', blend)
   onChange()
 }
 

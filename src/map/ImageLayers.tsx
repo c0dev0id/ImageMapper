@@ -37,6 +37,7 @@ function ImageLayer(props: { id: string }) {
     if (warp) glLayer.setWarp(warp)
   })
   createEffect(() => glLayer.setOpacity(layer()?.opacity ?? 0))
+  createEffect(() => glLayer.setBlend(layer()?.blend ?? 'normal'))
   createEffect(() => {
     map.setLayoutProperty(id, 'visibility', layer()?.visible ? 'visible' : 'none')
   })

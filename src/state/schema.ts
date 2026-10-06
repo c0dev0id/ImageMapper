@@ -3,6 +3,17 @@ import type { LngLat, Pair, Px } from '../geo/types.ts'
 export const PROJECT_VERSION = 2
 
 export type Side = 'image' | 'map'
+
+/** How an image layer is mixed with what lies below it (the W3C compositing modes). */
+export type BlendMode =
+  | 'normal'
+  | 'multiply'
+  | 'darken'
+  | 'screen'
+  | 'overlay'
+  | 'soft-light'
+  | 'hard-light'
+  | 'difference'
 export type Profile = 'car' | 'bike' | 'foot'
 
 /** A ground control point; either side may still be missing. */
@@ -21,6 +32,8 @@ export interface ImageLayer {
   height: number
   visible: boolean
   opacity: number
+  /** Absent means normal. */
+  blend?: BlendMode
   /** The pairs the displayed warp is fitted on (at least 3). */
   placement: Pair[]
   gcps: Gcp[]

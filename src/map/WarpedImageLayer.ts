@@ -1,5 +1,6 @@
 import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap } from 'maplibre-gl'
 import type { Warp } from '../geo/warp.ts'
+import type { BlendMode } from '../state/schema.ts'
 
 const VERTEX_SHADER = `#version 300 es
 uniform mat4 u_matrix;
@@ -11,16 +12,56 @@ void main() {
   gl_Position = u_matrix * vec4(a_pos, 0.0, 1.0);
 }`
 
+// Blend modes after the W3C Compositing and Blending spec, with b the backdrop (what lies
+// below) and s the image colour. Mode 0 (normal) relies on MapLibre's blending; the other
+// modes read the backdrop from a copy of the framebuffer and write the final colour.
 const FRAGMENT_SHADER = `#version 300 es
-precision mediump float;
+precision highp float;
 uniform sampler2D u_texture;
+uniform sampler2D u_backdrop;
 uniform float u_opacity;
+uniform int u_mode;
 in vec2 v_uv;
 out vec4 color;
+
+vec3 screen(vec3 b, vec3 s) { return b + s - b * s; }
+vec3 hardLight(vec3 b, vec3 s) { return mix(b * 2.0 * s, screen(b, 2.0 * s - 1.0), step(0.5, s)); }
+vec3 softLight(vec3 b, vec3 s) {
+  vec3 d = mix(sqrt(b), ((16.0 * b - 12.0) * b + 4.0) * b, step(b, vec3(0.25)));
+  return mix(b - (1.0 - 2.0 * s) * b * (1.0 - b), b + (2.0 * s - 1.0) * (d - b), step(0.5, s));
+}
+
 void main() {
   // The texture is premultiplied, matching MapLibre's ONE, ONE_MINUS_SRC_ALPHA blending.
-  color = texture(u_texture, v_uv) * u_opacity;
+  vec4 src = texture(u_texture, v_uv);
+  if (u_mode == 0) {
+    color = src * u_opacity;
+    return;
+  }
+  vec3 b = texelFetch(u_backdrop, ivec2(gl_FragCoord.xy), 0).rgb;
+  vec3 s = src.a > 0.0 ? src.rgb / src.a : vec3(0.0);
+  vec3 mixed;
+  if (u_mode == 1) mixed = b * s;
+  else if (u_mode == 2) mixed = min(b, s);
+  else if (u_mode == 3) mixed = screen(b, s);
+  else if (u_mode == 4) mixed = hardLight(s, b);
+  else if (u_mode == 5) mixed = softLight(b, s);
+  else if (u_mode == 6) mixed = hardLight(b, s);
+  else mixed = abs(b - s);
+  color = vec4(mix(b, mixed, src.a * u_opacity), 1.0);
 }`
+
+/** Shader numbers of the blend modes; overlay is hard light with image and backdrop swapped. */
+const MODE_NUMBERS: Record<BlendMode, number> = {
+  normal: 0,
+  multiply: 1,
+  darken: 2,
+  screen: 3,
+  overlay: 4,
+  'soft-light': 5,
+  'hard-light': 6,
+  difference: 7,
+}
 
 /** Longest texture side: about 350 dpi for an A4 page while bounding GPU memory per layer. */
 const MAX_TEXTURE_SIDE = 4096
@@ -29,7 +70,9 @@ interface GlResources {
   program: WebGLProgram
   matrix: WebGLUniformLocation | null
   texture: WebGLUniformLocation | null
+  backdrop: WebGLUniformLocation | null
   opacity: WebGLUniformLocation | null
+  mode: WebGLUniformLocation | null
   vao: WebGLVertexArrayObject
   positions: WebGLBuffer
   uvs: WebGLBuffer
@@ -60,6 +103,10 @@ export class WarpedImageLayer implements CustomLayerInterface {
   /** Mercator origin the vertex positions are relative to (avoids float32 jitter at high zoom). */
   private origin: [number, number] = [0, 0]
   private opacity = 1
+  private blend: BlendMode = 'normal'
+  /** Copy of what was drawn below this layer, for blend modes other than normal. */
+  private backdrop?: WebGLTexture
+  private backdropSize: [number, number] = [0, 0]
 
   constructor(
     readonly id: string,
@@ -74,6 +121,11 @@ export class WarpedImageLayer implements CustomLayerInterface {
 
   setOpacity(opacity: number): void {
     this.opacity = opacity
+    this.map?.triggerRepaint()
+  }
+
+  setBlend(blend: BlendMode): void {
+    this.blend = blend
     this.map?.triggerRepaint()
   }
 
@@ -97,9 +149,12 @@ export class WarpedImageLayer implements CustomLayerInterface {
       gl.deleteBuffer(this.gl.indices)
     }
     if (this.texture) gl.deleteTexture(this.texture)
+    if (this.backdrop) gl.deleteTexture(this.backdrop)
     this.pendingBitmap?.close()
     this.gl = undefined
     this.texture = undefined
+    this.backdrop = undefined
+    this.backdropSize = [0, 0]
     this.pendingBitmap = undefined
     this.map = undefined
   }
@@ -119,15 +174,43 @@ export class WarpedImageLayer implements CustomLayerInterface {
     for (let r = 0; r < 4; r++) matrix[12 + r] = m[r] * ox + m[4 + r] * oy + m[12 + r]
 
     const res = this.gl
+    const mode = MODE_NUMBERS[this.blend]
+    if (mode !== 0) {
+      this.copyBackdrop(gl)
+      // The shader writes the blended colour itself; MapLibre restores its state afterwards.
+      gl.disable(gl.BLEND)
+    }
     gl.useProgram(res.program)
     gl.uniformMatrix4fv(res.matrix, false, matrix)
     gl.uniform1f(res.opacity, this.opacity)
+    gl.uniform1i(res.mode, mode)
     gl.uniform1i(res.texture, 0)
+    gl.uniform1i(res.backdrop, 1)
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
     gl.bindVertexArray(res.vao)
     gl.drawElements(gl.TRIANGLES, this.indexCount, this.indexType, 0)
     gl.bindVertexArray(null)
+  }
+
+  /**
+   * Copies the framebuffer (everything drawn below this layer) into the backdrop texture
+   * on unit 1. RGB is a subset of any framebuffer format, so the copy is always allowed;
+   * MapLibre's canvas is not multisampled, which a copy would not allow.
+   */
+  private copyBackdrop(gl: WebGL2RenderingContext): void {
+    const width = gl.drawingBufferWidth
+    const height = gl.drawingBufferHeight
+    gl.activeTexture(gl.TEXTURE1)
+    if (!this.backdrop || this.backdropSize[0] !== width || this.backdropSize[1] !== height) {
+      this.backdrop ??= gl.createTexture()
+      gl.bindTexture(gl.TEXTURE_2D, this.backdrop)
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB8, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+      this.backdropSize = [width, height]
+    } else gl.bindTexture(gl.TEXTURE_2D, this.backdrop)
+    gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, width, height)
   }
 
   private async decode(): Promise<void> {
@@ -207,6 +290,8 @@ export class WarpedImageLayer implements CustomLayerInterface {
   private readonly onContextLost = () => {
     this.gl = undefined
     this.texture = undefined
+    this.backdrop = undefined
+    this.backdropSize = [0, 0]
     this.indexCount = 0
   }
 
@@ -248,7 +333,9 @@ function createResources(gl: WebGL2RenderingContext): GlResources {
     program,
     matrix: gl.getUniformLocation(program, 'u_matrix'),
     texture: gl.getUniformLocation(program, 'u_texture'),
+    backdrop: gl.getUniformLocation(program, 'u_backdrop'),
     opacity: gl.getUniformLocation(program, 'u_opacity'),
+    mode: gl.getUniformLocation(program, 'u_mode'),
     vao,
     positions,
     uvs,
