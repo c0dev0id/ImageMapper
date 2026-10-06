@@ -154,10 +154,10 @@ export function removeLayer(id: string): void {
 }
 
 /** Moves a layer up (+1, towards the top) or down (-1) in the stack. */
-export function moveLayer(id: string, delta: 1 | -1): void {
+/** Moves a layer to `to` in the stack (0 is the bottom). */
+export function moveLayer(id: string, to: number): void {
   const from = layerIndex(id)
-  const to = from + delta
-  if (from < 0 || to < 0 || to >= project.layers.length) return
+  if (from < 0 || from === to || to < 0 || to >= project.layers.length) return
   recordEdit('Reorder layers')
   setProject('layers', (layers) => {
     const next = [...layers]

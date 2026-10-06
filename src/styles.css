@@ -186,14 +186,81 @@ input[type='range'] {
   padding: 0;
 }
 
+/* Layer entries: drag handle, preview and name (selects the layer), visibility, delete. */
 .layer {
-  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   margin: 0 -6px 2px;
-  border-radius: 4px;
+  padding: 3px 6px 3px 2px;
+  border-radius: 6px;
 }
 
 .layer.active {
   background: #e7f5ff;
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+button.layer-select {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+}
+
+button.layer-select:hover:not(:disabled) {
+  background: none;
+}
+
+.layer.hidden .layer-select {
+  opacity: 0.5;
+}
+
+.thumb {
+  flex: none;
+  width: 44px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 3px;
+  background: #dee2e6;
+}
+
+.layer .grip {
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.layer.dragging {
+  opacity: 0.35;
+}
+
+.layer.drop-before {
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+
+.layer.drop-after {
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.layer-ghost {
+  position: fixed;
+  z-index: 1000;
+  margin: 0;
+  list-style: none;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.active-layer {
+  margin-top: 6px;
 }
 
 /* Names are text; renaming swaps in a field (EditableName). */
@@ -201,10 +268,6 @@ input[type='range'] {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.layer .name {
-  cursor: pointer;
 }
 
 .note {

@@ -120,6 +120,30 @@ export const DeleteIcon = () => (
   </Icon>
 )
 
+export const EyeIcon = () => (
+  <Icon>
+    <path d="M1 8s2.5-4.5 7-4.5S15 8 15 8s-2.5 4.5-7 4.5S1 8 1 8z" />
+    <circle cx="8" cy="8" r="2" />
+  </Icon>
+)
+
+export const EyeOffIcon = () => (
+  <Icon>
+    <path d="M1 8s2.5-4.5 7-4.5S15 8 15 8s-2.5 4.5-7 4.5S1 8 1 8z" />
+    <path d="M2 14 14 2" />
+  </Icon>
+)
+
+/** A handle to drag a list item. */
+export const GripIcon = () => (
+  <Icon>
+    <path
+      d="M6 3.5h.01M10 3.5h.01M6 8h.01M10 8h.01M6 12.5h.01M10 12.5h.01"
+      stroke-width="2.5"
+    />
+  </Icon>
+)
+
 /** The map pin of a waypoint; its tip marks the place. */
 export function WaypointPin() {
   return (
