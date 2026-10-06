@@ -4,12 +4,10 @@ import { allImageBytes } from '../state/images.ts'
 import { adoptProject } from '../state/persistence.ts'
 import { project, setProjectName } from '../state/project.ts'
 import { decodeProjectFile, encodeProjectFile } from '../state/projectFile.ts'
-import { emptyProject } from '../state/schema.ts'
+import { emptyProject, hasContent } from '../state/schema.ts'
 import { errorMessage, notify, panelCollapsed, setPanelCollapsed } from '../state/ui.ts'
 import { downloadBlob, fileBaseName } from './download.ts'
 import { EditableName } from './EditableName.tsx'
-
-const hasContent = () => project.layers.length > 0 || project.routes.length > 0
 
 export function ProjectSection() {
   const map = useMapAccessor()
@@ -26,7 +24,7 @@ export function ProjectSection() {
   const open = async (file: File) => {
     try {
       const { project: next, images } = decodeProjectFile(new Uint8Array(await file.arrayBuffer()))
-      if (hasContent() && !confirm('Replace the current project with the opened file?')) return
+      if (hasContent(project) && !confirm('Replace the current project with the opened file?')) return
       await adoptProject(next, images)
       map()?.jumpTo({ center: next.view.center, zoom: next.view.zoom, bearing: next.view.bearing, pitch: next.view.pitch })
     } catch (error) {
@@ -35,7 +33,7 @@ export function ProjectSection() {
   }
 
   const startNew = async () => {
-    if (hasContent() && !confirm('Start a new project? The current one is removed from this browser.')) return
+    if (hasContent(project) && !confirm('Start a new project? The current one is removed from this browser.')) return
     await adoptProject({ ...emptyProject(), view: { ...unwrap(project.view) } }, new Map())
   }
 

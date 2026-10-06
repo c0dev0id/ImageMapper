@@ -95,6 +95,11 @@ export function emptyProject(): Project {
   }
 }
 
+/** Whether the project holds work that New or Open would throw away (and cannot undo). */
+export function hasContent(project: Project): boolean {
+  return project.layers.length > 0 || project.routes.length > 0 || project.waypoints.length > 0
+}
+
 /** Parses a stored or loaded project; rejects other versions (no migrations before 1.0). */
 export function parseProject(json: string): Project {
   let data: unknown
