@@ -4,6 +4,18 @@ import type { LngLat, Pair, Px } from '../geo/types.ts'
 import { Warp } from '../geo/warp.ts'
 import type { Gcp, Side } from '../state/schema.ts'
 
+const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits
+
+/** An image point at the precision of point pairs: 2 decimals of a pixel. */
+export function roundImagePoint([x, y]: Px): Px {
+  return [round(x, 2), round(y, 2)]
+}
+
+/** A map point at the precision of point pairs: 7 decimals of a degree, about 1 cm. */
+export function roundMapPoint([lng, lat]: LngLat): LngLat {
+  return [round(lng, 7), round(lat, 7)]
+}
+
 /** One side of one ground control point. */
 export interface SideRef {
   gcpId: string

@@ -11,6 +11,8 @@ import {
   pinAction,
   pinEnabled,
   prepareSkew,
+  roundImagePoint,
+  roundMapPoint,
   type MenuEntry,
 } from './gcps.ts'
 
@@ -259,5 +261,12 @@ describe('prepareSkew', () => {
     )
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.warning).toMatch(/folds/)
+  })
+})
+
+describe('rounding to point pair precision', () => {
+  it('keeps 2 decimals of a pixel and 7 of a degree', () => {
+    expect(roundImagePoint([888.123456, 271.5])).toEqual([888.12, 271.5])
+    expect(roundMapPoint([7.9712345678, 50.5598765432])).toEqual([7.9712346, 50.5598765])
   })
 })

@@ -1,6 +1,15 @@
 import type { LngLat as MapLibreLngLat, Map as MapLibreMap } from 'maplibre-gl'
 import { unwrap } from 'solid-js/store'
-import { applyGcpAction, gcpMenu, hitTest, pinAction, pinEnabled, type SideRef } from '../gcp/gcps.ts'
+import {
+  applyGcpAction,
+  gcpMenu,
+  hitTest,
+  pinAction,
+  pinEnabled,
+  roundImagePoint,
+  roundMapPoint,
+  type SideRef,
+} from '../gcp/gcps.ts'
 import type { LngLat, Px } from '../geo/types.ts'
 import type { Warp } from '../geo/warp.ts'
 import { warpOf } from '../state/derived.ts'
@@ -8,17 +17,12 @@ import { activeLayer, setLayerGcps } from '../state/project.ts'
 import type { Side } from '../state/schema.ts'
 import { selection, setMenu, setSelection, setTool } from '../state/ui.ts'
 
-const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits
-
-/**
- * A place on the map as GCP coordinates: the map position (7 decimals, about 1 cm) and,
- * where the image is drawn, its pixel there (2 decimals).
- */
+/** A place on the map as GCP coordinates: the map position and, where the image is drawn, its pixel there. */
 export function gcpPointAt(lngLat: MapLibreLngLat, warp: Warp | undefined): { map: LngLat; image?: Px } {
   const wrapped = lngLat.wrap()
-  const map: LngLat = [round(wrapped.lng, 7), round(wrapped.lat, 7)]
+  const map = roundMapPoint([wrapped.lng, wrapped.lat])
   const pixel = warp?.mapToImage(map)
-  return { map, image: pixel && [round(pixel[0], 2), round(pixel[1], 2)] }
+  return { map, image: pixel && roundImagePoint(pixel) }
 }
 
 /**
