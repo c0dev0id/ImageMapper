@@ -20,6 +20,7 @@ import {
   setMode,
   setSelection,
   setSkewNote,
+  setTool,
   stopDrawing,
 } from './ui.ts'
 
@@ -106,6 +107,7 @@ export function replaceProject(next: Project): void {
   setSelection(undefined)
   setEditingRouteId(undefined)
   setMode('georef')
+  setTool(undefined)
   setMenu(undefined)
   setSkewNote(undefined)
   setProject(reconcile(next, { key: 'id', merge: false }))

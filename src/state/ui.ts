@@ -19,7 +19,14 @@ export interface Notice {
   action?: { label: string; run: () => void | Promise<void> }
 }
 
+/**
+ * Map tools picked in the toolbar: pinning point pairs on the active image, and adding,
+ * inserting or deleting while a route is drawn. Without a tool the map only navigates.
+ */
+export type Tool = 'pin-map' | 'pin-image' | 'append' | 'insert' | 'waypoint' | 'delete'
+
 export const [mode, setMode] = createSignal<Mode>('georef')
+export const [tool, setTool] = createSignal<Tool>()
 export const [editingRouteId, setEditingRouteId] = createSignal<string>()
 export const [selection, setSelection] = createSignal<Selection>()
 export const [notices, setNotices] = createSignal<Notice[]>([])
@@ -65,12 +72,14 @@ export function startDrawing(routeId: string): void {
   setMenu(undefined)
   setEditingRouteId(routeId)
   setMode('route')
+  setTool('append')
 }
 
 export function stopDrawing(): void {
   setMenu(undefined)
   setEditingRouteId(undefined)
   setMode('georef')
+  setTool(undefined)
 }
 
 /** Enters the move/rotate/resize mode for the active image layer. */
@@ -79,6 +88,7 @@ export function startTransform(): void {
   setMenu(undefined)
   setEditingRouteId(undefined)
   setMode('transform')
+  setTool(undefined)
 }
 
 export function stopTransform(): void {

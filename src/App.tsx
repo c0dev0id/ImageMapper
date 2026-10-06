@@ -11,6 +11,7 @@ import { Interactions } from './map/Interactions.tsx'
 import { RouteEditor } from './map/RouteEditor.tsx'
 import { RouteLayers } from './map/RouteLayers.tsx'
 import { MapView } from './map/MapView.tsx'
+import { Toolbar } from './map/Toolbar.tsx'
 import { Waypoints } from './map/Waypoints.tsx'
 import { initPersistence } from './state/persistence.ts'
 import { errorMessage, notify } from './state/ui.ts'
@@ -50,6 +51,7 @@ export function App() {
               <Interactions />
               <ContextMenu />
               <HintBar />
+              <Toolbar />
             </Show>
           </main>
         </div>

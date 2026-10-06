@@ -2,7 +2,7 @@ import { unwrap } from 'solid-js/store'
 import { useMapAccessor } from '../map/context.ts'
 import { allImageBytes } from '../state/images.ts'
 import { adoptProject } from '../state/persistence.ts'
-import { project, redo, redoLabel, setProjectName, undo, undoLabel } from '../state/project.ts'
+import { project, setProjectName } from '../state/project.ts'
 import { decodeProjectFile, encodeProjectFile } from '../state/projectFile.ts'
 import { emptyProject } from '../state/schema.ts'
 import { errorMessage, notify, panelCollapsed, setPanelCollapsed } from '../state/ui.ts'
@@ -43,24 +43,6 @@ export function ProjectSection() {
     <header class="section panel-header">
       <div class="row title-row">
         <h1 class="grow">mappic</h1>
-        <button
-          class="icon history"
-          title={undoLabel() ? `Undo: ${undoLabel()} (Ctrl+Z)` : 'Nothing to undo'}
-          aria-label="Undo"
-          disabled={!undoLabel()}
-          onClick={undo}
-        >
-          ↶
-        </button>
-        <button
-          class="icon history"
-          title={redoLabel() ? `Redo: ${redoLabel()} (Ctrl+Shift+Z)` : 'Nothing to redo'}
-          aria-label="Redo"
-          disabled={!redoLabel()}
-          onClick={redo}
-        >
-          ↷
-        </button>
         <button
           class="icon panel-toggle"
           aria-label={panelCollapsed() ? 'Show panel' : 'Hide panel'}

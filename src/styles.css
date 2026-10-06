@@ -418,6 +418,67 @@ button.icon svg {
   user-select: none;
 }
 
+/* The toolbar floats over the map, above the scale bar and the attribution. */
+.toolbar {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  max-width: calc(100% - 20px);
+  padding: 4px;
+  overflow-x: auto;
+  transform: translateX(-50%);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 2px;
+}
+
+.toolbar-group + .toolbar-group {
+  margin-left: 4px;
+  padding-left: 4px;
+  border-left: 1px solid var(--border);
+}
+
+.tool {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: #343a40;
+  cursor: pointer;
+}
+
+.tool svg {
+  width: 20px;
+  height: 20px;
+}
+
+.tool:hover:not(:disabled) {
+  background: #f1f3f5;
+}
+
+.tool.active,
+.tool.active:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tool:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
 /* Handles to resize (corners) and rotate (top edge) the active image; padding enlarges the target. */
 .transform-handle-marker {
   z-index: 3;
@@ -466,11 +527,6 @@ button.icon svg {
 
 .row.buttons {
   margin-top: 6px;
-}
-
-button.icon.history {
-  font-size: 20px;
-  padding: 0 4px;
 }
 
 .context-menu {
@@ -606,6 +662,11 @@ input[type='search'] {
 
   .transform-handle-marker {
     padding: 10px;
+  }
+
+  .tool {
+    width: 40px;
+    height: 40px;
   }
 
   .transform-handle {
