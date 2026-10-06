@@ -22,8 +22,6 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - SolidJS 1.9 (UI and state), Vite 8 (build), TypeScript 7 (type checking).
 - MapLibre GL JS 6 (map rendering, WebGL2 required).
 - fflate (ZIP project files), idb-keyval (IndexedDB access).
-- tesseract.js 7 with its WebAssembly engine and the German model (text recognition for
-  matching towns), loaded on first use.
 - Vitest 5 for unit tests of the pure modules.
 - Icons from Tabler Icons (MIT), copied as SVG paths into `src/ui/icons.tsx` rather than
   added as a dependency; the licence text is in `src/ui/tabler-icons-license.txt`.
@@ -150,54 +148,38 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   handles, and 16 px inputs so iOS does not zoom in on focus. The toolbar sits higher
   on narrow screens, above the attribution, which starts expanded over two lines, and
   uses smaller captions so that it needs at most two rows.
-- **Placing an image by town names.** The user names up to four towns printed on the
-  image. Text recognition reads the image (Tesseract's German LSTM model in sparse-text
-  mode, as map labels are scattered; small images are enlarged twice, since labels are
-  often only ten pixels high), and the names are matched against the words read with an
-  edit-distance tolerance that grows with the name's length. Nominatim settlement
-  searches give the map candidates, up to five per name; a name no settlement has (a
-  pass, a peak) is searched again without that filter, and the agreement with the other
-  towns decides. A town can also be picked by hand, on either side: a place on the map
-  (a search under the row, started with the name, any kind of place) or the spot on the
-  image (a tap; an empty row takes the name read there, joined across the words of one
-  printed line). A tap on a row that has a name takes the spot as tapped, centred on the
-  label only if the image was read already, so it never waits for text recognition. A
-  picked side is the only candidate of its row; with every row picked on the image, the
-  image is not read at all. Picks settle namesakes, names the lookup
-  cannot find and labels the text recognition misses, while the name stays as printed.
-  The tap goes through a general tap request: the next map tap goes to the requester,
-  also where a marker sits (markers take no pointer events meanwhile), with a hint and a
+- **Placing an image by picked towns.** The user picks up to four towns on both sides:
+  a Nominatim search per row, with the place picked from the results, and a tap where
+  the town is on the image. Match fits a similarity transform (rotation, uniform scale,
+  translation) through the complete rows: every two towns propose one, each is refitted
+  by least squares on the towns within 10 % of the image diagonal, and the one most
+  towns agree with wins. One wrong pick (a namesake, a tap in the wrong spot) is thus
+  left out and flagged on its row instead of spoiling the placement. A similarity rather
+  than the thin plate spline, because printed maps are distorted and a first placement
+  should not bend the image; skewing afterwards fits it to the pairs exactly. The towns
+  that fit become ordinary point pairs, in one undo step with the new placement. Each
+  carries the name of its town (`Gcp.town`), and the next match replaces all such pairs,
+  edited or not, while pairs pinned by hand stay: a corrected namesake or a dragged ring
+  cannot leave a stale pair or a second one for the same town. The marker is project
+  data, not session memory, so undo, reloads and project files keep it consistent. The
+  tap goes through a general tap request: the next map tap goes to the requester, also
+  where a marker sits (markers take no pointer events meanwhile), with a hint and a
   crosshair. Esc, Cancel, a mode change, a tool pick or another request end it; the
   requester may refuse a tap (beside the image, or with the image hidden) and keep
-  waiting. The dialog does not block the map, so the image
-  can be panned, zoomed and tapped while it is open; it is dragged by its title, stays
-  partly on screen and keeps its position, and it stays open after a match that left
-  towns out, saying per row what is missing. Its lookups prefer the area that was in view
-  when it opened, so a retry after the view moved asks the same questions and the search
-  answers them from its cache. Reading and looking up run side by side; when one fails,
-  the other is stopped. The country of the picked places does not
-  choose the text recognition model: a map is printed in the magazine's language (a
-  German map of Italy says "Mailand"), and the German model with accent-free comparison
-  reads Latin script well enough. Each pair of towns and candidates proposes a
-  similarity transform; towns within 10 % of the image diagonal count, the best proposal
-  is refitted by least squares, and ties go to upright maps and better-ranked
-  candidates. The fit is a similarity rather than the thin plate spline because text
-  recognition finds the label, which sits beside the town; exact interpolation would
-  bend the image toward the labels. The towns become ordinary point pairs for the user
-  to correct before skewing, in one undo step with the new placement. Each carries the
-  name of its town (`Gcp.town`), and the next match replaces all such pairs, edited or
-  not, while pairs pinned by hand stay: a corrected namesake or a dragged ring cannot
-  leave a stale pair or a second one for the same town. The marker is project data, not
-  session memory, so undo, reloads and project files keep it consistent. Words read are
-  kept per layer for the session. The image goes to the worker as PNG, encoded while
-  the worker loads: JPEG was smaller and faster to decode but lost a printed name on the
-  Allgäu sample. The engine, worker and model (about 5 MB) are files of
-  the build, loaded on first use; tesseract.js 7 cannot take the model as bytes (its
-  init passes the data where the language code belongs), so the model keeps its file
-  name in the build and the worker fetches it from that directory. Its promises stay
-  pending when the worker fails, so failures are routed through its error handler.
-  Everything lives in `src/match/`, its styles included, so the feature can be taken out
-  in one piece.
+  waiting. The dialog does not block the map, so the image can be panned, zoomed and
+  tapped while it is open; it is dragged by its title, stays partly on screen and keeps
+  its position, and it stays open while a row is incomplete or left out, saying per row
+  what is missing. Its searches prefer the area that was in view when it opened, so
+  repeating a search is answered from the cache. Everything lives in `src/match/`, its
+  styles included, so the feature can be taken out in one piece.
+  Text recognition was tried first and dropped. tesseract.js (German model, self-hosted,
+  about 5 MB) read the whole image, typed names were matched against the words read, and
+  settlement searches found the map side automatically. On real tour maps it missed or
+  garbled many labels: names under the route line or a marker, labels split over two
+  lines, small print. A read took up to 16 seconds. Reading only a box drawn around a
+  label did better (13 of 25 test labels against 4) but still needed correcting. Picking
+  each place from search results and tapping its spot needs about as little typing and is
+  exact.
 - **Finding the area.** Locating uses MapLibre's GeolocateControl (one shot, no tracking).
   Search uses Nominatim on explicit submit only, since its policy forbids
   search-as-you-type; requests are spaced one second apart, identical requests cached,
@@ -237,8 +219,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - A map toolbar with captioned tools of the active image or the route being drawn.
 - GCP editing with pin tools or context menus (right-click or long press), and "skew
   image to map" with fold/mirror checks.
-- A first placement from up to four town names, read on the image and looked up on the
-  map, or picked by hand on either side.
+- A first placement from up to four towns, each picked from a place search and tapped on
+  the image; towns that do not fit the others are left out.
 - Move, rotate and resize an image by hand on the map; fly to an image or bring it
   into the view.
 - Undo/redo of content edits.

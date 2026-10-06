@@ -27,22 +27,17 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      after a pin the other side is picked, and the side waiting for its partner is
      greyed out. Esc or the picked tool again stops pinning. Right-click (or long-press
      on a touch screen) offers the same as a menu.
-   - **Match Towns** gives a newly added image a first placement: name up to four towns
-     printed on it, as far apart as possible. The app reads the text on the image, looks
-     the towns up on the map and places the image by those it finds on both; each
-     becomes a point pair. Each row has two pins for doing a town by hand. The image pin
-     waits for a tap on the image: tap where the name is printed, and an empty row takes
-     the name read there (correct it if it was misread). The map pin searches the map:
-     change the search until the right place comes up and pick it. Places that are not
-     towns, such as a pass or a peak, work too; the name stays as printed. The dialog
-     stays open until every town is matched and says what is missing for each; it does
-     not block the map, so the image can be zoomed and tapped, and it can be dragged
-     aside by its title. The rings sit on the printed names, not on the towns, so drag
-     them onto the towns before skewing. Matching again replaces the pairs of the
-     previous match, also ones you dragged (Undo brings them back); pairs you pinned
-     yourself stay. Clearly printed names work best. Reading a
-     large image takes a few seconds, and the first use loads about 5 MB for the text
-     recognition.
+   - **Match Towns** gives a newly added image a first placement from up to four towns
+     (or other places you can find on it), as far apart as possible. For each, type its
+     name and press Enter or Search, pick the right place from the results, then press
+     the row's image pin and tap where the town is on the image. **Match** places the
+     image by them, and each becomes a point pair. A town that does not fit the others
+     (a namesake picked by mistake, a tap in the wrong spot) is left out and marked. The
+     dialog stays open until every town it was given is used and says what is missing
+     for each; it does not block the map, so the image can be zoomed and tapped, and it
+     can be dragged aside by its title. Matching again replaces the pairs of the previous
+     match, also ones you dragged (Undo brings them back); pairs you pinned yourself
+     stay.
    - **Skew Image** (three or more pairs) fits the image to its pairs. Three pairs rotate,
      scale and skew it; more pairs also bend it so that every pair matches exactly. Add
      pairs where the image is still off and skew again.
@@ -111,8 +106,8 @@ mappic uses public services directly from the browser. Please respect their term
   only cover this together with Esri software or an ArcGIS subscription; the URL is a
   single constant in `src/config.ts`.
 - **Search**: [Nominatim](https://operations.osmfoundation.org/policies/nominatim/), searched
-  only when you press Enter (no search-as-you-type) or match towns (one request per
-  name), at most one request per second, repeated searches answered from a cache.
+  only when you press Enter or Search (no search-as-you-type), at most one request per
+  second, repeated searches answered from a cache.
 - **Routing**: [FOSSGIS OSRM servers](https://routing.openstreetmap.de/about.html) (car, bike,
   foot). At most one request per second; mappic waits 1.1 s between requests. The terms
   require the operator's contact address to be shown, which the app does in its panel.
@@ -130,7 +125,7 @@ npm run build      # production build in dist/
 npm run preview    # serve dist/
 ```
 
-Stack: SolidJS, MapLibre GL JS 6, Vite, TypeScript, fflate, idb-keyval, tesseract.js. The icons are
+Stack: SolidJS, MapLibre GL JS 6, Vite, TypeScript, fflate, idb-keyval. The icons are
 drawn from or composed of [Tabler Icons](https://tabler.io/icons) (MIT License). The
 build writes `licenses.txt` next to the app with the licences of everything it ships;
 the footer links to it. Design notes are in
