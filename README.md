@@ -40,8 +40,11 @@ It runs entirely in the browser; nothing is uploaded anywhere.
    waypoints of all routes as GPX waypoints.
 
 Image and map points of a pair are shown as a numbered ring (image) and dot (map),
-joined by a dashed line until a skew makes them coincide. Right-clicking a point offers
-to remove it; removing one side of a pair selects the other side so it can be matched
+joined by a dashed line until a skew makes them coincide. Drag a point to correct it: a
+dot moves on the map, a ring moves to another spot of the image (dropped beside the
+image, it goes back). Where a pair coincides, the centre grabs the dot and the ring's
+edge grabs the ring. Skew again to apply the change. Right-clicking a point offers to
+remove it; removing one side of a pair selects the other side so it can be matched
 again.
 
 **Undo** and **Redo** (the arrows next to the title, or Ctrl+Z and Ctrl+Shift+Z) step

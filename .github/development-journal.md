@@ -50,6 +50,12 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   Sides are marked in turns: with a side selected, the menu offers no new point, so a
   half-marked GCP cannot be left behind by accident. Esc or a click on the empty map
   deselects on purpose; the click that only closes an open menu does not.
+  Both markers can be dragged to correct a point. A map dot keeps the dropped position;
+  an image ring takes the pixel under the drop through the drawn mesh (the same inverse
+  as a click) and goes back when dropped beside the image. The warp itself only changes
+  on the next skew. Dots are stacked above rings so both sides of a nested pair stay
+  reachable. Draggable markers do not pass right-clicks and long presses to the map, so
+  they open their menu themselves (`onMarkerMenu`, shared with route points).
 - **Routing.** Each leg (pair of consecutive waypoints) is requested separately from
   the FOSSGIS OSRM server for the route's profile (car, bike, foot). Results are
   cached in the route under a key built from profile and both coordinates and stored
