@@ -23,6 +23,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - MapLibre GL JS 6 (map rendering, WebGL2 required).
 - fflate (ZIP project files), idb-keyval (IndexedDB access).
 - Vitest 5 for unit tests of the pure modules.
+- Icons from Tabler Icons (MIT), copied as SVG paths into `src/ui/icons.tsx` rather than
+  added as a dependency; the licence notice is at the top of that file.
 - External services: OSM standard tiles, Esri World Imagery tiles, FOSSGIS OSRM
   routing servers (routing.openstreetmap.de), Nominatim search.
 - Deployment: GitHub Actions to GitHub Pages.
@@ -73,13 +75,17 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   otherwise their markers take no pointer events. Labels are DOM markers rather than a
   symbol layer, because the inline map style has no glyph source for text.
 - **Toolbar and tools.** A toolbar over the map carries the tools of the current scope:
-  the active image (pins, move/rotate/resize, skew, fly to, move here) or the route
-  being drawn (append, insert, waypoint, delete), with undo and redo always. The picked
-  tool is a UI signal next to the mode; map taps are dispatched on it, and it is set as
-  `data-tool` on the map element so CSS can change the cursor. The context menus stay
-  as a second way to the same actions. Inserting finds the leg nearest to the tap in
-  screen pixels (routed geometry, or the straight line while unrouted) and puts the new
-  point on the line, so the route keeps its shape.
+  the active image (Pin Map, Pin Image, Skew Image | Center on Image, Move Image Here,
+  Resize) or the route being drawn (Append, Insert, Waypoint, Delete), with undo and redo
+  always. Each group is a box of its own; the boxes wrap onto a second row on narrow
+  screens instead of scrolling, so no tool is out of sight. Every tool has a one-line
+  caption (its accessible name) and a longer tooltip. Icons of related tools are variants
+  of one icon: the same pin badge on a map or on a picture, the same arrow into or out of
+  a picture. The picked tool is a UI signal next to the mode; map taps are dispatched on
+  it, and it is set as `data-tool` on the map element so CSS can change the cursor. The
+  context menus stay as a second way to the same actions. Inserting finds the leg
+  nearest to the tap in screen pixels (routed geometry, or the straight line while
+  unrouted) and puts the new point on the line, so the route keeps its shape.
 - **State updates.** All writes go through actions; results of pure functions are
   applied with `reconcile` at the narrowest path. Components that own MapLibre
   objects are keyed by id so edits never recreate map layers.
@@ -130,11 +136,16 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   resizing, rotating) applies to the active layer's image, also where other images are
   drawn over it. Hit tests run against the active image's warp or footprint only, never
   against the rendered stack, so overlapping images cannot intercept or block a gesture.
-  The dashed frame, handles and point markers are drawn above all images.
+  The dashed frame, handles and point markers are drawn above all images. Hiding a layer
+  only stops drawing it: it stays active, keeps its point markers, links and the picked
+  tool, and can still be moved by hand, so a pair can be pinned on the image and then on
+  the map below it. A new image point needs the image shown, because the user cannot see
+  what they would pin; the hint bar says so.
 - **Phones.** Below 720 px the panel moves under the map (at most 45 % of the height)
   and can be folded to its title row. Coarse pointers get larger buttons, markers and
   handles, and 16 px inputs so iOS does not zoom in on focus. The toolbar sits higher
-  on narrow screens, above the attribution, which starts expanded over two lines.
+  on narrow screens, above the attribution, which starts expanded over two lines, and
+  uses smaller captions so that it needs at most two rows.
 - **Finding the area.** Locating uses MapLibre's GeolocateControl (one shot, no tracking).
   Search uses Nominatim on explicit submit only, since its policy forbids
   search-as-you-type; requests are spaced one second apart, identical requests cached,
@@ -164,7 +175,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
   reordering, visibility, opacity, blend modes and an active layer.
-- A map toolbar with the tools of the active image or the route being drawn.
+- A map toolbar with captioned tools of the active image or the route being drawn.
 - GCP editing with pin tools or context menus (right-click or long press), and "skew
   image to map" with fold/mirror checks.
 - Move, rotate and resize an image by hand on the map; fly to an image or bring it

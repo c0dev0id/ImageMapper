@@ -20,30 +20,31 @@ It runs entirely in the browser; nothing is uploaded anywhere.
    layer. **Multiply** makes white paper transparent while printed lines stay, so the map
    shows through a scan; **Difference** cancels out where image and map match, so
    misaligned lines stand out after a skew. Each mode explains itself below the list.
-3. The **toolbar** at the bottom of the map holds the tools of the active image; each
-   explains itself in a tooltip.
-   - **Pin on map** and **Pin on image** mark point pairs: pin a feature on the image and
-     the same feature on the map, or the other way round. The pins take turns on their
-     own: after a pin the other side is picked, and the side waiting for its partner is
+3. The **toolbar** at the bottom of the map holds the tools of the active image, each with
+   a short caption and a tooltip that says more.
+   - **Pin Map** and **Pin Image** mark point pairs: pin a feature on the image and the
+     same feature on the map, or the other way round. The pins take turns on their own:
+     after a pin the other side is picked, and the side waiting for its partner is
      greyed out. Esc or the picked tool again stops pinning. Right-click (or long-press
      on a touch screen) offers the same as a menu.
-   - **Move, rotate, resize** lines the image up by hand: drag the image to move it, a
-     corner to resize it and the round handle to rotate it. Optional, but pinning is
-     easier when the image is roughly in place.
-   - **Skew image to map** (three or more pairs) fits the image to its pairs. Three pairs
-     rotate, scale and skew it; more pairs also bend it so that every pair matches
-     exactly. Add pairs where the image is still off and skew again.
-   - **Fly to image** and **Move image here** bring an image that is far off into view:
-     the view goes to the image, or the image comes to the middle of the view at the
-     size of a newly added image.
+   - **Skew Image** (three or more pairs) fits the image to its pairs. Three pairs rotate,
+     scale and skew it; more pairs also bend it so that every pair matches exactly. Add
+     pairs where the image is still off and skew again.
+   - **Center on Image** and **Move Image Here** bring an image that is far off into
+     view: the view goes to the image, or the image comes to the middle of the view at
+     the size of a newly added image.
+   - **Resize** lines the image up by hand: drag the image to move it, a corner to resize
+     it and the round handle to rotate it. Optional, but pinning is easier when the image
+     is roughly in place.
 
    Pins and placement always apply to the active layer, also where other images lie on
-   top of it. Lowering the opacity, a blend mode or hiding the layer helps to find a
-   feature on the map.
-4. **Draw route** switches the toolbar to the route tools: **Append points** (tap the
-   map to add points at the end), **Insert point** (tap the route line to add a point
-   there), **Add waypoint** and **Delete** (tap a route point or waypoint). Drag points
-   to move them. Esc goes back to appending, a second Esc or Done finishes. Each route
+   top of it. Hiding the active layer keeps it active, its points and the picked tool:
+   pin a feature on the image, hide it and pin the same feature on the map below, or the
+   other way round (new image points need the image shown). Lowering the opacity or a
+   blend mode also helps to find a feature on the map.
+4. **Draw route** switches the toolbar to the route tools: **Append** (tap the map to add
+   points at the end), **Insert** (tap the route line to add a point there),
+   **Waypoint** and **Delete** (tap a route point or waypoint). Drag points to move them. Esc goes back to appending, a second Esc or Done finishes. Each route
    is routed for car, bike or foot. In a route's row, the pencil renames the route, the
    crosshair flies to it and **Edit** continues drawing it.
 5. **Waypoints** are places of their own, independent of the routes: a viewpoint, a café,
@@ -68,7 +69,7 @@ and blend mode are not part of it, and opening a file, starting a new project or
 new history.
 
 On a phone the panel sits below the map; the arrow at the top of the panel folds it
-away to give the map more room.
+away to give the map more room. The toolbar takes up to two rows there.
 
 ## Saving
 
@@ -110,8 +111,9 @@ npm run build      # production build in dist/
 npm run preview    # serve dist/
 ```
 
-Stack: SolidJS, MapLibre GL JS 6, Vite, TypeScript, fflate, idb-keyval. Design notes are
-in [.github/development-journal.md](.github/development-journal.md).
+Stack: SolidJS, MapLibre GL JS 6, Vite, TypeScript, fflate, idb-keyval. The icons are
+drawn from or composed of [Tabler Icons](https://tabler.io/icons) (MIT License). Design
+notes are in [.github/development-journal.md](.github/development-journal.md).
 
 ## Deployment
 
