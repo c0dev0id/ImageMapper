@@ -10,6 +10,7 @@ import { addRoute, project, removeRoute, renameRoute, setRouteProfile } from '..
 import type { Profile, Route } from '../state/schema.ts'
 import { editingRouteId, startDrawing, stopDrawing } from '../state/ui.ts'
 import { downloadBlob, fileBaseName } from './download.ts'
+import { EditableName } from './EditableName.tsx'
 import { CrosshairIcon } from './icons.tsx'
 
 const PROFILES: { value: Profile; label: string }[] = [
@@ -87,12 +88,7 @@ function RouteRow(props: { route: Route }) {
     <li class="route" classList={{ active: editing() }}>
       <div class="row">
         <span class="swatch" style={{ 'background-color': route.color }} />
-        <input
-          class="grow"
-          aria-label="Route name"
-          value={route.name}
-          onChange={(e) => renameRoute(route.id, e.currentTarget.value.trim() || route.name)}
-        />
+        <EditableName value={route.name} label="route" onRename={(name) => renameRoute(route.id, name)} />
         <button
           class="icon"
           title="Fly to route"

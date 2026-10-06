@@ -72,11 +72,6 @@ select {
   color: var(--muted);
 }
 
-.project-name {
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .row {
   display: flex;
   align-items: center;
@@ -201,10 +196,14 @@ input[type='range'] {
   background: #e7f5ff;
 }
 
-.layer .name {
+/* Names are text; renaming swaps in a field (EditableName). */
+.name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.layer .name {
   cursor: pointer;
 }
 
@@ -359,10 +358,6 @@ button.icon svg {
 
 .route.active {
   background: #e7f5ff;
-}
-
-.route input {
-  min-width: 0;
 }
 
 .swatch {

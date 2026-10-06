@@ -9,3 +9,18 @@ export function CrosshairIcon() {
     </svg>
   )
 }
+
+/** Rename. */
+export function PencilIcon() {
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+      <path
+        d="M2.5 13.5v-3l8-8 3 3-8 8zM9 4l3 3"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linejoin="round"
+      />
+    </svg>
+  )
+}

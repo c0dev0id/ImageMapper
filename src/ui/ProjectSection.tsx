@@ -7,6 +7,7 @@ import { decodeProjectFile, encodeProjectFile } from '../state/projectFile.ts'
 import { emptyProject } from '../state/schema.ts'
 import { errorMessage, notify, panelCollapsed, setPanelCollapsed } from '../state/ui.ts'
 import { downloadBlob, fileBaseName } from './download.ts'
+import { EditableName } from './EditableName.tsx'
 
 const hasContent = () => project.layers.length > 0 || project.routes.length > 0
 
@@ -69,12 +70,9 @@ export function ProjectSection() {
           {panelCollapsed() ? '▴' : '▾'}
         </button>
       </div>
-      <input
-        class="project-name"
-        aria-label="Project name"
-        value={project.name}
-        onChange={(e) => setProjectName(e.currentTarget.value.trim() || 'Untitled')}
-      />
+      <div class="row">
+        <EditableName value={project.name} label="project" onRename={setProjectName} />
+      </div>
       <div class="row buttons">
         <button title="Download the project with all images as a .mappic file" onClick={save}>
           Save
