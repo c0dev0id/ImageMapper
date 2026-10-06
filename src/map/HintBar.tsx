@@ -1,7 +1,17 @@
 import { Match, Switch } from 'solid-js'
 import { gcpNumber } from '../gcp/gcps.ts'
 import { activeLayer, routeById } from '../state/project.ts'
-import { editingRouteId, mode, selection, stopDrawing, stopTransform, tool, type Tool } from '../state/ui.ts'
+import {
+  cancelTapRequest,
+  editingRouteId,
+  mode,
+  selection,
+  stopDrawing,
+  stopTransform,
+  tapRequest,
+  tool,
+  type Tool,
+} from '../state/ui.ts'
 
 const ROUTE_HINTS: Partial<Record<Tool, string>> = {
   append: 'tap the map to add points at the end, drag points to move them.',
@@ -35,6 +45,14 @@ export function HintBar() {
   const drawing = () => (mode() === 'route' ? routeById(editingRouteId()) : undefined)
   return (
     <Switch>
+      <Match when={tapRequest()}>
+        {(request) => (
+          <div class="hint-bar interactive">
+            {request().hint}{' '}
+            <button onClick={cancelTapRequest}>Cancel</button>
+          </div>
+        )}
+      </Match>
       <Match when={drawing()}>
         {(route) => (
           <div class="hint-bar interactive">

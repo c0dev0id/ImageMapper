@@ -71,6 +71,25 @@ export interface WaypointDraft {
 
 export const [waypointDraft, setWaypointDraft] = createSignal<WaypointDraft>()
 
+/**
+ * A request for one tap on the map, such as picking where a name is printed on the image:
+ * the next tap goes to `onTap` instead of the tools, and the hint bar shows `hint`. Esc or
+ * the hint bar's Cancel ends it without a tap.
+ */
+export interface TapRequest {
+  hint: string
+  onTap: (lngLat: LngLat) => void
+  onCancel?: () => void
+}
+
+export const [tapRequest, setTapRequest] = createSignal<TapRequest>()
+
+export function cancelTapRequest(): void {
+  const request = tapRequest()
+  setTapRequest(undefined)
+  request?.onCancel?.()
+}
+
 /** Outcome of the last skew or town match on a layer, shown below the layer's settings. */
 export const [layerNote, setLayerNote] = createSignal<{
   layerId: string

@@ -5,7 +5,7 @@ import { openMatchTowns } from '../match/MatchTownsDialog.tsx'
 import { warpOf } from '../state/derived.ts'
 import { activeLayer, redo, redoLabel, skewImageToMap, undo, undoLabel } from '../state/project.ts'
 import type { ImageLayer, Side } from '../state/schema.ts'
-import { mode, selection, setTool, startTransform, stopTransform, tool, type Tool } from '../state/ui.ts'
+import { mode, selection, setTool, startTransform, stopTransform, tapRequest, tool, type Tool } from '../state/ui.ts'
 import {
   AppendIcon,
   CenterOnImageIcon,
@@ -54,9 +54,9 @@ function ToolButton(props: {
 /** The tools of the current scope over the map, with undo and redo always at hand. */
 export function Toolbar() {
   const map = useMap()
-  // The picked tool, for the cursor over the map (styles.css).
+  // The picked tool (or a requested tap), for the cursor over the map (styles.css).
   createEffect(() => {
-    const t = tool()
+    const t = tapRequest() ? 'tap' : tool()
     if (t) map.getContainer().dataset.tool = t
     else delete map.getContainer().dataset.tool
   })

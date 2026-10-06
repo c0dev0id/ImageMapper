@@ -3,15 +3,18 @@ import { onCleanup } from 'solid-js'
 import { roundLngLat } from '../routing/legs.ts'
 import { appendPoint, redo, undo } from '../state/project.ts'
 import {
+  cancelTapRequest,
   editingRouteId,
   menu,
   mode,
   setMenu,
   setSelection,
+  setTapRequest,
   setTool,
   setWaypointDraft,
   stopDrawing,
   stopTransform,
+  tapRequest,
   tool,
 } from '../state/ui.ts'
 import { useMap } from './context.ts'
@@ -45,6 +48,14 @@ export function Interactions() {
       swallowClick = false
       return
     }
+    // A requested tap counts wherever it lands, also on a marker over the spot.
+    const request = tapRequest()
+    if (request) {
+      setTapRequest(undefined)
+      const { lng, lat } = e.lngLat.wrap()
+      request.onTap([lng, lat])
+      return
+    }
     if (fromMarker(e.originalEvent)) return
     setMenu(undefined)
     const routeId = editingRouteId()
@@ -69,7 +80,8 @@ export function Interactions() {
       return
     }
     if (e.key !== 'Escape') return
-    if (menu()) setMenu(undefined)
+    if (tapRequest()) cancelTapRequest()
+    else if (menu()) setMenu(undefined)
     else if (mode() === 'route') {
       // The other route tools fall back to appending; Esc while appending ends drawing.
       if (tool() !== 'append') setTool('append')
