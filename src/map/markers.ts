@@ -24,6 +24,14 @@ export class MarkerHandle {
     this.root.className = options.className
     this.root.append(content)
     this.marker = new maplibregl.Marker({ element: this.root, draggable: options.draggable ?? false })
+    if (options.draggable) {
+      // MapLibre starts a marker drag with any button. A right-click opens a menu under the
+      // pointer that receives the release, which MapLibre never sees: the marker would
+      // then follow the mouse. Only the primary button may drag.
+      this.root.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) e.stopPropagation()
+      })
+    }
   }
 
   /** Shows the marker at a position, or hides it for undefined. */
