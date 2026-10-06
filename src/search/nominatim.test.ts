@@ -27,9 +27,19 @@ describe('searchUrl', () => {
     )
   })
 
-  it('adds a rounded viewbox to prefer the visible area', () => {
+  it('adds the viewbox, rounded outward, to prefer the visible area', () => {
     expect(searchUrl('Post', { viewbox: [11.123, 47.456, 11.789, 47.912] })).toContain(
-      'viewbox=11.12%2C47.46%2C11.79%2C47.91',
+      'viewbox=11.12%2C47.45%2C11.79%2C47.92',
+    )
+  })
+
+  it('keeps a viewbox smaller than the rounding step a proper box', () => {
+    // Nominatim answers 400 when two sides coincide.
+    expect(searchUrl('Post', { viewbox: [7.8231, 50.6612, 7.8239, 50.6618] })).toContain(
+      'viewbox=7.82%2C50.66%2C7.83%2C50.67',
+    )
+    expect(searchUrl('Post', { viewbox: [-0.1281, 51.5071, -0.1276, 51.5075] })).toContain(
+      'viewbox=-0.13%2C51.50%2C-0.12%2C51.51',
     )
   })
 })

@@ -22,7 +22,13 @@ export interface SearchOptions {
 
 export function searchUrl(query: string, { viewbox }: SearchOptions = {}): string {
   const params = new URLSearchParams({ q: query, format: 'jsonv2', limit: '5' })
-  if (viewbox) params.set('viewbox', viewbox.map((v) => v.toFixed(2)).join(','))
+  if (viewbox) {
+    const [west, south, east, north] = viewbox
+    // Rounded outward: the box still holds the view, and a view narrower than a hundredth
+    // of a degree does not collapse into a line, which Nominatim rejects.
+    const box = [Math.floor(west * 100), Math.floor(south * 100), Math.ceil(east * 100), Math.ceil(north * 100)]
+    params.set('viewbox', box.map((v) => (v / 100).toFixed(2)).join(','))
+  }
   return `${NOMINATIM_URL}/search?${params}`
 }
 

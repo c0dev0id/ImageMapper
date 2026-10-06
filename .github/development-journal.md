@@ -192,7 +192,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - **Finding the area.** Locating uses MapLibre's GeolocateControl (one shot, no tracking).
   Search uses Nominatim on explicit submit only, since its policy forbids
   search-as-you-type; requests are spaced one second apart, identical requests cached,
-  and the visible area is passed as a preference once zoomed in (zoom >= 6).
+  and the visible area is passed as a preference once zoomed in (zoom >= 6). It is
+  rounded outward to a hundredth of a degree: rounding to the nearest value collapsed a
+  street-level view into a line, which Nominatim rejects with status 400.
 - **Persistence.** The project is stored as JSON in IndexedDB, image bytes as
   ArrayBuffers (Safari private mode rejects Blobs). Autosave is enabled only after the
   stored project loaded successfully, so a failed load never overwrites data.
