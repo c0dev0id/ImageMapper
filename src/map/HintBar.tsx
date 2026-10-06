@@ -26,7 +26,7 @@ export function HintBar() {
     }
     if (t === 'pin-map') return 'Tap a feature on the map to pin it, then the same feature on the image.'
     if (t === 'pin-image') return 'Tap a feature on the image to pin it, then the same feature on the map.'
-    return 'Pin a feature on the image and the same feature on the map (toolbar, right-click or long-press), then skew with 3 or more pairs.'
+    return 'Pin a feature on the image and the same feature on the map; skew with 3 or more pairs.'
   }
   const drawing = () => (mode() === 'route' ? routeById(editingRouteId()) : undefined)
   return (

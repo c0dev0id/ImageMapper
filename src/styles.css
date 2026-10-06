@@ -668,6 +668,11 @@ input[type='search'] {
   .hint-bar {
     font-size: 12px;
   }
+
+  /* Above the attribution, which starts expanded over two lines on narrow screens. */
+  .toolbar {
+    bottom: 64px;
+  }
 }
 
 /* Touch screens: larger targets, and 16px inputs so iOS does not zoom in on focus. */
