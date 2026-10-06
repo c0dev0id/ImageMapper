@@ -488,6 +488,12 @@ button.icon svg {
   cursor: pointer;
 }
 
+/* A requested tap goes to the map, also where a marker sits on the spot. MapLibre and the
+   waypoints set pointer-events on markers inline. */
+.map[data-tool='tap'] .maplibregl-marker {
+  pointer-events: none !important;
+}
+
 /*
  * The toolbar floats over the map, above the scale bar and the attribution. Each group of
  * tools is a box of its own; on narrow screens the boxes wrap onto a second row.

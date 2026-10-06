@@ -1,15 +1,15 @@
 import type { MapMouseEvent } from 'maplibre-gl'
-import { onCleanup } from 'solid-js'
+import { createEffect, onCleanup } from 'solid-js'
 import { roundLngLat } from '../routing/legs.ts'
 import { appendPoint, redo, undo } from '../state/project.ts'
 import {
   cancelTapRequest,
+  deliverTap,
   editingRouteId,
   menu,
   mode,
   setMenu,
   setSelection,
-  setTapRequest,
   setTool,
   setWaypointDraft,
   stopDrawing,
@@ -25,6 +25,13 @@ import { fromMarker } from './markers.ts'
 /** Mouse and keyboard handling on the map that depends on the current mode. */
 export function Interactions() {
   const map = useMap()
+
+  // What the next tap does, for the cursor over the map and for the markers (styles.css).
+  createEffect(() => {
+    const next = tapRequest() ? 'tap' : tool()
+    if (next) map.getContainer().dataset.tool = next
+    else delete map.getContainer().dataset.tool
+  })
 
   // MapLibre turns a touch held for 500 ms into a contextmenu event. The browser may still
   // send a click when that finger lifts; it must neither close the menu nor add a point.
@@ -48,20 +55,13 @@ export function Interactions() {
       swallowClick = false
       return
     }
-    // A requested tap counts wherever it lands, also on a marker over the spot.
-    const request = tapRequest()
-    if (request) {
-      setTapRequest(undefined)
-      const { lng, lat } = e.lngLat.wrap()
-      request.onTap([lng, lat])
-      return
-    }
-    if (fromMarker(e.originalEvent)) return
+    const { lng, lat } = e.lngLat.wrap()
+    // A requested tap comes before the tools; markers let it through meanwhile (styles.css).
+    if (deliverTap([lng, lat]) || fromMarker(e.originalEvent)) return
     setMenu(undefined)
     const routeId = editingRouteId()
     const t = tool()
     if (mode() === 'route' && routeId) {
-      const { lng, lat } = e.lngLat.wrap()
       if (t === 'insert') insertPointOnLine(map, routeId, [e.point.x, e.point.y], pointerType === 'mouse' ? 10 : 24)
       else if (t === 'waypoint') setWaypointDraft({ lngLat: roundLngLat([lng, lat]), name: '', description: '' })
       else if (t === 'append' || t === undefined) appendPoint(routeId, roundLngLat([lng, lat]))
@@ -70,8 +70,8 @@ export function Interactions() {
   }
   const onMoveStart = () => setMenu(undefined)
   const onKeyDown = (e: KeyboardEvent) => {
-    // Text fields keep their own undo and Escape handling.
-    if (isTextField(e.target)) return
+    // Keys a dialog has handled are done; text fields keep their own undo and Escape handling.
+    if (e.defaultPrevented || isTextField(e.target)) return
     const key = e.key.toLowerCase()
     if ((e.ctrlKey || e.metaKey) && !e.altKey && (key === 'z' || key === 'y')) {
       e.preventDefault()

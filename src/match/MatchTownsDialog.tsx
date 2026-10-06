@@ -7,7 +7,7 @@ import { searchPlaces, type Place } from '../search/nominatim.ts'
 import { warpOf } from '../state/derived.ts'
 import { imageBlob } from '../state/images.ts'
 import { layerById } from '../state/project.ts'
-import { cancelTapRequest, errorMessage, setTapRequest, tapRequest, type TapRequest } from '../state/ui.ts'
+import { cancelTapRequest, errorMessage, requestTap, tapRequest, type TapRequest } from '../state/ui.ts'
 import { PinImageIcon, PinMapIcon } from '../ui/icons.tsx'
 import { matchTowns, type MatchProgress, type TownInput } from './matchTowns.ts'
 import { labelAt } from './names.ts'
@@ -81,10 +81,10 @@ export function MatchTownsDialog() {
       aria-label="Match towns"
       onClose={close}
       onKeyDown={(e) => {
-        // Esc withdraws a tap request first; a search handles its own Esc.
+        // Esc withdraws a tap request first; a search handles its own Esc. The map's keys
+        // leave alone what is handled here.
         if (e.key !== 'Escape' || e.defaultPrevented) return
         e.preventDefault()
-        e.stopPropagation()
         if (tapRequest()) cancelTapRequest()
         else close()
       }}
@@ -142,8 +142,8 @@ function TownForm(props: { layerId: string; dialog: HTMLDialogElement; onClose: 
       },
       onCancel: () => setPicking(undefined),
     }
+    requestTap(ownTap)
     setPicking(i)
-    setTapRequest(ownTap)
   }
 
   /** Takes the tapped spot for the row; an empty row also takes the name read there. */

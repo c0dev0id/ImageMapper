@@ -5,7 +5,16 @@ import { openMatchTowns } from '../match/MatchTownsDialog.tsx'
 import { warpOf } from '../state/derived.ts'
 import { activeLayer, redo, redoLabel, skewImageToMap, undo, undoLabel } from '../state/project.ts'
 import type { ImageLayer, Side } from '../state/schema.ts'
-import { mode, selection, setTool, startTransform, stopTransform, tapRequest, tool, type Tool } from '../state/ui.ts'
+import {
+  cancelTapRequest,
+  mode,
+  selection,
+  setTool,
+  startTransform,
+  stopTransform,
+  tool,
+  type Tool,
+} from '../state/ui.ts'
 import {
   AppendIcon,
   CenterOnImageIcon,
@@ -53,13 +62,6 @@ function ToolButton(props: {
 
 /** The tools of the current scope over the map, with undo and redo always at hand. */
 export function Toolbar() {
-  const map = useMap()
-  // The picked tool (or a requested tap), for the cursor over the map (styles.css).
-  createEffect(() => {
-    const t = tapRequest() ? 'tap' : tool()
-    if (t) map.getContainer().dataset.tool = t
-    else delete map.getContainer().dataset.tool
-  })
   return (
     <div class="toolbar" role="toolbar" aria-label="Tools">
       <Show when={mode() !== 'route' && activeLayer()} keyed>
@@ -188,7 +190,15 @@ function ImageTools(props: { layer: ImageLayer }) {
 /** Tools of the route being drawn; one of them is always picked. */
 function RouteTools() {
   const button = (t: Tool, label: string, title: string, icon: JSX.Element) => (
-    <ToolButton label={label} title={title} active={tool() === t} onClick={() => setTool(t)}>
+    <ToolButton
+      label={label}
+      title={title}
+      active={tool() === t}
+      onClick={() => {
+        cancelTapRequest()
+        setTool(t)
+      }}
+    >
       {icon}
     </ToolButton>
   )

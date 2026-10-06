@@ -73,21 +73,38 @@ export const [waypointDraft, setWaypointDraft] = createSignal<WaypointDraft>()
 
 /**
  * A request for one tap on the map, such as picking where a name is printed on the image:
- * the next tap goes to `onTap` instead of the tools, and the hint bar shows `hint`. Esc or
- * the hint bar's Cancel ends it without a tap.
+ * the next tap goes to `onTap` instead of the tools and markers, and the hint bar shows
+ * `hint`. Esc, the hint bar's Cancel, a mode change, a tool pick or another request end it
+ * without a tap.
  */
 export interface TapRequest {
   hint: string
-  onTap: (lngLat: LngLat) => void
+  /** Gets the tapped place; false keeps the request open for another tap. */
+  onTap: (lngLat: LngLat) => boolean | void
   onCancel?: () => void
 }
 
-export const [tapRequest, setTapRequest] = createSignal<TapRequest>()
+const [tapRequest, setTapRequest] = createSignal<TapRequest>()
+export { tapRequest }
+
+/** Opens a tap request, ending the one before. */
+export function requestTap(request: TapRequest): void {
+  cancelTapRequest()
+  setTapRequest(request)
+}
 
 export function cancelTapRequest(): void {
   const request = tapRequest()
   setTapRequest(undefined)
   request?.onCancel?.()
+}
+
+/** Hands a tap on the map to the open request; false when there is none. */
+export function deliverTap(lngLat: LngLat): boolean {
+  const request = tapRequest()
+  if (!request) return false
+  if (request.onTap(lngLat) !== false && tapRequest() === request) setTapRequest(undefined)
+  return true
 }
 
 /** Outcome of the last skew or town match on a layer, shown below the layer's settings. */
@@ -99,6 +116,7 @@ export const [layerNote, setLayerNote] = createSignal<{
 
 /** Enters draw route mode for a route; georeferencing selection and menus are closed. */
 export function startDrawing(routeId: string): void {
+  cancelTapRequest()
   setSelection(undefined)
   setMenu(undefined)
   setEditingRouteId(routeId)
@@ -107,6 +125,7 @@ export function startDrawing(routeId: string): void {
 }
 
 export function stopDrawing(): void {
+  cancelTapRequest()
   setMenu(undefined)
   setEditingRouteId(undefined)
   setMode('georef')
@@ -115,6 +134,7 @@ export function stopDrawing(): void {
 
 /** Enters the move/rotate/resize mode for the active image layer. */
 export function startTransform(): void {
+  cancelTapRequest()
   setSelection(undefined)
   setMenu(undefined)
   setEditingRouteId(undefined)
@@ -123,5 +143,6 @@ export function startTransform(): void {
 }
 
 export function stopTransform(): void {
+  cancelTapRequest()
   if (mode() === 'transform') setMode('georef')
 }

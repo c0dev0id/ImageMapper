@@ -16,6 +16,7 @@ import {
   type Waypoint,
 } from './schema.ts'
 import {
+  cancelTapRequest,
   editingRouteId,
   setEditingRouteId,
   setMenu,
@@ -112,6 +113,7 @@ export function replaceProject(next: Project): void {
   setTool(undefined)
   setMenu(undefined)
   setLayerNote(undefined)
+  cancelTapRequest()
   setProject(reconcile(next, { key: 'id', merge: false }))
   history.clear()
   setHistoryVersion((v) => v + 1)
