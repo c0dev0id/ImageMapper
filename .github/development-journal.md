@@ -24,7 +24,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - fflate (ZIP project files), idb-keyval (IndexedDB access).
 - Vitest 5 for unit tests of the pure modules.
 - Icons from Tabler Icons (MIT), copied as SVG paths into `src/ui/icons.tsx` rather than
-  added as a dependency; the licence notice is at the top of that file.
+  added as a dependency; the licence text is in `src/ui/tabler-icons-license.txt`.
 - External services: OSM standard tiles, Esri World Imagery tiles, FOSSGIS OSRM
   routing servers (routing.openstreetmap.de), Nominatim search.
 - Deployment: GitHub Actions to GitHub Pages.
@@ -168,6 +168,13 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   app). Esri World Imagery is used through the keyless legacy URL; Esri's terms only
   cover use with Esri software or an ArcGIS subscription. The URL is a single
   constant in `src/config.ts`.
+- **Licence notices in a file.** Minification drops licence comments, so the bundle
+  itself carries no notices. Vite's `build.license` writes `licenses.txt` with the
+  licences of all bundled packages; a small plugin in `vite.config.ts` appends the Tabler
+  Icons licence, which Vite cannot see because the icon shapes are copied into the
+  source. The file sits next to `index.html` (Vite's default `.vite/` folder would be a
+  hidden directory) and is linked in the footer; it only exists in builds, not on the
+  development server.
 
 ## Core features
 

@@ -112,8 +112,10 @@ npm run preview    # serve dist/
 ```
 
 Stack: SolidJS, MapLibre GL JS 6, Vite, TypeScript, fflate, idb-keyval. The icons are
-drawn from or composed of [Tabler Icons](https://tabler.io/icons) (MIT License). Design
-notes are in [.github/development-journal.md](.github/development-journal.md).
+drawn from or composed of [Tabler Icons](https://tabler.io/icons) (MIT License). The
+build writes `licenses.txt` next to the app with the licences of everything it ships;
+the footer links to it. Design notes are in
+[.github/development-journal.md](.github/development-journal.md).
 
 ## Deployment
 
