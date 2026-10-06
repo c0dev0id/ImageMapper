@@ -30,13 +30,17 @@ It runs entirely in the browser; nothing is uploaded anywhere.
    - **Match Towns** gives a newly added image a first placement: name up to four towns
      printed on it, as far apart as possible. The app reads the text on the image, looks
      the towns up on the map and places the image by those it finds on both; each
-     becomes a point pair. When a name is not found on the map, or found in the wrong
-     place, the pin next to it searches the map by hand: change the search until the
-     right place comes up and pick it. That also works for places that are not towns,
-     such as a pass or a peak; the name stays as printed, for finding it on the image.
-     The rings sit on the printed names, not on the towns, so drag them onto the towns
-     before skewing. Clearly printed names work best. Reading a large image takes a few
-     seconds, and the first use loads about 5 MB for the text recognition.
+     becomes a point pair. Each row has two pins for doing a town by hand. The image pin
+     waits for a tap on the image: tap where the name is printed, and an empty row takes
+     the name read there (correct it if it was misread). The map pin searches the map:
+     change the search until the right place comes up and pick it. Places that are not
+     towns, such as a pass or a peak, work too; the name stays as printed. The dialog
+     stays open until every town is matched and says what is missing for each; it does
+     not block the map, so the image can be zoomed and tapped, and it can be dragged
+     aside by its title. The rings sit on the printed names, not on the towns, so drag
+     them onto the towns before skewing. Clearly printed names work best. Reading a
+     large image takes a few seconds, and the first use loads about 5 MB for the text
+     recognition.
    - **Skew Image** (three or more pairs) fits the image to its pairs. Three pairs rotate,
      scale and skew it; more pairs also bend it so that every pair matches exactly. Add
      pairs where the image is still off and skew again.
