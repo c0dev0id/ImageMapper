@@ -72,7 +72,7 @@ export interface WaypointDraft {
 export const [waypointDraft, setWaypointDraft] = createSignal<WaypointDraft>()
 
 /**
- * A request for one tap on the map, such as picking where a name is printed on the image:
+ * A request for one tap on the map, such as picking where a town is on the image:
  * the next tap goes to `onTap` instead of the tools and markers, and the hint bar shows
  * `hint`. Esc, the hint bar's Cancel, a mode change, a tool pick or another request end it
  * without a tap.

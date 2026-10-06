@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { Gcp } from '../state/schema.ts'
-import { describeMisses, describeSolution, listNames, replaceTownPairs } from './report.ts'
-import type { TownMatch, TownMiss } from './solve.ts'
+import { describeMatch, listNames, replaceTownPairs } from './report.ts'
+import type { TownPair } from './solve.ts'
 
-const match = (name: string, image: [number, number], map: [number, number]): TownMatch => ({ index: 0, name, image, map })
-const miss = (name: string, reason: TownMiss['reason']): TownMiss => ({ index: 0, name, reason })
-const fit = { c: 1e-6, s: 0, tx: 0.5, ty: 0.3 }
+const town = (name: string, image: [number, number], map: [number, number]): TownPair => ({ name, image, map })
 
 describe('replaceTownPairs', () => {
   it('replaces the pairs of the previous match, keeps pairs pinned by hand and marks the new ones', () => {
@@ -16,11 +14,11 @@ describe('replaceTownPairs', () => {
       // A pair of the previous match with its image side removed by the user.
       { id: 'half', map: [7.97, 50.56], town: 'Westerburg' },
     ]
-    const matches = [
-      match('Hachenburg', [888.123456, 271.5], [7.82, 50.66]),
-      match('Westerburg', [1172.3333, 546.6666], [7.9712345678, 50.5598765432]),
+    const towns = [
+      town('Hachenburg', [888.123456, 271.5], [7.82, 50.66]),
+      town('Westerburg', [1172.3333, 546.6666], [7.9712345678, 50.5598765432]),
     ]
-    expect(replaceTownPairs(gcps, matches, () => `new-${next++}`)).toEqual([
+    expect(replaceTownPairs(gcps, towns, () => `new-${next++}`)).toEqual([
       { id: 'hand', image: [10, 10], map: [7, 50] },
       { id: 'new-0', image: [888.12, 271.5], map: [7.82, 50.66], town: 'Hachenburg' },
       { id: 'new-1', image: [1172.33, 546.67], map: [7.9712346, 50.5598765], town: 'Westerburg' },
@@ -37,49 +35,29 @@ describe('listNames', () => {
   })
 })
 
-describe('describeMisses', () => {
-  it('says one sentence per reason, in singular or plural', () => {
-    expect(
-      describeMisses([miss('Selters', 'image'), miss('Hof', 'image'), miss('Atlantis', 'map'), miss('Marienberg', 'fit')]),
-    ).toEqual([
-      'Selters and Hof were not read on the image.',
-      'Atlantis was not found on the map.',
-      'Marienberg does not fit the others.',
-    ])
-  })
-})
-
-describe('describeSolution', () => {
-  const three = [match('Kleve', [1, 1], [6, 51]), match('Goch', [9, 9], [6.1, 51.6]), match('Wesel', [5, 1], [6.6, 51.6])]
+describe('describeMatch', () => {
+  const towns = [town('Kleve', [1, 1], [6, 51]), town('Goch', [9, 9], [6.1, 51.6]), town('Wesel', [5, 1], [6.6, 51.6])]
 
   it('names the towns used and what to do next', () => {
-    expect(describeSolution({ fit, matches: three, misses: [] })).toEqual({
+    expect(describeMatch(towns, [])).toEqual({
       kind: 'info',
-      text: 'Placed by Kleve, Goch and Wesel. The rings sit on the printed names: drag each onto its town, then skew.',
+      text: 'Placed by Kleve, Goch and Wesel. Skew to fit the image to the pairs exactly.',
     })
   })
 
-  it('warns about missed towns', () => {
-    expect(describeSolution({ fit, matches: three, misses: [miss('Xanten', 'image')] })).toEqual({
+  it('warns about towns left out', () => {
+    expect(describeMatch([...towns, town('Xanten', [3, 3], [6.4, 51.7])], [3])).toEqual({
       kind: 'warning',
       text:
-        'Placed by Kleve, Goch and Wesel. Xanten was not read on the image. ' +
-        'The rings sit on the printed names: drag each onto its town, then skew.',
+        'Placed by Kleve, Goch and Wesel. Xanten does not fit the others and was left out. ' +
+        'Skew to fit the image to the pairs exactly.',
     })
+    expect(describeMatch(towns, [0, 2]).text).toContain('Kleve and Wesel do not fit the others and were left out.')
   })
 
   it('warns when only two towns placed the image', () => {
-    const note = describeSolution({ fit, matches: three.slice(0, 2), misses: [] })
+    const note = describeMatch(towns.slice(0, 2), [])
     expect(note.kind).toBe('warning')
     expect(note.text).toContain('Two towns cannot be checked against each other')
-  })
-
-  it('explains a failure', () => {
-    expect(describeSolution({ matches: [], misses: [miss('Kleve', 'fit'), miss('Goch', 'image')] })).toEqual({
-      kind: 'warning',
-      text:
-        'The image could not be placed. Goch was not read on the image. Kleve does not fit the others. ' +
-        'At least two towns must be read on the image and found on the map.',
-    })
   })
 })

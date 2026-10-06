@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fitAngle, fitScale, fitSimilarity, placementOf, toImage, toMap, type Fit } from './fit.ts'
+import { fitScale, fitSimilarity, placementOf, toImage, toMap, type Fit } from './fit.ts'
 import { toMercator } from '../geo/mercator.ts'
 import type { Merc, Px } from '../geo/types.ts'
 
@@ -18,7 +18,6 @@ describe('fitSimilarity', () => {
     const fit = fitSimilarity(points.slice(0, 2).map((image) => ({ image, map: toMap(truth, image) })))!
     expect(fit.c).toBeCloseTo(truth.c, 15)
     expect(fit.s).toBeCloseTo(truth.s, 15)
-    expect(fitAngle(fit)).toBeCloseTo(angle, 9)
     expect(fitScale(fit)).toBeCloseTo(2e-7, 15)
   })
 

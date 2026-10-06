@@ -141,7 +141,7 @@ function ImageTools(props: { layer: ImageLayer }) {
         </ToolButton>
         <ToolButton
           label="Match Towns"
-          title="Place the image by towns printed on it: name them, and they are looked for on the image and the map"
+          title="Place the image by towns: search each one, then tap its spot on the image"
           onClick={() => openMatchTowns(layer.id)}
         >
           <MatchTownsIcon />

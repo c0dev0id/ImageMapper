@@ -70,11 +70,6 @@ export function fitScale(fit: Fit): number {
   return Math.hypot(fit.c, fit.s)
 }
 
-/** Rotation in radians; positive turns clockwise on screen. */
-export function fitAngle(fit: Fit): number {
-  return Math.atan2(fit.s, fit.c)
-}
-
 /** Placement pairs for the image corners, which put the whole image where the fit says. */
 export function placementOf(fit: Fit, width: number, height: number): Pair[] {
   const corners: Px[] = [

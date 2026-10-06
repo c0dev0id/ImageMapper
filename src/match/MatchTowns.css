@@ -15,8 +15,8 @@
   user-select: none;
 }
 
-/* Town rows: the name with its pick buttons, then what was picked, a place search, or why
-   the last match left the town out. */
+/* Town rows: the search with its image pin, then the results, what was picked, or why the
+   last match could not use the town. */
 .town-rows {
   margin: 10px 0;
   padding: 0;
@@ -61,7 +61,8 @@
   color: #fff;
 }
 
-.place-search {
+/* Search results under a row, until one is picked. */
+.town-results {
   margin-top: 4px;
   padding: 6px;
   border-radius: 6px;

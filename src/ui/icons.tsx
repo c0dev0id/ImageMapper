@@ -62,7 +62,7 @@ export const PinImageIcon = () => (
   </Icon>
 )
 
-/** Match towns: a picture with a magnifier, for the names read on it (Tabler's photo-search). */
+/** Match towns: a picture with a magnifier, for towns searched and found on it (Tabler's photo-search). */
 export const MatchTownsIcon = () => (
   <Icon>
     <path d="M15 8h.01" />
