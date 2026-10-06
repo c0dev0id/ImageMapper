@@ -26,9 +26,14 @@ export interface ImageLayer {
   gcps: Gcp[]
 }
 
+/**
+ * A point the route runs through (a waypoint in OSRM's terms). One with a name is a
+ * waypoint in the GPX sense as well: a named place that is exported on its own.
+ */
 export interface Waypoint {
   id: string
   lngLat: LngLat
+  name?: string
 }
 
 export interface Route {

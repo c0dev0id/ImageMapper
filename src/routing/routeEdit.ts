@@ -23,6 +23,21 @@ export function removeWaypoint(route: Route, id: string): Route {
   return withPrunedLegs({ ...route, waypoints: route.waypoints.filter((w) => w.id !== id) })
 }
 
+/** Names a point, which makes it a waypoint, or removes the name for undefined. */
+export function nameWaypoint(route: Route, id: string, name: string | undefined): Route {
+  const target = route.waypoints.find((w) => w.id === id)
+  if (!target || target.name === name) return route
+  return {
+    ...route,
+    waypoints: route.waypoints.map((w) => {
+      if (w !== target) return w
+      const named = { ...w, name }
+      if (name === undefined) delete named.name
+      return named
+    }),
+  }
+}
+
 export function changeProfile(route: Route, profile: Profile): Route {
   return withPrunedLegs({ ...route, profile })
 }

@@ -267,6 +267,11 @@ export function removeWaypoint(routeId: string, waypointId: string): void {
   updateRoute(routeId, (r) => edit.removeWaypoint(r, waypointId), 'Remove point')
 }
 
+/** Names a route point (making it a waypoint) or removes its name with undefined. */
+export function nameWaypoint(routeId: string, waypointId: string, name: string | undefined, label: string): void {
+  updateRoute(routeId, (r) => edit.nameWaypoint(r, waypointId, name), label)
+}
+
 export function setRouteLeg(routeId: string, key: string, geometry: string): void {
   updateRoute(routeId, (r) => edit.addLeg(r, key, geometry))
 }

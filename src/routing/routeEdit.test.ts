@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import type { Route } from '../state/schema.ts'
-import { addLeg, appendWaypoint, changeProfile, moveWaypoint, nextRouteColor, removeWaypoint } from './routeEdit.ts'
+import {
+  addLeg,
+  appendWaypoint,
+  changeProfile,
+  moveWaypoint,
+  nameWaypoint,
+  nextRouteColor,
+  removeWaypoint,
+} from './routeEdit.ts'
 
 const base: Route = {
   id: 'r',
@@ -36,6 +44,32 @@ describe('route edits', () => {
 
   it('keeps the remaining leg when the last waypoint is removed', () => {
     expect(removeWaypoint(base, 'c').legs).toEqual({ 'car/1,1;2,2': 'ab' })
+  })
+
+  it('names a point without touching the routing', () => {
+    const r = nameWaypoint(base, 'b', 'Pass')
+    expect(r.waypoints[1]).toEqual({ id: 'b', lngLat: [2, 2], name: 'Pass' })
+    expect(r.waypoints[0]).toBe(base.waypoints[0])
+    expect(r.legs).toBe(base.legs)
+  })
+
+  it('removes a name without leaving the key behind', () => {
+    const named = nameWaypoint(base, 'b', 'Pass')
+    const plain = nameWaypoint(named, 'b', undefined)
+    expect(plain.waypoints[1]).toEqual({ id: 'b', lngLat: [2, 2] })
+    expect('name' in plain.waypoints[1]).toBe(false)
+  })
+
+  it('returns the route itself when nothing changes', () => {
+    const named = nameWaypoint(base, 'b', 'Pass')
+    expect(nameWaypoint(named, 'b', 'Pass')).toBe(named)
+    expect(nameWaypoint(base, 'b', undefined)).toBe(base)
+    expect(nameWaypoint(base, 'x', 'Nowhere')).toBe(base)
+  })
+
+  it('keeps the name of a moved point', () => {
+    const moved = moveWaypoint(nameWaypoint(base, 'b', 'Pass'), 'b', [2.5, 2.5])
+    expect(moved.waypoints[1]).toEqual({ id: 'b', lngLat: [2.5, 2.5], name: 'Pass' })
   })
 
   it('drops every leg when the profile changes', () => {
