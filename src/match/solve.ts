@@ -1,12 +1,10 @@
 import { toMercator } from '../geo/mercator.ts'
-import type { LngLat, Px } from '../geo/types.ts'
+import type { Pair } from '../geo/types.ts'
 import { fitScale, fitSimilarity, toImage, type Correspondence, type Fit } from './fit.ts'
 
 /** A town as the user picked it: its spot on the image and its place on the map. */
-export interface TownPair {
+export interface TownPair extends Pair {
   name: string
-  image: Px
-  map: LngLat
 }
 
 export interface TownFit {

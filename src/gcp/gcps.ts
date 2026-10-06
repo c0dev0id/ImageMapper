@@ -179,7 +179,7 @@ export type SkewResult = { ok: true; pairs: Pair[]; warning?: string } | { ok: f
 
 /** Checks the complete pairs of a layer and returns them as the new placement. */
 export function prepareSkew(gcps: readonly Gcp[], width: number, height: number): SkewResult {
-  const complete = gcps.filter((g): g is Required<Gcp> => !!(g.image && g.map))
+  const complete = gcps.filter((g): g is Gcp & Pair => !!(g.image && g.map))
   const pairs: Pair[] = complete.map((g) => ({ image: [...g.image], map: [...g.map] }))
   const labels = complete.map((g) => String(gcpNumber(gcps, g.id)))
   const problem = checkControlPoints(
