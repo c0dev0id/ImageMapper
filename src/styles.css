@@ -483,40 +483,44 @@ button.icon svg {
   cursor: pointer;
 }
 
-/* The toolbar floats over the map, above the scale bar and the attribution. */
+/*
+ * The toolbar floats over the map, above the scale bar and the attribution. Each group of
+ * tools is a box of its own; on narrow screens the boxes wrap onto a second row.
+ */
 .toolbar {
   position: absolute;
   bottom: 40px;
   left: 50%;
   z-index: 5;
   display: flex;
-  max-width: calc(100% - 20px);
-  padding: 4px;
-  overflow-x: auto;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100% - 16px);
   transform: translateX(-50%);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
 }
 
 .toolbar-group {
   display: flex;
   gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
 }
 
-.toolbar-group + .toolbar-group {
-  margin-left: 4px;
-  padding-left: 4px;
-  border-left: 1px solid var(--border);
-}
-
+/* Icon over a one-line caption; the caption sets the width. */
 .tool {
-  display: grid;
+  display: flex;
   flex: none;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 48px;
+  padding: 5px 6px 4px;
   border: none;
   border-radius: 8px;
   background: none;
@@ -525,8 +529,15 @@ button.icon svg {
 }
 
 .tool svg {
-  width: 20px;
-  height: 20px;
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+
+.tool-label {
+  font-size: 10px;
+  line-height: 12px;
+  white-space: nowrap;
 }
 
 .tool:hover:not(:disabled) {
@@ -540,7 +551,7 @@ button.icon svg {
 }
 
 .tool:disabled {
-  opacity: 0.3;
+  opacity: 0.4;
   cursor: default;
 }
 
@@ -674,6 +685,17 @@ input[type='search'] {
   .toolbar {
     bottom: 64px;
   }
+
+  /* Smaller captions, so that the tools take at most two rows on phones. */
+  .tool {
+    min-width: 44px;
+    padding: 5px 4px 4px;
+  }
+
+  .tool-label {
+    font-size: 9px;
+    line-height: 11px;
+  }
 }
 
 /* Touch screens: larger targets, and 16px inputs so iOS does not zoom in on focus. */
@@ -732,11 +754,6 @@ input[type='search'] {
 
   .transform-handle-marker {
     padding: 10px;
-  }
-
-  .tool {
-    width: 40px;
-    height: 40px;
   }
 
   .transform-handle {

@@ -22,10 +22,13 @@ import {
 import { useMap } from './context.ts'
 import { flyToImage, moveImageHere } from './navigate.ts'
 
-/** A toolbar button: an icon with a descriptive tooltip; `active` marks the picked tool. */
-export function ToolButton(props: {
+/**
+ * A toolbar button: an icon over a short caption, with a tooltip that says more. `active`
+ * marks the picked tool.
+ */
+function ToolButton(props: {
   label: string
-  title?: string
+  title: string
   active?: boolean
   disabled?: boolean
   onClick: () => void
@@ -35,13 +38,13 @@ export function ToolButton(props: {
     <button
       class="tool"
       classList={{ active: props.active }}
-      title={props.title ?? props.label}
-      aria-label={props.label}
+      title={props.title}
       aria-pressed={props.active === undefined ? undefined : props.active}
       disabled={props.disabled}
       onClick={() => props.onClick()}
     >
       {props.children}
+      <span class="tool-label">{props.label}</span>
     </button>
   )
 }
@@ -63,7 +66,7 @@ export function Toolbar() {
       <Show when={mode() === 'route'}>
         <RouteTools />
       </Show>
-      <div class="toolbar-group">
+      <div class="toolbar-group" role="group" aria-label="History">
         <ToolButton
           label="Undo"
           title={undoLabel() ? `Undo: ${undoLabel()} (Ctrl+Z)` : 'Nothing to undo'}
@@ -85,7 +88,7 @@ export function Toolbar() {
   )
 }
 
-/** Tools of the active image: pin point pairs, place it by hand, skew it, find it. */
+/** Tools of the active image: pin point pairs and skew; find it, bring it into view or place it by hand. */
 function ImageTools(props: { layer: ImageLayer }) {
   const map = useMap()
   const layer = props.layer
@@ -113,9 +116,9 @@ function ImageTools(props: { layer: ImageLayer }) {
 
   return (
     <>
-      <div class="toolbar-group">
+      <div class="toolbar-group" role="group" aria-label="Point pairs">
         <ToolButton
-          label="Pin on map"
+          label="Pin Map"
           title="Pin a point on the map, then the same place on the image"
           active={tool() === 'pin-map'}
           disabled={!usable('map')}
@@ -124,7 +127,7 @@ function ImageTools(props: { layer: ImageLayer }) {
           <PinMapIcon />
         </ToolButton>
         <ToolButton
-          label="Pin on image"
+          label="Pin Image"
           title="Pin a point on the image, then the same place on the map"
           active={tool() === 'pin-image'}
           disabled={!usable('image')}
@@ -133,15 +136,7 @@ function ImageTools(props: { layer: ImageLayer }) {
           <PinImageIcon />
         </ToolButton>
         <ToolButton
-          label="Move, rotate, resize"
-          title="Move, rotate and resize the image by hand"
-          active={mode() === 'transform'}
-          onClick={() => (mode() === 'transform' ? stopTransform() : startTransform())}
-        >
-          <ResizeIcon />
-        </ToolButton>
-        <ToolButton
-          label="Skew image to map"
+          label="Skew Image"
           title={
             pairs() >= 3
               ? `Skew the image so that its ${pairs()} point pairs match`
@@ -153,16 +148,28 @@ function ImageTools(props: { layer: ImageLayer }) {
           <SkewIcon />
         </ToolButton>
       </div>
-      <div class="toolbar-group">
-        <ToolButton label="Fly to image" title="Show the whole image" onClick={withWarp((warp) => flyToImage(map, warp))}>
+      <div class="toolbar-group" role="group" aria-label="Placement">
+        <ToolButton
+          label="Center on Image"
+          title="Show the whole image"
+          onClick={withWarp((warp) => flyToImage(map, warp))}
+        >
           <CenterOnImageIcon />
         </ToolButton>
         <ToolButton
-          label="Move image here"
+          label="Move Image Here"
           title="Move the image to the middle of the view, at the size of a new image"
           onClick={withWarp((warp) => moveImageHere(map, layer, warp))}
         >
           <MoveImageHereIcon />
+        </ToolButton>
+        <ToolButton
+          label="Resize"
+          title="Move, rotate and resize the image by hand"
+          active={mode() === 'transform'}
+          onClick={() => (mode() === 'transform' ? stopTransform() : startTransform())}
+        >
+          <ResizeIcon />
         </ToolButton>
       </div>
     </>
@@ -177,12 +184,12 @@ function RouteTools() {
     </ToolButton>
   )
   return (
-    <div class="toolbar-group">
-      {button('append', 'Append points', 'Tap the map to add points at the end of the route', <AppendIcon />)}
-      {button('insert', 'Insert point', 'Tap the route line to insert a point there', <InsertIcon />)}
+    <div class="toolbar-group" role="group" aria-label="Route">
+      {button('append', 'Append', 'Tap the map to add points at the end of the route', <AppendIcon />)}
+      {button('insert', 'Insert', 'Tap the route line to insert a point there', <InsertIcon />)}
       {button(
         'waypoint',
-        'Add waypoint',
+        'Waypoint',
         'Tap the map to place a waypoint: a named place of its own, such as a viewpoint or a warning',
         <WaypointIcon />,
       )}
