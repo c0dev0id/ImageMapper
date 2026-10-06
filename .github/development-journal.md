@@ -45,19 +45,19 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   happen inside `render()` so MapLibre's cached GL state stays valid.
 - **Inverse mapping through the drawn mesh.** A click is converted to image pixels by
   finding the mesh triangle under it, so the result is exactly the pixel on screen.
-- **GCP model.** A GCP has an optional image side and an optional map side. Selection
-  is one side of one GCP of the active layer. "Match" sets or replaces the opposite
-  side of the selected GCP; "remove" removes one side and selects the remaining one.
-  Sides are marked in turns: with a side selected, neither the menu nor the pin tools
-  offer a new point on that side, so a half-marked GCP cannot be left behind by
-  accident; after each pin the toolbar picks the other side's pin. Esc or a click on the empty map
-  deselects on purpose; the click that only closes an open menu does not.
-  Both markers can be dragged to correct a point. A map dot keeps the dropped position;
-  an image ring takes the pixel under the drop through the drawn mesh (the same inverse
-  as a click) and goes back when dropped beside the image. The warp itself only changes
-  on the next skew. Dots are stacked above rings so both sides of a nested pair stay
-  reachable. Draggable markers do not pass right-clicks and long presses to the map, so
-  they open their menu themselves (`onMarkerMenu`, shared with route points).
+- **GCP model.** A GCP has an optional image side and an optional map side. Selection is
+  one side of one GCP of the active layer. "Match" sets or replaces the opposite side of
+  the selected GCP; "remove" removes one side and selects the remaining one. Sides are
+  marked in turns: with a side selected, neither the menu nor the pin tools offer a new
+  point on that side, so a half-marked GCP cannot be left behind by accident; after each
+  pin the toolbar picks the other side's pin. Esc or a click on the empty map deselects
+  on purpose; the click that only closes an open menu does not. Both markers can be
+  dragged to correct a point. A map dot keeps the dropped position; an image ring takes
+  the pixel under the drop through the drawn mesh (the same inverse as a click) and goes
+  back when dropped beside the image. The warp itself only changes on the next skew.
+  Dots are stacked above rings so both sides of a nested pair stay reachable. Draggable
+  markers do not pass right-clicks and long presses to the map, so they open their menu
+  themselves (`onMarkerMenu`, shared with route points).
 - **Routing.** Each leg (pair of consecutive route points) is requested separately from
   the FOSSGIS OSRM server for the route's profile (car, bike, foot). Results are
   cached in the route under a key built from profile and both coordinates and stored
@@ -84,10 +84,11 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   applied with `reconcile` at the narrowest path. Components that own MapLibre
   objects are keyed by id so edits never recreate map layers.
 - **Undo.** Snapshots of the project are taken before every content edit (images, GCPs,
-  skews, routes, waypoints, names) and restored with `reconcile`. Display settings (map view,
-  satellite, layer visibility and opacity) keep their current values on undo, so toggling
-  an image while looking for map features does not fill the history. Routing results are
-  not steps. Open/New/reload start a new history; deletions need no confirmation.
+  skews, routes, waypoints, names) and restored with `reconcile`. Display settings (map
+  view, satellite, layer visibility, opacity and blend mode) keep their current values
+  on undo, so toggling an image while looking for map features does not fill the
+  history. Routing results are not steps. Open/New/reload start a new history; deletions
+  need no confirmation.
 - **Touch.** MapLibre fires `contextmenu` for a 500 ms touch on the map; the app drops the
   click that may follow the lifting finger, and a long-press menu only reacts to a new
   tap. Draggable markers block MapLibre's long press, so they detect their own with
@@ -103,12 +104,20 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   hands the gesture back to the map. "Move image here" applies the same kind of
   transform to fit an image that is far off into the view (centred, sized like a new
   image); "Fly to image" fits the view to the image instead.
+- **Blend modes in the shader.** The image layers draw into MapLibre's canvas, so CSS
+  blend modes do not apply, and fixed-function GL blending cannot do overlay, soft
+  light, hard light or difference (they need the colour below). For any mode but normal
+  the layer copies the framebuffer into an RGB texture (`copyTexSubImage2D`; MapLibre's
+  canvas is not multisampled) and the fragment shader mixes image and backdrop with the
+  W3C Compositing and Blending formulas, writing the result with blending off. One copy
+  per frame and blended layer; normal keeps the plain premultiplied path. The mode is a
+  display setting like opacity: stored per layer (absent means normal), not undone.
 - **Layer list.** Entries show a preview, made once per layer as a small bitmap
   (`createImageBitmap` with a resize) rather than an `<img>` of the full photo. They are
   reordered by dragging a handle with pointer events (HTML drag and drop barely works
   on touch screens); a copy follows the pointer and a line marks the drop place. The
-  handle also takes the arrow keys. One opacity slider below the list acts on the
-  active layer.
+  handle also takes the arrow keys. One opacity slider and the blend mode below the list
+  act on the active layer.
 - **Names are text, not fields.** Route and project names show as text with a pencil
   button; renaming swaps in a focused field in place (Enter or leaving it keeps the
   name, Esc or an empty field drops the change). The panel shows no open text fields
@@ -154,7 +163,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - OSM base map, Esri satellite layer with visibility and opacity.
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
-  reordering, visibility, opacity and an active layer.
+  reordering, visibility, opacity, blend modes and an active layer.
 - A map toolbar with the tools of the active image or the route being drawn.
 - GCP editing with pin tools or context menus (right-click or long press), and "skew
   image to map" with fold/mirror checks.

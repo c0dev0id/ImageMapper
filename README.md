@@ -16,7 +16,10 @@ It runs entirely in the browser; nothing is uploaded anywhere.
 2. **Add images** (JPEG, PNG, WebP). Each image becomes a layer, listed with a preview.
    Click an entry to make it the active layer, the one you work on. Drag an entry by its
    handle to change the order (or press the arrow keys on the handle); the eye hides a
-   layer, × deletes it. The opacity slider below the list belongs to the active layer.
+   layer, × deletes it. Opacity and blend mode below the list belong to the active
+   layer. **Multiply** makes white paper transparent while printed lines stay, so the map
+   shows through a scan; **Difference** cancels out where image and map match, so
+   misaligned lines stand out after a skew. Each mode explains itself below the list.
 3. The **toolbar** at the bottom of the map holds the tools of the active image; each
    explains itself in a tooltip.
    - **Pin on map** and **Pin on image** mark point pairs: pin a feature on the image and
@@ -35,7 +38,8 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      size of a newly added image.
 
    Pins and placement always apply to the active layer, also where other images lie on
-   top of it. Lowering the opacity or hiding the layer helps to find a feature on the map.
+   top of it. Lowering the opacity, a blend mode or hiding the layer helps to find a
+   feature on the map.
 4. **Draw route** switches the toolbar to the route tools: **Append points** (tap the
    map to add points at the end), **Insert point** (tap the route line to add a point
    there), **Add waypoint** and **Delete** (tap a route point or waypoint). Drag points
@@ -59,8 +63,8 @@ again.
 
 **Undo** and **Redo** (the arrows in the toolbar, or Ctrl+Z and Ctrl+Shift+Z) step
 through the edits of the current session: images, placements, points, skews, routes,
-waypoints and names. The map view, the satellite layer and layer visibility and opacity
-are not part of it, and opening a file, starting a new project or reloading starts a
+waypoints and names. The map view, the satellite layer and layer visibility, opacity
+and blend mode are not part of it, and opening a file, starting a new project or reloading starts a
 new history.
 
 On a phone the panel sits below the map; the arrow at the top of the panel folds it
