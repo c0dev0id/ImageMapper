@@ -22,11 +22,13 @@ It runs entirely in the browser; nothing is uploaded anywhere.
    misaligned lines stand out after a skew. Each mode explains itself below the list.
 3. The **toolbar** at the bottom of the map holds the tools of the active image, each with
    a short caption and a tooltip that says more.
-   - **Pin Map** and **Pin Image** mark point pairs: pin a feature on the image and the
-     same feature on the map, or the other way round. The pins take turns on their own:
-     after a pin the other side is picked, and the side waiting for its partner is
-     greyed out. Esc or the picked tool again stops pinning. Right-click (or long-press
-     on a touch screen) offers the same as a menu.
+   - **Pin** marks point pairs, always image first: tap a spot on the image (a dashed ring
+     shows it), then tap its place on the map; the next pair can follow right away. A
+     ring waiting for its place is only kept once that place is tapped: Esc, Cancel or
+     another tool drops it, and a second Esc stops pinning. Right-click (or long-press on
+     a touch screen) starts a pair the same way, and also matches or removes existing
+     points. Rings belong to the image and travel with it; dots belong to the map and
+     stay where they are.
    - **Match Towns** gives a newly added image a first placement from up to four towns
      (or other places you can find on it), as far apart as possible. For each, type its
      name and press Enter or Search, pick the right place from the results, then press
@@ -46,7 +48,8 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      the size of a newly added image.
    - **Resize** lines the image up by hand: drag the image to move it, a corner to resize
      it and the round handle to rotate it. Optional, but pinning is easier when the image
-     is roughly in place.
+     is roughly in place. The rings travel with the image meanwhile and the dots stay, so
+     you can see that the next skew puts the image back onto its pairs.
 
    Pins and placement always apply to the active layer, also where other images lie on
    top of it. Hiding the active layer keeps it active, its points and the picked tool:

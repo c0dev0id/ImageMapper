@@ -49,13 +49,17 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   finding the mesh triangle under it, so the result is exactly the pixel on screen.
   Where a skew folds the image over itself, several triangles lie under the click; the
   search starts from the one drawn last, which is the one on top and the one seen.
-- **GCP model.** A GCP has an optional image side and an optional map side. Selection is
-  one side of one GCP of the active layer. "Match" sets or replaces the opposite side of
-  the selected GCP; "remove" removes one side and selects the remaining one. Sides are
-  marked in turns: with a side selected, neither the menu nor the pin tools offer a new
-  point on that side, so a half-marked GCP cannot be left behind by accident; after each
-  pin the toolbar picks the other side's pin. Esc or a click on the empty map deselects
-  on purpose; the click that only closes an open menu does not. Both markers can be
+- **GCP model.** A GCP has an optional image side and an optional map side. New pairs are
+  pinned in a strict order, image first, because pinning the two sides in either order
+  made it easy to put a map point where an image point was meant. The Pin tool (or the
+  menu's "Pin point on image") takes the image point, which waits as a dashed ring
+  outside the project (`pendingPin`); the next tap anywhere on the map, through a tap
+  request, pins its place and stores the pair in one undo step. Leaving the flow (Esc,
+  Cancel, another tool, a mode or layer change) drops the waiting ring, so no half pair
+  is left behind. Selection is one side of one GCP of the active layer: the menu then
+  matches its other side (sets or replaces it at the click) or removes one side and
+  selects the remaining one. Esc or a click on the empty map deselects on purpose; the
+  click that only closes an open menu does not. Both markers can be
   dragged to correct a point. A map dot keeps the dropped position; an image ring takes
   the pixel under the drop through the drawn mesh (the same inverse as a click) and goes
   back when dropped beside the image. The warp itself only changes on the next skew.
@@ -77,7 +81,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   otherwise their markers take no pointer events. Labels are DOM markers rather than a
   symbol layer, because the inline map style has no glyph source for text.
 - **Toolbar and tools.** A toolbar over the map carries the tools of the current scope:
-  the active image (Pin Map, Pin Image, Skew Image | Center on Image, Move Image Here,
+  the active image (Pin, Match Towns, Skew Image | Center on Image, Move Image Here,
   Resize) or the route being drawn (Append, Insert, Waypoint, Delete), with undo and redo
   always. Each group is a box of its own; the boxes wrap onto a second row on narrow
   screens instead of scrolling, so no tool is out of sight. Every tool has a one-line
@@ -111,7 +115,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   gesture records one undo step when it starts. A press on the image arrives as a
   MapLibre layer event on a transparent fill of the image's footprint; preventing it
   keeps the map's pan, pinch and long press out of that gesture, and a second finger
-  hands the gesture back to the map. "Move image here" applies the same kind of
+  hands the gesture back to the map. The point markers stay visible meanwhile but cannot
+  be grabbed: the rings travel with the image and the dots stay, which shows that the
+  next skew pulls the image back onto its pairs. "Move image here" applies the same kind of
   transform to fit an image that is far off into the view (centred, sized like a new
   image); "Fly to image" fits the view to the image instead.
 - **Blend modes in the shader.** The image layers draw into MapLibre's canvas, so CSS
@@ -220,8 +226,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
   reordering, visibility, opacity, blend modes and an active layer.
 - A map toolbar with captioned tools of the active image or the route being drawn.
-- GCP editing with pin tools or context menus (right-click or long press), and "skew
-  image to map" with fold/mirror checks.
+- GCP editing with the Pin tool (image first, then map) or context menus (right-click or
+  long press), and "skew image to map" with fold/mirror checks.
 - A first placement from up to four towns, each picked from a place search and tapped on
   the image; towns that do not fit the others are left out.
 - Move, rotate and resize an image by hand on the map; fly to an image or bring it
