@@ -10,8 +10,9 @@ real map:
 2. Georeference each image with ground control points (GCPs): pairs of the same
    feature marked on the image and on the map.
 3. Warp the image so every pair matches (rubber sheeting with a thin plate spline).
-4. Trace the tour on top with OSRM routing, filling gaps between partial images.
-5. Export all routes as one GPX file with one track per route.
+4. Trace the tour on top with OSRM routing, filling gaps between partial images, and
+   mark places worth knowing as waypoints.
+5. Export all routes as one GPX file with one track per route, plus the waypoints.
 
 It is a static single-page app hosted on GitHub Pages. Work is kept in the browser
 (IndexedDB) and can be saved to / opened from a project file.
@@ -47,8 +48,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - **GCP model.** A GCP has an optional image side and an optional map side. Selection
   is one side of one GCP of the active layer. "Match" sets or replaces the opposite
   side of the selected GCP; "remove" removes one side and selects the remaining one.
-  Sides are marked in turns: with a side selected, the menu offers no new point, so a
-  half-marked GCP cannot be left behind by accident. Esc or a click on the empty map
+  Sides are marked in turns: with a side selected, neither the menu nor the pin tools
+  offer a new point on that side, so a half-marked GCP cannot be left behind by
+  accident; after each pin the toolbar picks the other side's pin. Esc or a click on the empty map
   deselects on purpose; the click that only closes an open menu does not.
   Both markers can be dragged to correct a point. A map dot keeps the dropped position;
   an image ring takes the pixel under the drop through the drawn mesh (the same inverse
@@ -56,31 +58,40 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   on the next skew. Dots are stacked above rings so both sides of a nested pair stay
   reachable. Draggable markers do not pass right-clicks and long presses to the map, so
   they open their menu themselves (`onMarkerMenu`, shared with route points).
-- **Routing.** Each leg (pair of consecutive waypoints) is requested separately from
+- **Routing.** Each leg (pair of consecutive route points) is requested separately from
   the FOSSGIS OSRM server for the route's profile (car, bike, foot). Results are
   cached in the route under a key built from profile and both coordinates and stored
   as polyline6 strings. A pull-based pump fetches missing legs one at a time with at
   least 1.1 s between requests (FOSSGIS allows one request per second). Legs are
   persisted so reloading never re-routes on newer OSM data.
-- **Waypoints.** A waypoint is a route point with a name; the route still runs through
-  it. The name is optional on the stored point (whose list keeps OSRM's name,
-  `waypoints`, so existing projects load unchanged). Naming does not touch the routed
-  legs. The export writes named points as GPX `wpt` elements before the tracks. The name
-  is asked for with the browser's prompt, like the confirmations for New and Open.
-  Labels are DOM markers rather than a symbol layer, because the inline map style has no
-  glyph source for text; outside draw mode they take no pointer events.
+- **Waypoints are places of their own** (GPX `wpt`), independent of the routes: name
+  and optional description, stored in the project's `waypoints`. Route points are only
+  route points (`points`); an earlier version named route points instead, which mixed
+  routing with places of interest. Changing this made project format 2; format 1 is not
+  read (no migrations before 1.0). Waypoints are created with the waypoint tool, edited
+  in a native `<dialog>` and can be dragged, edited or deleted while a route is drawn;
+  otherwise their markers take no pointer events. Labels are DOM markers rather than a
+  symbol layer, because the inline map style has no glyph source for text.
+- **Toolbar and tools.** A toolbar over the map carries the tools of the current scope:
+  the active image (pins, move/rotate/resize, skew, fly to, move here) or the route
+  being drawn (append, insert, waypoint, delete), with undo and redo always. The picked
+  tool is a UI signal next to the mode; map taps are dispatched on it, and it is set as
+  `data-tool` on the map element so CSS can change the cursor. The context menus stay
+  as a second way to the same actions. Inserting finds the leg nearest to the tap in
+  screen pixels (routed geometry, or the straight line while unrouted) and puts the new
+  point on the line, so the route keeps its shape.
 - **State updates.** All writes go through actions; results of pure functions are
   applied with `reconcile` at the narrowest path. Components that own MapLibre
   objects are keyed by id so edits never recreate map layers.
 - **Undo.** Snapshots of the project are taken before every content edit (images, GCPs,
-  skews, routes, names) and restored with `reconcile`. Display settings (map view,
+  skews, routes, waypoints, names) and restored with `reconcile`. Display settings (map view,
   satellite, layer visibility and opacity) keep their current values on undo, so toggling
   an image while looking for map features does not fill the history. Routing results are
   not steps. Open/New/reload start a new history; deletions need no confirmation.
 - **Touch.** MapLibre fires `contextmenu` for a 500 ms touch on the map; the app drops the
   click that may follow the lifting finger, and a long-press menu only reacts to a new
-  tap. Draggable waypoint markers block MapLibre's long press, so they detect their own
-  with pointer events (touch and pen only).
+  tap. Draggable markers block MapLibre's long press, so they detect their own with
+  pointer events (touch and pen only).
 - **Placing an image by hand.** Move, rotate and resize change the map side of the
   placement pairs by a similarity transform in Web Mercator. The TPS is linear in its
   targets, so the warped image, bends included, moves as a whole and the GCPs stay as
@@ -92,16 +103,19 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   hands the gesture back to the map. "Move image here" applies the same kind of
   transform to fit an image that is far off into the view (centred, sized like a new
   image); "Fly to image" fits the view to the image instead.
-- **Panel menus are popovers.** The image layer menu uses the HTML Popover API: it lies
-  in the top layer, so the scrolling panel cannot clip it, and closes on outside clicks
-  and Esc by itself. It is placed next to its button by script (above it when the
-  button is in the lower half of the screen, as in the phone layout).
+- **Layer list.** Entries show a preview, made once per layer as a small bitmap
+  (`createImageBitmap` with a resize) rather than an `<img>` of the full photo. They are
+  reordered by dragging a handle with pointer events (HTML drag and drop barely works
+  on touch screens); a copy follows the pointer and a line marks the drop place. The
+  handle also takes the arrow keys. One opacity slider below the list acts on the
+  active layer.
 - **Names are text, not fields.** Route and project names show as text with a pencil
   button; renaming swaps in a focused field in place (Enter or leaving it keeps the
   name, Esc or an empty field drops the change). The panel shows no open text fields
   apart from the search box.
 - **Bringing things into view** lives in `map/navigate.ts`: one `showBounds` (padding,
-  current rotation kept) behind place search, fly to image and fly to route. Fly to
+  current rotation kept) behind place search, fly to image and fly to route; move image
+  here is there too. Fly to
   route fits the joined route geometry, so routed detours stay in view.
 - **The active layer is the target.** Every image interaction (marking points, moving,
   resizing, rotating) applies to the active layer's image, also where other images are
@@ -110,7 +124,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   The dashed frame, handles and point markers are drawn above all images.
 - **Phones.** Below 720 px the panel moves under the map (at most 45 % of the height)
   and can be folded to its title row. Coarse pointers get larger buttons, markers and
-  handles, and 16 px inputs so iOS does not zoom in on focus.
+  handles, and 16 px inputs so iOS does not zoom in on focus. The toolbar sits higher
+  on narrow screens, above the attribution, which starts expanded over two lines.
 - **Finding the area.** Locating uses MapLibre's GeolocateControl (one shot, no tracking).
   Search uses Nominatim on explicit submit only, since its policy forbids
   search-as-you-type; requests are spaced one second apart, identical requests cached,
@@ -138,16 +153,17 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 
 - OSM base map, Esri satellite layer with visibility and opacity.
 - Place/address search (Nominatim) and locate-me.
-- Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with order, visibility,
-  opacity and an active layer.
+- Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
+  reordering, visibility, opacity and an active layer.
+- A map toolbar with the tools of the active image or the route being drawn.
+- GCP editing with pin tools or context menus (right-click or long press), and "skew
+  image to map" with fold/mirror checks.
 - Move, rotate and resize an image by hand on the map; fly to an image or bring it
   into the view.
-- Context-menu driven GCP editing (right-click or long press) and "skew image to map"
-  with fold/mirror checks.
 - Undo/redo of content edits.
-- Draw route mode: append, drag and remove route points; per-route OSRM profile; fly
-  to a route.
-- Named route points (waypoints), shown on the map.
-- GPX export of all routes as tracks, with their waypoints.
+- Draw route mode: append, insert, drag and delete route points; per-route OSRM
+  profile; fly to a route.
+- Waypoints with name and description, independent of the routes.
+- GPX export of all routes as tracks, with all waypoints.
 - Project save/open/new; automatic persistence in IndexedDB including map view.
 - Layout for phones and touch screens.
