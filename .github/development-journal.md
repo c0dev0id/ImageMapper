@@ -47,6 +47,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - **GCP model.** A GCP has an optional image side and an optional map side. Selection
   is one side of one GCP of the active layer. "Match" sets or replaces the opposite
   side of the selected GCP; "remove" removes one side and selects the remaining one.
+  Sides are marked in turns: with a side selected, the menu offers no new point, so a
+  half-marked GCP cannot be left behind by accident. Esc or a click on the empty map
+  deselects on purpose; the click that only closes an open menu does not.
 - **Routing.** Each leg (pair of consecutive waypoints) is requested separately from
   the FOSSGIS OSRM server for the route's profile (car, bike, foot). Results are
   cached in the route under a key built from profile and both coordinates and stored
@@ -80,7 +83,13 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   gesture records one undo step when it starts. A press on the image arrives as a
   MapLibre layer event on a transparent fill of the image's footprint; preventing it
   keeps the map's pan, pinch and long press out of that gesture, and a second finger
-  hands the gesture back to the map.
+  hands the gesture back to the map. "Move image here" applies the same kind of
+  transform to fit an image that is far off into the view (centred, sized like a new
+  image); "Fly to image" fits the view to the image instead.
+- **Panel menus are popovers.** The image layer menu uses the HTML Popover API: it lies
+  in the top layer, so the scrolling panel cannot clip it, and closes on outside clicks
+  and Esc by itself. It is placed next to its button by script (above it when the
+  button is in the lower half of the screen, as in the phone layout).
 - **The active layer is the target.** Every image interaction (marking points, moving,
   resizing, rotating) applies to the active layer's image, also where other images are
   drawn over it. Hit tests run against the active image's warp or footprint only, never
@@ -118,7 +127,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with order, visibility,
   opacity and an active layer.
-- Move, rotate and resize an image by hand on the map.
+- Move, rotate and resize an image by hand on the map; fly to an image or bring it
+  into the view.
 - Context-menu driven GCP editing (right-click or long press) and "skew image to map"
   with fold/mirror checks.
 - Undo/redo of content edits.

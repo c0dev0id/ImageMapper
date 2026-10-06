@@ -19,9 +19,13 @@ It runs entirely in the browser; nothing is uploaded anywhere.
    **Move, rotate, resize** in the active layer's row lines the image up with the map by
    hand: drag the image to move it, a corner to resize it and the round handle to rotate
    it. Optional, but matching points is easier when the image is roughly in place.
+   If an image ends up far from where you work, the crosshair button in its row offers
+   **Fly to image** (the view goes to the image) and **Move image here** (the image comes
+   to the middle of the view, at the size of a newly added image).
 3. Right-click (or long-press on a touch screen) a feature on the image and choose
    **Mark point on image**, then do the same on the feature on the map and choose
-   **Match point on map** (or the other way round).
+   **Match point on map** (or the other way round). Points are marked in turns: while a
+   point waits for its partner, the menu only offers to match it on the other side.
    Lowering the layer opacity or hiding the layer helps to find the feature on the map.
 4. With three or more pairs, press **Skew image to map**. Three pairs rotate, scale and
    skew the image; more pairs also bend it so that every pair matches exactly. Add pairs
