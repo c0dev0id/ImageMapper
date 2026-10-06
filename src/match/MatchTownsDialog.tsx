@@ -2,9 +2,9 @@ import { createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid
 import { createStore, unwrap } from 'solid-js/store'
 import type { Px } from '../geo/types.ts'
 import { useMap } from '../map/context.ts'
+import { newPointWarp } from '../map/gcpMenu.ts'
 import { searchViewbox } from '../map/navigate.ts'
 import { searchPlaces, type Place } from '../search/nominatim.ts'
-import { warpOf } from '../state/derived.ts'
 import { layerById } from '../state/project.ts'
 import { cancelTapRequest, errorMessage, requestTap, tapRequest } from '../state/ui.ts'
 import { PinImageIcon } from '../ui/icons.tsx'
@@ -142,7 +142,7 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
       hint: `Tap where ${nameOf(i)} is on the image.`,
       onTap: (lngLat) => {
         const layer = layerById(props.layerId)
-        const at = layer?.visible ? warpOf(layer.id)?.mapToImage(lngLat) : undefined
+        const at = newPointWarp(layer)?.mapToImage(lngLat)
         if (!at) {
           const text = layer?.visible ? `That was beside the image: tap where ${nameOf(i)} is on it.` : SHOW_IMAGE
           setMessage({ kind: 'warning', text })

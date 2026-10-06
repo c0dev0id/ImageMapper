@@ -14,7 +14,7 @@ import type { LngLat, Px } from '../geo/types.ts'
 import type { Warp } from '../geo/warp.ts'
 import { warpOf } from '../state/derived.ts'
 import { activeLayer, setLayerGcps } from '../state/project.ts'
-import type { Side } from '../state/schema.ts'
+import type { ImageLayer, Side } from '../state/schema.ts'
 import { selection, setMenu, setSelection, setTool } from '../state/ui.ts'
 
 /** A place on the map as GCP coordinates: the map position and, where the image is drawn, its pixel there. */
@@ -25,6 +25,11 @@ export function gcpPointAt(lngLat: MapLibreLngLat, warp: Warp | undefined): { ma
   return { map, image: pixel && roundImagePoint(pixel) }
 }
 
+/** The warp a tap becomes a new image point through: none while the image is hidden. */
+export function newPointWarp(layer: ImageLayer | undefined): Warp | undefined {
+  return layer?.visible ? warpOf(layer.id) : undefined
+}
+
 /**
  * Places a point with a pin tool: it completes the selected point if that waits for this
  * side, or starts a new one. The pin of the other side is picked next, so pairs are
@@ -33,7 +38,7 @@ export function gcpPointAt(lngLat: MapLibreLngLat, warp: Warp | undefined): { ma
 export function placePin(side: Side, lngLat: MapLibreLngLat): void {
   const layer = activeLayer()
   if (!layer) return
-  const at = gcpPointAt(lngLat, layer.visible ? warpOf(layer.id) : undefined)
+  const at = gcpPointAt(lngLat, newPointWarp(layer))
   if (side === 'image' && !at.image) return
   const sel = selection()
   const selected =
@@ -57,7 +62,7 @@ export function openGcpMenu(
 ): void {
   const layer = activeLayer()
   const warp = warpOf(layer?.id)
-  const at = gcpPointAt(lngLat, layer?.visible ? warp : undefined)
+  const at = gcpPointAt(lngLat, newPointWarp(layer))
 
   const sides: (SideRef & { x: number; y: number })[] = []
   for (const g of layer?.gcps ?? []) {
