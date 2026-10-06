@@ -18,7 +18,7 @@ import {
   tool,
 } from '../state/ui.ts'
 import { useMap } from './context.ts'
-import { openGcpMenu, placePin } from './gcpMenu.ts'
+import { openGcpMenu, startPin } from './gcpMenu.ts'
 import { insertPointOnLine } from './routeTools.ts'
 import { fromMarker } from './markers.ts'
 
@@ -65,7 +65,7 @@ export function Interactions() {
       if (t === 'insert') insertPointOnLine(map, routeId, [e.point.x, e.point.y], pointerType === 'mouse' ? 10 : 24)
       else if (t === 'waypoint') setWaypointDraft({ lngLat: roundLngLat([lng, lat]), name: '', description: '' })
       else if (t === 'append' || t === undefined) appendPoint(routeId, roundLngLat([lng, lat]))
-    } else if (t === 'pin-map' || t === 'pin-image') placePin(t === 'pin-map' ? 'map' : 'image', e.lngLat)
+    } else if (t === 'pin') startPin(e.lngLat)
     else setSelection(undefined)
   }
   const onMoveStart = () => setMenu(undefined)

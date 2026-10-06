@@ -42,17 +42,7 @@ const PictureWithCorner = () => (
   </>
 )
 
-/** Pin a point on the map: a folded map with a pin (Tabler's map-2). */
-export const PinMapIcon = () => (
-  <Icon>
-    <path d="M12 18.5l-3 -1.5l-6 3v-13l6 -3l6 3l6 -3v7.5" />
-    <path d="M9 4v13" />
-    <path d="M15 7v5.5" />
-    <PinBadge />
-  </Icon>
-)
-
-/** Pin a point on the image: a picture with a pin (Tabler's photo-pin). */
+/** Pin a point pair, starting on the image: a picture with a pin (Tabler's photo-pin). */
 export const PinImageIcon = () => (
   <Icon>
     <path d="M15 8h.01" />

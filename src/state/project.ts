@@ -173,6 +173,8 @@ export function moveLayer(id: string, to: number): void {
 
 export function setActiveLayer(id: string | undefined): void {
   if (project.activeLayerId === id) return
+  // A pin waiting for its place belongs to the layer that was active.
+  cancelTapRequest()
   setSelection(undefined)
   setMenu(undefined)
   setProject('activeLayerId', id)

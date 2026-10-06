@@ -8,8 +8,6 @@ import {
   gcpMenu,
   hitTest,
   moveGcpSide,
-  pinAction,
-  pinEnabled,
   prepareSkew,
   roundImagePoint,
   roundMapPoint,
@@ -23,19 +21,20 @@ const imageOnly: Gcp = { id: 'b', image: [20, 20] }
 const mapOnly: Gcp = { id: 'c', map: [11.1, 48.1] }
 
 describe('gcpMenu', () => {
-  it('offers marking on both sides without a selection', () => {
+  it('starts a new pair on the image only, without a selection', () => {
     const entries = gcpMenu({ gcps: [], selected: undefined, hits: [], onImage: true })
-    expect(labels(entries)).toEqual(['Mark point on image', 'Mark point on map'])
+    expect(labels(entries)).toEqual(['Pin point on image'])
+    expect(entries[0].action).toEqual({ kind: 'pin' })
   })
 
-  it('disables marking on the image when the click is not on it', () => {
+  it('disables starting a pair when the click is not on the image', () => {
     const entries = gcpMenu({ gcps: [], selected: undefined, hits: [], onImage: false })
-    expect(labels(entries)).toEqual(['Mark point on image (disabled)', 'Mark point on map'])
+    expect(labels(entries)).toEqual(['Pin point on image (disabled)'])
   })
 
   it('disables everything without an active layer', () => {
     const entries = gcpMenu({ gcps: undefined, selected: undefined, hits: [], onImage: false })
-    expect(labels(entries)).toEqual(['Mark point on image (disabled)', 'Mark point on map (disabled)'])
+    expect(labels(entries)).toEqual(['Pin point on image (disabled)'])
   })
 
   it('offers matching on the map when an image point is selected', () => {
@@ -76,7 +75,7 @@ describe('gcpMenu', () => {
 
   it('ignores a selection that does not belong to the layer', () => {
     const entries = gcpMenu({ gcps: [paired], selected: { gcpId: 'zz', side: 'image' }, hits: [], onImage: true })
-    expect(labels(entries)).toEqual(['Mark point on image', 'Mark point on map'])
+    expect(labels(entries)).toEqual(['Pin point on image'])
   })
 
   it('offers removing the nearest hit point', () => {
@@ -106,74 +105,46 @@ describe('gcpMenu', () => {
       ],
       onImage: true,
     })
-    expect(labels(entries).slice(2)).toEqual(['Remove image point', 'Remove map point'])
+    expect(labels(entries).slice(1)).toEqual(['Remove image point', 'Remove map point'])
   })
 })
 
 describe('applyGcpAction', () => {
   const at = { image: [5, 6] as Px, map: [12, 49] as LngLat }
-  const ids = () => 'new'
-
-  it('marks a new image point and selects it', () => {
-    const result = applyGcpAction([paired], { kind: 'mark', side: 'image' }, at, ids)
-    expect(result.gcps).toEqual([paired, { id: 'new', image: [5, 6] }])
-    expect(result.selected).toEqual({ gcpId: 'new', side: 'image' })
-  })
-
-  it('marks a new map point and selects it', () => {
-    const result = applyGcpAction([], { kind: 'mark', side: 'map' }, at, ids)
-    expect(result.gcps).toEqual([{ id: 'new', map: [12, 49] }])
-    expect(result.selected).toEqual({ gcpId: 'new', side: 'map' })
-  })
 
   it('matches the selected point and clears the selection', () => {
-    const result = applyGcpAction([imageOnly], { kind: 'match', side: 'map', gcpId: 'b' }, at, ids)
+    const result = applyGcpAction([imageOnly], { kind: 'match', side: 'map', gcpId: 'b' }, at)
     expect(result.gcps).toEqual([{ id: 'b', image: [20, 20], map: [12, 49] }])
     expect(result.selected).toBeUndefined()
   })
 
   it('replaces the partner of a complete pair when matching again', () => {
-    const result = applyGcpAction([paired], { kind: 'match', side: 'image', gcpId: 'a' }, at, ids)
+    const result = applyGcpAction([paired], { kind: 'match', side: 'image', gcpId: 'a' }, at)
     expect(result.gcps).toEqual([{ id: 'a', image: [5, 6], map: [11, 48] }])
   })
 
   it('removes one side and selects the remaining partner', () => {
-    const result = applyGcpAction([paired, imageOnly], { kind: 'remove', side: 'map', gcpId: 'a' }, at, ids)
+    const result = applyGcpAction([paired, imageOnly], { kind: 'remove', side: 'map', gcpId: 'a' }, at)
     expect(result.gcps).toEqual([{ id: 'a', image: [10, 10] }, imageOnly])
     expect(result.gcps[0]).not.toHaveProperty('map')
     expect(result.selected).toEqual({ gcpId: 'a', side: 'image' })
   })
 
   it('keeps what else the point carries when removing one side', () => {
-    const result = applyGcpAction([{ ...paired, town: 'Kleve' }], { kind: 'remove', side: 'map', gcpId: 'a' }, at, ids)
+    const result = applyGcpAction([{ ...paired, town: 'Kleve' }], { kind: 'remove', side: 'map', gcpId: 'a' }, at)
     expect(result.gcps).toEqual([{ id: 'a', image: [10, 10], town: 'Kleve' }])
   })
 
   it('deletes the point when its last side is removed', () => {
-    const result = applyGcpAction([paired, imageOnly], { kind: 'remove', side: 'image', gcpId: 'b' }, at, ids)
+    const result = applyGcpAction([paired, imageOnly], { kind: 'remove', side: 'image', gcpId: 'b' }, at)
     expect(result.gcps).toEqual([paired])
     expect(result.selected).toBeUndefined()
   })
 
   it('does not modify its input', () => {
     const gcps = [paired]
-    applyGcpAction(gcps, { kind: 'remove', side: 'map', gcpId: 'a' }, at, ids)
+    applyGcpAction(gcps, { kind: 'remove', side: 'map', gcpId: 'a' }, at)
     expect(gcps).toEqual([{ id: 'a', image: [10, 10], map: [11, 48] }])
-  })
-})
-
-describe('pin tools', () => {
-  it('start a new point on either side when nothing waits', () => {
-    expect(pinEnabled('map', undefined) && pinEnabled('image', undefined)).toBe(true)
-    expect(pinAction('map', undefined)).toEqual({ kind: 'mark', side: 'map' })
-    expect(pinAction('image', undefined)).toEqual({ kind: 'mark', side: 'image' })
-  })
-
-  it('only complete a waiting point on the other side', () => {
-    const waiting = { gcpId: 'c', side: 'map' } as const
-    expect(pinEnabled('map', waiting)).toBe(false)
-    expect(pinEnabled('image', waiting)).toBe(true)
-    expect(pinAction('image', waiting)).toEqual({ kind: 'match', side: 'image', gcpId: 'c' })
   })
 })
 

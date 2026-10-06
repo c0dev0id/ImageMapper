@@ -1,21 +1,12 @@
 import type { LngLat as MapLibreLngLat, Map as MapLibreMap } from 'maplibre-gl'
 import { unwrap } from 'solid-js/store'
-import {
-  applyGcpAction,
-  gcpMenu,
-  hitTest,
-  pinAction,
-  pinEnabled,
-  roundImagePoint,
-  roundMapPoint,
-  type SideRef,
-} from '../gcp/gcps.ts'
+import { applyGcpAction, gcpMenu, hitTest, roundImagePoint, roundMapPoint, type SideRef } from '../gcp/gcps.ts'
 import type { LngLat, Px } from '../geo/types.ts'
 import type { Warp } from '../geo/warp.ts'
 import { warpOf } from '../state/derived.ts'
-import { activeLayer, setLayerGcps } from '../state/project.ts'
-import type { ImageLayer, Side } from '../state/schema.ts'
-import { selection, setMenu, setSelection, setTool } from '../state/ui.ts'
+import { activeLayer, layerById, setLayerGcps } from '../state/project.ts'
+import type { Gcp, ImageLayer } from '../state/schema.ts'
+import { requestTap, selection, setMenu, setPendingPin, setSelection } from '../state/ui.ts'
 
 /** A place on the map as GCP coordinates: the map position and, where the image is drawn, its pixel there. */
 export function gcpPointAt(lngLat: MapLibreLngLat, warp: Warp | undefined): { map: LngLat; image?: Px } {
@@ -31,26 +22,28 @@ export function newPointWarp(layer: ImageLayer | undefined): Warp | undefined {
 }
 
 /**
- * Places a point with a pin tool: it completes the selected point if that waits for this
- * side, or starts a new one. The pin of the other side is picked next, so pairs are
- * pinned in turns. Image pins need a place on the active, visible image.
+ * Pins the image point of a new pair where the image was tapped; the next tap on the map
+ * pins its place and makes the pair. Esc, Cancel or picking another tool drop the image
+ * point, which is only stored together with its place.
  */
-export function placePin(side: Side, lngLat: MapLibreLngLat): void {
+export function startPin(lngLat: MapLibreLngLat): void {
   const layer = activeLayer()
-  if (!layer) return
-  const at = gcpPointAt(lngLat, newPointWarp(layer))
-  if (side === 'image' && !at.image) return
-  const sel = selection()
-  const selected =
-    sel && sel.layerId === layer.id && layer.gcps.some((g) => g.id === sel.gcpId)
-      ? { gcpId: sel.gcpId, side: sel.side }
-      : undefined
-  if (!pinEnabled(side, selected)) return
-  const action = pinAction(side, selected)
-  const result = applyGcpAction(unwrap(layer.gcps), action, at, () => crypto.randomUUID())
-  setLayerGcps(layer.id, result.gcps, `${action.kind === 'match' ? 'Match' : 'Mark'} point on ${side}`)
-  setSelection(result.selected && { layerId: layer.id, ...result.selected })
-  setTool(side === 'map' ? 'pin-image' : 'pin-map')
+  const image = layer && gcpPointAt(lngLat, newPointWarp(layer)).image
+  if (!layer || !image) return
+  const layerId = layer.id
+  setSelection(undefined)
+  setPendingPin({ layerId, image })
+  requestTap({
+    hint: 'Now tap the same place on the map.',
+    onTap: (map) => {
+      setPendingPin(undefined)
+      const target = layerById(layerId)
+      if (!target) return
+      const pair: Gcp = { id: crypto.randomUUID(), image, map: roundMapPoint(map) }
+      setLayerGcps(layerId, [...unwrap(target.gcps), pair], 'Pin point pair')
+    },
+    onCancel: () => setPendingPin(undefined),
+  })
 }
 
 /** Opens the georeferencing context menu for a right-click at `point` / `lngLat`. */
@@ -93,9 +86,11 @@ export function openGcpMenu(
       run: () => {
         const target = activeLayer()
         if (!target || target.id !== layer?.id) return
-        const result = applyGcpAction(unwrap(target.gcps), entry.action, at, () =>
-          crypto.randomUUID(),
-        )
+        if (entry.action.kind === 'pin') {
+          startPin(lngLat)
+          return
+        }
+        const result = applyGcpAction(unwrap(target.gcps), entry.action, at)
         setLayerGcps(target.id, result.gcps, entry.label)
         setSelection(result.selected && { layerId: target.id, ...result.selected })
       },

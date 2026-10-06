@@ -7,7 +7,7 @@ import type { LngLat } from '../geo/types.ts'
 import { warpOf } from '../state/derived.ts'
 import { activeLayer, layerById, setLayerGcps } from '../state/project.ts'
 import type { Side } from '../state/schema.ts'
-import { menu, mode, selection, setSelection } from '../state/ui.ts'
+import { menu, mode, pendingPin, selection, setSelection } from '../state/ui.ts'
 import { useMap } from './context.ts'
 import { gcpPointAt, openGcpMenu } from './gcpMenu.ts'
 import { MarkerHandle, onMarkerMenu } from './markers.ts'
@@ -32,13 +32,38 @@ export function GcpMarkers() {
     { equals: (a, b) => a.length === b.length && a.every((k, i) => k === b[i]) },
   )
   return (
-    <For each={keys()}>
-      {(key) => {
-        const [layerId, gcpId, side] = key.split('/') as [string, string, Side]
-        return <GcpMarker layerId={layerId} gcpId={gcpId} side={side} />
-      }}
-    </For>
+    <>
+      <For each={keys()}>
+        {(key) => {
+          const [layerId, gcpId, side] = key.split('/') as [string, string, Side]
+          return <GcpMarker layerId={layerId} gcpId={gcpId} side={side} />
+        }}
+      </For>
+      <PendingPin />
+    </>
   )
+}
+
+/** The image point of a pair being pinned, as a ring with its coming number, until its place on the map is tapped. */
+function PendingPin() {
+  const map = useMap()
+  const pin = () => {
+    const p = pendingPin()
+    return p && georefLayer()?.id === p.layerId ? p : undefined
+  }
+  const number = () => (layerById(pin()?.layerId)?.gcps.length ?? 0) + 1
+  const content = (
+    <div class="gcp gcp-image unpaired" title="Image point: tap its place on the map">
+      {number()}
+    </div>
+  ) as HTMLElement
+  const handle = new MarkerHandle(map, content, { className: 'gcp-marker gcp-marker-image' })
+  createEffect(() => {
+    const p = pin()
+    handle.setPosition(p && warpOf(p.layerId)?.imageToMap(p.image))
+  })
+  onCleanup(() => handle.remove())
+  return null
 }
 
 function GcpMarker(props: { layerId: string; gcpId: string; side: Side }) {

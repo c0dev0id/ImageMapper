@@ -27,10 +27,11 @@ export interface Hit extends SideRef {
   distance: number
 }
 
-export type GcpAction =
-  | { kind: 'mark'; side: Side }
-  | { kind: 'match'; side: Side; gcpId: string }
-  | { kind: 'remove'; side: Side; gcpId: string }
+/** An edit of an existing point: set or replace one of its sides, or remove one. */
+export type PointEdit = { kind: 'match'; side: Side; gcpId: string } | { kind: 'remove'; side: Side; gcpId: string }
+
+/** What a menu entry does: start a new pair (its image point first), or edit a point. */
+export type GcpAction = { kind: 'pin' } | PointEdit
 
 export interface MenuEntry {
   label: string
@@ -51,18 +52,16 @@ export interface MenuInput {
 const other = (side: Side): Side => (side === 'image' ? 'map' : 'image')
 
 /**
- * Context menu entries for a right-click in georeferencing mode. Points are marked in
- * turns: while one side of a GCP is selected, the only way on is to match it on the other
- * side, which sets (or replaces) that side at the click. Removing stays possible.
+ * Context menu entries for a right-click in georeferencing mode. A new pair always starts
+ * with its image point, at the click; its place on the map is the next tap. While one side
+ * of a point is selected, the menu matches it on the other side instead, which sets (or
+ * replaces) that side at the click. Removing stays possible.
  */
 export function gcpMenu({ gcps, selected, hits, onImage }: MenuInput): MenuEntry[] {
   const hasLayer = gcps !== undefined
   const sel = selected && gcps?.some((g) => g.id === selected.gcpId) ? selected : undefined
   const entries: MenuEntry[] = !sel
-    ? [
-        { label: 'Mark point on image', action: { kind: 'mark', side: 'image' }, enabled: hasLayer && onImage },
-        { label: 'Mark point on map', action: { kind: 'mark', side: 'map' }, enabled: hasLayer },
-      ]
+    ? [{ label: 'Pin point on image', action: { kind: 'pin' }, enabled: hasLayer && onImage }]
     : sel.side === 'map'
       ? [{ label: 'Match point on image', action: { kind: 'match', side: 'image', gcpId: sel.gcpId }, enabled: onImage }]
       : [{ label: 'Match point on map', action: { kind: 'match', side: 'map', gcpId: sel.gcpId }, enabled: true }]
@@ -88,41 +87,18 @@ export function gcpMenu({ gcps, selected, hits, onImage }: MenuInput): MenuEntry
   return entries
 }
 
-/** A pin tool can be used unless its side is the one waiting for a partner. */
-export function pinEnabled(side: Side, selected: SideRef | undefined): boolean {
-  return selected?.side !== side
-}
-
-/** What a pin tool does: match the selected point on its side, or start a new point. */
-export function pinAction(side: Side, selected: SideRef | undefined): GcpAction {
-  return selected && selected.side !== side ? { kind: 'match', side, gcpId: selected.gcpId } : { kind: 'mark', side }
-}
-
 export interface ActionResult {
   gcps: Gcp[]
   selected: SideRef | undefined
 }
 
 /**
- * Applies a menu action. `at` is the clicked position: map coordinates and, when the
- * click is on the image, the image pixel there. Removing one side of a pair keeps the
- * other side and selects it, so it can be matched again.
+ * Applies an edit of an existing point. `at` is the clicked position: map coordinates and,
+ * when the click is on the image, the image pixel there. Removing one side of a pair keeps
+ * the other side and selects it, so it can be matched again.
  */
-export function applyGcpAction(
-  gcps: readonly Gcp[],
-  action: GcpAction,
-  at: { image?: Px; map: LngLat },
-  newId: () => string,
-): ActionResult {
+export function applyGcpAction(gcps: readonly Gcp[], action: PointEdit, at: { image?: Px; map: LngLat }): ActionResult {
   switch (action.kind) {
-    case 'mark': {
-      const id = newId()
-      if (action.side === 'image') {
-        if (!at.image) return { gcps: [...gcps], selected: undefined }
-        return { gcps: [...gcps, { id, image: at.image }], selected: { gcpId: id, side: 'image' } }
-      }
-      return { gcps: [...gcps, { id, map: at.map }], selected: { gcpId: id, side: 'map' } }
-    }
     case 'match': {
       const value = action.side === 'image' ? at.image : at.map
       if (!value) return { gcps: [...gcps], selected: undefined }

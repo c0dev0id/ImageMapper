@@ -1,5 +1,5 @@
 import { createSignal } from 'solid-js'
-import type { LngLat } from '../geo/types.ts'
+import type { LngLat, Px } from '../geo/types.ts'
 import type { Side } from './schema.ts'
 
 /**
@@ -25,7 +25,13 @@ export interface Notice {
  * Map tools picked in the toolbar: pinning point pairs on the active image, and adding,
  * inserting or deleting while a route is drawn. Without a tool the map only navigates.
  */
-export type Tool = 'pin-map' | 'pin-image' | 'append' | 'insert' | 'waypoint' | 'delete'
+export type Tool = 'pin' | 'append' | 'insert' | 'waypoint' | 'delete'
+
+/**
+ * The image point of a pair being pinned, while it waits for its place on the map. It
+ * only becomes a point pair together with that place, so dropping it leaves nothing.
+ */
+export const [pendingPin, setPendingPin] = createSignal<{ layerId: string; image: Px }>()
 
 export const [mode, setMode] = createSignal<Mode>('georef')
 export const [tool, setTool] = createSignal<Tool>()

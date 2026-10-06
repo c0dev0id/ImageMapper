@@ -1,14 +1,13 @@
-import { createEffect, Show, type JSX } from 'solid-js'
-import { countPairs, pinEnabled } from '../gcp/gcps.ts'
+import { Show, type JSX } from 'solid-js'
+import { countPairs } from '../gcp/gcps.ts'
 import type { Warp } from '../geo/warp.ts'
 import { openMatchTowns } from '../match/MatchTownsDialog.tsx'
 import { warpOf } from '../state/derived.ts'
 import { activeLayer, redo, redoLabel, skewImageToMap, undo, undoLabel } from '../state/project.ts'
-import type { ImageLayer, Side } from '../state/schema.ts'
+import type { ImageLayer } from '../state/schema.ts'
 import {
   cancelTapRequest,
   mode,
-  selection,
   setTool,
   startTransform,
   stopTransform,
@@ -23,7 +22,6 @@ import {
   MatchTownsIcon,
   MoveImageHereIcon,
   PinImageIcon,
-  PinMapIcon,
   RedoIcon,
   ResizeIcon,
   SkewIcon,
@@ -96,22 +94,11 @@ export function Toolbar() {
 function ImageTools(props: { layer: ImageLayer }) {
   const map = useMap()
   const layer = props.layer
-  const waiting = () => {
-    const s = selection()
-    return s?.layerId === layer.id ? s : undefined
-  }
   const pairs = () => countPairs(layer.gcps).complete
-  const usable = (side: Side) => pinEnabled(side, waiting())
-
-  // The picked pin always belongs to a side that can take the next point.
-  createEffect(() => {
-    const t = tool()
-    if (t === 'pin-map' && !usable('map')) setTool(usable('image') ? 'pin-image' : undefined)
-    else if (t === 'pin-image' && !usable('image')) setTool(usable('map') ? 'pin-map' : undefined)
-  })
-  const pick = (side: Side) => {
+  // Picking Pin again stops pinning; leaving Resize (or a waiting pin) comes first.
+  const pickPin = () => {
     stopTransform()
-    setTool((t) => (t === `pin-${side}` ? undefined : `pin-${side}`))
+    setTool((t) => (t === 'pin' ? undefined : 'pin'))
   }
   const withWarp = (action: (warp: Warp) => void) => () => {
     const warp = warpOf(layer.id)
@@ -122,20 +109,10 @@ function ImageTools(props: { layer: ImageLayer }) {
     <>
       <div class="toolbar-group" role="group" aria-label="Point pairs">
         <ToolButton
-          label="Pin Map"
-          title="Pin a point on the map, then the same place on the image"
-          active={tool() === 'pin-map'}
-          disabled={!usable('map')}
-          onClick={() => pick('map')}
-        >
-          <PinMapIcon />
-        </ToolButton>
-        <ToolButton
-          label="Pin Image"
-          title="Pin a point on the image, then the same place on the map"
-          active={tool() === 'pin-image'}
-          disabled={!usable('image')}
-          onClick={() => pick('image')}
+          label="Pin"
+          title="Pin a spot on the image, then its place on the map"
+          active={tool() === 'pin'}
+          onClick={pickPin}
         >
           <PinImageIcon />
         </ToolButton>
