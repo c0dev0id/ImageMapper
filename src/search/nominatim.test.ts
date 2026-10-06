@@ -28,7 +28,14 @@ describe('searchUrl', () => {
   })
 
   it('adds a rounded viewbox to prefer the visible area', () => {
-    expect(searchUrl('Post', [11.123, 47.456, 11.789, 47.912])).toContain('viewbox=11.12%2C47.46%2C11.79%2C47.91')
+    expect(searchUrl('Post', { viewbox: [11.123, 47.456, 11.789, 47.912] })).toContain(
+      'viewbox=11.12%2C47.46%2C11.79%2C47.91',
+    )
+  })
+
+  it('can ask for settlements only', () => {
+    expect(searchUrl('Hachenburg', { settlement: true })).toContain('&featureType=settlement')
+    expect(searchUrl('Hachenburg')).not.toContain('featureType')
   })
 })
 

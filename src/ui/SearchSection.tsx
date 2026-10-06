@@ -1,20 +1,9 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import { createSignal, For, Show } from 'solid-js'
 import { useMapAccessor } from '../map/context.ts'
-import { showBounds } from '../map/navigate.ts'
-import { createPlaceSearch, type Place, type Viewbox } from '../search/nominatim.ts'
+import { searchViewbox, showBounds } from '../map/navigate.ts'
+import { searchPlaces, type Place } from '../search/nominatim.ts'
 import { errorMessage } from '../state/ui.ts'
-
-const search = createPlaceSearch()
-
-const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value))
-
-/** The visible area, used to prefer nearby results; omitted when looking at a continent. */
-function viewbox(map: MapLibreMap): Viewbox | undefined {
-  if (map.getZoom() < 6) return undefined
-  const b = map.getBounds()
-  return [clamp(b.getWest(), 180), clamp(b.getSouth(), 85), clamp(b.getEast(), 180), clamp(b.getNorth(), 85)]
-}
 
 function showPlace(map: MapLibreMap, place: Place): void {
   if (place.bounds) {
@@ -40,7 +29,7 @@ export function SearchSection() {
     setBusy(true)
     setError(undefined)
     try {
-      const places = await search(q, viewbox(m))
+      const places = await searchPlaces(q, { viewbox: searchViewbox(m) })
       if (places.length === 1) {
         showPlace(m, places[0])
         setResults(undefined)

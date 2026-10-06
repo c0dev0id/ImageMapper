@@ -5,8 +5,18 @@ import { fromMercator } from '../geo/mercator.ts'
 import { placementInView, type Warp } from '../geo/warp.ts'
 import { routePoints } from '../routing/legs.ts'
 import { decodePolyline } from '../routing/polyline.ts'
+import type { Viewbox } from '../search/nominatim.ts'
 import { setLayerPlacement } from '../state/project.ts'
 import type { ImageLayer, Route } from '../state/schema.ts'
+
+const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value))
+
+/** The visible area, to prefer nearby results in place searches; none when looking at a continent. */
+export function searchViewbox(map: MapLibreMap): Viewbox | undefined {
+  if (map.getZoom() < 6) return undefined
+  const b = map.getBounds()
+  return [clamp(b.getWest(), 180), clamp(b.getSouth(), 85), clamp(b.getEast(), 180), clamp(b.getNorth(), 85)]
+}
 
 /** Moves the view to show the bounds; the map keeps its rotation and tilt. */
 export function showBounds(map: MapLibreMap, [west, south, east, north]: Bounds, maxZoom = map.getMaxZoom()): void {

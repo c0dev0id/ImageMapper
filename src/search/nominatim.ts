@@ -11,12 +11,20 @@ export interface Place {
   bounds?: [number, number, number, number]
 }
 
-/** Area to prefer as [west, south, east, north]; results elsewhere are still returned. */
+/** Area as [west, south, east, north]. */
 export type Viewbox = [number, number, number, number]
 
-export function searchUrl(query: string, viewbox?: Viewbox): string {
+export interface SearchOptions {
+  /** Area to prefer; results elsewhere are still returned. */
+  viewbox?: Viewbox
+  /** Only settlements: cities, towns, villages, hamlets and the like. */
+  settlement?: boolean
+}
+
+export function searchUrl(query: string, { viewbox, settlement }: SearchOptions = {}): string {
   const params = new URLSearchParams({ q: query, format: 'jsonv2', limit: '5' })
   if (viewbox) params.set('viewbox', viewbox.map((v) => v.toFixed(2)).join(','))
+  if (settlement) params.set('featureType', 'settlement')
   return `${NOMINATIM_URL}/search?${params}`
 }
 
@@ -59,8 +67,8 @@ const browserDeps: SearchDeps = {
 export function createPlaceSearch({ fetchFn, now, wait }: SearchDeps = browserDeps) {
   const cache = new Map<string, Place[]>()
   let lastStart = -Infinity
-  return async (query: string, viewbox?: Viewbox): Promise<Place[]> => {
-    const url = searchUrl(query, viewbox)
+  return async (query: string, options?: SearchOptions): Promise<Place[]> => {
+    const url = searchUrl(query, options)
     const cached = cache.get(url)
     if (cached) return cached
     const start = Math.max(now(), lastStart + SEARCH_MIN_INTERVAL_MS)
@@ -80,3 +88,6 @@ export function createPlaceSearch({ fetchFn, now, wait }: SearchDeps = browserDe
     return places
   }
 }
+
+/** The app's place search; everything that asks Nominatim shares its request spacing. */
+export const searchPlaces = createPlaceSearch()
