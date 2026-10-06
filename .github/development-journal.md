@@ -93,8 +93,10 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   skews, routes, waypoints, names) and restored with `reconcile`. Display settings (map
   view, satellite, layer visibility, opacity and blend mode) keep their current values
   on undo, so toggling an image while looking for map features does not fill the
-  history. Routing results are not steps. Open/New/reload start a new history; deletions
-  need no confirmation.
+  history. Routing results are not steps. Open/New/reload start a new history. Every deletion is
+  an undo step and is not confirmed; what cannot be undone asks first: New and Open
+  while the project holds layers, routes or waypoints, and discarding a stored project
+  that cannot be read (a notice action can carry such a question).
 - **Touch.** MapLibre fires `contextmenu` for a 500 ms touch on the map; the app drops the
   click that may follow the lifting finger, and a long-press menu only reacts to a new
   tap. Draggable markers block MapLibre's long press, so they detect their own with
