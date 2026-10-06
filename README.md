@@ -27,6 +27,13 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      after a pin the other side is picked, and the side waiting for its partner is
      greyed out. Esc or the picked tool again stops pinning. Right-click (or long-press
      on a touch screen) offers the same as a menu.
+   - **Match Towns** gives a newly added image a first placement: name up to four towns
+     printed on it, as far apart as possible. The app reads the text on the image, looks
+     the towns up on the map and places the image by those it finds on both; each
+     becomes a point pair. The rings sit on the printed names, not on the towns, so drag
+     them onto the towns before skewing. Clearly printed names work best. Reading a large
+     image takes a few seconds, and the first use loads about 5 MB for the text
+     recognition.
    - **Skew Image** (three or more pairs) fits the image to its pairs. Three pairs rotate,
      scale and skew it; more pairs also bend it so that every pair matches exactly. Add
      pairs where the image is still off and skew again.
@@ -95,8 +102,8 @@ mappic uses public services directly from the browser. Please respect their term
   only cover this together with Esri software or an ArcGIS subscription; the URL is a
   single constant in `src/config.ts`.
 - **Search**: [Nominatim](https://operations.osmfoundation.org/policies/nominatim/), searched
-  only when you press Enter (no search-as-you-type), at most one request per second,
-  repeated searches answered from a cache.
+  only when you press Enter (no search-as-you-type) or match towns (one request per
+  name), at most one request per second, repeated searches answered from a cache.
 - **Routing**: [FOSSGIS OSRM servers](https://routing.openstreetmap.de/about.html) (car, bike,
   foot). At most one request per second; mappic waits 1.1 s between requests. The terms
   require the operator's contact address to be shown, which the app does in its panel.
@@ -114,7 +121,7 @@ npm run build      # production build in dist/
 npm run preview    # serve dist/
 ```
 
-Stack: SolidJS, MapLibre GL JS 6, Vite, TypeScript, fflate, idb-keyval. The icons are
+Stack: SolidJS, MapLibre GL JS 6, Vite, TypeScript, fflate, idb-keyval, tesseract.js. The icons are
 drawn from or composed of [Tabler Icons](https://tabler.io/icons) (MIT License). The
 build writes `licenses.txt` next to the app with the licences of everything it ships;
 the footer links to it. Design notes are in

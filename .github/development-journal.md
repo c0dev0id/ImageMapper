@@ -22,6 +22,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - SolidJS 1.9 (UI and state), Vite 8 (build), TypeScript 7 (type checking).
 - MapLibre GL JS 6 (map rendering, WebGL2 required).
 - fflate (ZIP project files), idb-keyval (IndexedDB access).
+- tesseract.js 7 with its WebAssembly engine and the German model (text recognition for
+  matching towns), loaded on first use.
 - Vitest 5 for unit tests of the pure modules.
 - Icons from Tabler Icons (MIT), copied as SVG paths into `src/ui/icons.tsx` rather than
   added as a dependency; the licence text is in `src/ui/tabler-icons-license.txt`.
@@ -148,6 +150,24 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   handles, and 16 px inputs so iOS does not zoom in on focus. The toolbar sits higher
   on narrow screens, above the attribution, which starts expanded over two lines, and
   uses smaller captions so that it needs at most two rows.
+- **Placing an image by town names.** The user names up to four towns printed on the
+  image. Text recognition reads the image (Tesseract's German LSTM model in sparse-text
+  mode, as map labels are scattered; small images are enlarged twice, since labels are
+  often only ten pixels high), and the names are matched against the words read with
+  an edit-distance tolerance that grows with the name's length. Nominatim settlement
+  searches give the map candidates. Each pair of towns and candidates proposes a
+  similarity transform; towns within 10 % of the image diagonal count, the best
+  proposal is refitted by least squares, and ties go to upright maps and better-ranked
+  candidates. The fit is a similarity rather than the thin plate spline because text
+  recognition finds the label, which sits beside the town; exact interpolation would
+  bend the image toward the labels. The towns become ordinary point pairs for the user
+  to correct before skewing, in one undo step with the new placement. Words read are
+  kept per layer for the session. The engine, worker and model (about 5 MB) are files
+  of the build, loaded on first use; tesseract.js 7 cannot take the model as bytes (its
+  init passes the data where the language code belongs), so the model keeps its file
+  name in the build and the worker fetches it from that directory. Its promises stay
+  pending when the worker fails, so failures are routed through its error handler.
+  Everything lives in `src/match/`, so the feature can be taken out in one piece.
 - **Finding the area.** Locating uses MapLibre's GeolocateControl (one shot, no tracking).
   Search uses Nominatim on explicit submit only, since its policy forbids
   search-as-you-type; requests are spaced one second apart, identical requests cached,
@@ -187,6 +207,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - A map toolbar with captioned tools of the active image or the route being drawn.
 - GCP editing with pin tools or context menus (right-click or long press), and "skew
   image to map" with fold/mirror checks.
+- A first placement from up to four town names, read on the image and looked up on the
+  map.
 - Move, rotate and resize an image by hand on the map; fly to an image or bring it
   into the view.
 - Undo/redo of content edits.
