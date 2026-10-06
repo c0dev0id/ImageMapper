@@ -160,14 +160,22 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   towns decides. A town can also be picked by hand, on either side: a place on the map
   (a search under the row, started with the name, any kind of place) or the spot on the
   image (a tap; an empty row takes the name read there, joined across the words of one
-  printed line). A picked side is the only candidate of its row; with every row picked
-  on the image, the image is not read at all. Picks settle namesakes, names the lookup
+  printed line). A tap on a row that has a name takes the spot as tapped, centred on the
+  label only if the image was read already, so it never waits for text recognition. A
+  picked side is the only candidate of its row; with every row picked on the image, the
+  image is not read at all. Picks settle namesakes, names the lookup
   cannot find and labels the text recognition misses, while the name stays as printed.
-  The tap goes through a general tap request (next map tap goes to the requester, with a
-  hint and a crosshair; Esc ends it). The dialog does not block the map, so the image
+  The tap goes through a general tap request: the next map tap goes to the requester,
+  also where a marker sits (markers take no pointer events meanwhile), with a hint and a
+  crosshair. Esc, Cancel, a mode change, a tool pick or another request end it; the
+  requester may refuse a tap (beside the image, or with the image hidden) and keep
+  waiting. The dialog does not block the map, so the image
   can be panned, zoomed and tapped while it is open; it is dragged by its title, stays
   partly on screen and keeps its position, and it stays open after a match that left
-  towns out, saying per row what is missing. The country of the picked places does not
+  towns out, saying per row what is missing. Its lookups prefer the area that was in view
+  when it opened, so a retry after the view moved asks the same questions and the search
+  answers them from its cache. Reading and looking up run side by side; when one fails,
+  the other is stopped. The country of the picked places does not
   choose the text recognition model: a map is printed in the magazine's language (a
   German map of Italy says "Mailand"), and the German model with accent-free comparison
   reads Latin script well enough. Each pair of towns and candidates proposes a
@@ -177,12 +185,15 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   recognition finds the label, which sits beside the town; exact interpolation would
   bend the image toward the labels. The towns become ordinary point pairs for the user
   to correct before skewing, in one undo step with the new placement. Words read are
-  kept per layer for the session. The engine, worker and model (about 5 MB) are files of
+  kept per layer for the session. The image goes to the worker as PNG, encoded while
+  the worker loads: JPEG was smaller and faster to decode but lost a printed name on the
+  Allgäu sample. The engine, worker and model (about 5 MB) are files of
   the build, loaded on first use; tesseract.js 7 cannot take the model as bytes (its
   init passes the data where the language code belongs), so the model keeps its file
   name in the build and the worker fetches it from that directory. Its promises stay
   pending when the worker fails, so failures are routed through its error handler.
-  Everything lives in `src/match/`, so the feature can be taken out in one piece.
+  Everything lives in `src/match/`, its styles included, so the feature can be taken out
+  in one piece.
 - **Finding the area.** Locating uses MapLibre's GeolocateControl (one shot, no tracking).
   Search uses Nominatim on explicit submit only, since its policy forbids
   search-as-you-type; requests are spaced one second apart, identical requests cached,
