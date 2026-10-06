@@ -25,6 +25,25 @@ export function routeLegs(route: RoutePath): Leg[] {
   return legs
 }
 
+/**
+ * The points of a route: routed legs in order, unrouted legs as the straight line shown
+ * on the map, with the shared point between consecutive legs only once.
+ */
+export function routePoints(
+  route: RoutePath & Pick<Route, 'legs'>,
+  decode: (geometry: string) => LngLat[],
+): LngLat[] {
+  const points: LngLat[] = []
+  for (const leg of routeLegs(route)) {
+    const geometry = route.legs[leg.key]
+    for (const p of geometry ? decode(geometry) : [leg.from, leg.to]) {
+      const last = points.at(-1)
+      if (!last || last[0] !== p[0] || last[1] !== p[1]) points.push([p[0], p[1]])
+    }
+  }
+  return points
+}
+
 /** The cached legs the route still needs; everything else is dropped. */
 export function pruneLegs(route: RoutePath & Pick<Route, 'legs'>): Record<string, string> {
   const needed = new Set(routeLegs(route).map((l) => l.key))

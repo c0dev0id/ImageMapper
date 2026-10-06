@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { LngLat } from '../geo/types.ts'
 import type { Route } from '../state/schema.ts'
-import { namedPoints, routePoints, routeTracks, toGpx } from './gpx.ts'
+import { namedPoints, routeTracks, toGpx } from './gpx.ts'
 
 const time = new Date('2026-10-05T12:00:00Z')
 
@@ -73,17 +73,6 @@ const route: Route = {
   ],
   legs: { 'car/1,1;2,2': '[[1,1],[1.5,1.2],[2,2]]', 'car/2,2;3,3': '[[2,2],[2.5,2.8],[3,3]]' },
 }
-
-describe('routePoints', () => {
-  it('joins routed legs without repeating the shared point', () => {
-    expect(routePoints(route, decode)).toEqual([[1, 1], [1.5, 1.2], [2, 2], [2.5, 2.8], [3, 3]])
-  })
-
-  it('uses straight lines for legs that are not routed', () => {
-    const partial = { ...route, legs: { 'car/1,1;2,2': '[[1,1],[1.5,1.2],[2,2]]' } }
-    expect(routePoints(partial, decode)).toEqual([[1, 1], [1.5, 1.2], [2, 2], [3, 3]])
-  })
-})
 
 describe('namedPoints', () => {
   it('collects the named points of all routes in order', () => {

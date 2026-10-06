@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Route } from '../state/schema.ts'
-import { legKey, nextMissingLeg, pruneLegs, roundLngLat, routeLegs } from './legs.ts'
+import type { LngLat } from '../geo/types.ts'
+import { legKey, nextMissingLeg, pruneLegs, roundLngLat, routeLegs, routePoints } from './legs.ts'
 
 const route = (id: string, points: [number, number][], legs: Record<string, string> = {}): Route => ({
   id,
@@ -47,3 +48,26 @@ describe('legs', () => {
     expect(roundLngLat([11.12345678, -48.98765432])).toEqual([11.123457, -48.987654])
   })
 })
+
+const decode = (geometry: string): LngLat[] => JSON.parse(geometry)
+const tour: Route = {
+  ...route('t', [
+    [1, 1],
+    [2, 2],
+    [3, 3],
+  ]),
+  profile: 'car',
+  legs: { 'car/1,1;2,2': '[[1,1],[1.5,1.2],[2,2]]', 'car/2,2;3,3': '[[2,2],[2.5,2.8],[3,3]]' },
+}
+
+describe('routePoints', () => {
+  it('joins routed legs without repeating the shared point', () => {
+    expect(routePoints(tour, decode)).toEqual([[1, 1], [1.5, 1.2], [2, 2], [2.5, 2.8], [3, 3]])
+  })
+
+  it('uses straight lines for legs that are not routed', () => {
+    const partial = { ...tour, legs: { 'car/1,1;2,2': '[[1,1],[1.5,1.2],[2,2]]' } }
+    expect(routePoints(partial, decode)).toEqual([[1, 1], [1.5, 1.2], [2, 2], [3, 3]])
+  })
+})
+
