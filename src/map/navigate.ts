@@ -5,10 +5,27 @@ import { placementInView, type Warp } from '../geo/warp.ts'
 import { setLayerPlacement } from '../state/project.ts'
 import type { ImageLayer } from '../state/schema.ts'
 
-/** Moves the view to show the whole image; the map keeps its rotation and tilt. */
+/** Moves the view to show the bounds; the map keeps its rotation and tilt. */
+export function showBounds(
+  map: MapLibreMap,
+  [west, south, east, north]: [number, number, number, number],
+  maxZoom = map.getMaxZoom(),
+): void {
+  map.fitBounds(
+    [
+      [west, south],
+      [east, north],
+    ],
+    { padding: 40, maxZoom, bearing: map.getBearing() },
+  )
+}
+
+/** Moves the view to show the whole image. */
 export function flyToImage(map: MapLibreMap, warp: Warp): void {
   const [minX, minY, maxX, maxY] = warp.bounds
-  map.fitBounds([fromMercator([minX, maxY]), fromMercator([maxX, minY])], { padding: 40, bearing: map.getBearing() })
+  const [west, north] = fromMercator([minX, minY])
+  const [east, south] = fromMercator([maxX, maxY])
+  showBounds(map, [west, south, east, north])
 }
 
 /** Moves the image to the middle of the view at the size of a new image (one undo step). */

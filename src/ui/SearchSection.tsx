@@ -1,6 +1,7 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import { createSignal, For, Show } from 'solid-js'
 import { useMapAccessor } from '../map/context.ts'
+import { showBounds } from '../map/navigate.ts'
 import { createPlaceSearch, type Place, type Viewbox } from '../search/nominatim.ts'
 import { errorMessage } from '../state/ui.ts'
 
@@ -17,14 +18,7 @@ function viewbox(map: MapLibreMap): Viewbox | undefined {
 
 function showPlace(map: MapLibreMap, place: Place): void {
   if (place.bounds) {
-    const [west, south, east, north] = place.bounds
-    map.fitBounds(
-      [
-        [west, south],
-        [east, north],
-      ],
-      { padding: 40, maxZoom: 16, bearing: map.getBearing() },
-    )
+    showBounds(map, place.bounds, 16)
   } else {
     map.flyTo({ center: place.center, zoom: 15 })
   }
