@@ -1,6 +1,6 @@
 import { For, Show } from 'solid-js'
 import { unwrap } from 'solid-js/store'
-import { routeTracks, toGpx } from '../export/gpx.ts'
+import { namedPoints, routeTracks, toGpx } from '../export/gpx.ts'
 import { decodePolyline } from '../routing/polyline.ts'
 import { nextRouteColor } from '../routing/routeEdit.ts'
 import { failedLegs, lastError, pendingLegs, retryFailedLegs } from '../routing/service.ts'
@@ -36,13 +36,14 @@ function exportGpx() {
   ) {
     return
   }
-  const tracks = routeTracks(unwrap(project.routes), (geometry) => decodePolyline(geometry))
-  const gpx = toGpx(project.name, tracks, new Date())
+  const routes = unwrap(project.routes)
+  const tracks = routeTracks(routes, (geometry) => decodePolyline(geometry))
+  const gpx = toGpx(project.name, namedPoints(routes), tracks, new Date())
   downloadBlob(new Blob([gpx], { type: 'application/gpx+xml' }), `${fileBaseName(project.name)}.gpx`)
 }
 
 export function RoutesSection() {
-  const exportable = () => project.routes.some((r) => r.waypoints.length >= 2)
+  const exportable = () => project.routes.some((r) => r.waypoints.length >= 2 || r.waypoints.some((w) => w.name))
   return (
     <section class="section">
       <div class="row">

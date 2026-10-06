@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { LngLat } from '../geo/types.ts'
 import type { Route } from '../state/schema.ts'
-import { routePoints, routeTracks, toGpx } from './gpx.ts'
+import { namedPoints, routePoints, routeTracks, toGpx } from './gpx.ts'
 
 const time = new Date('2026-10-05T12:00:00Z')
 
 describe('toGpx', () => {
   it('writes one track with a segment per route', () => {
-    const gpx = toGpx('Alps', [
+    const gpx = toGpx('Alps', [], [
       { name: 'Day 1', points: [[11.5, 48.1], [11.6, 48.2]] },
       { name: 'Day 2', points: [[12, 47]] },
     ], time)
@@ -34,14 +34,25 @@ describe('toGpx', () => {
 `)
   })
 
+  it('writes waypoints before the tracks', () => {
+    const gpx = toGpx('Alps', [{ name: 'Café', lngLat: [11.5, 48.1] }], [{ name: 'Day 1', points: [[11.5, 48.1]] }], time)
+    expect(gpx).toContain(`  </metadata>
+  <wpt lat="48.100000" lon="11.500000">
+    <name>Café</name>
+  </wpt>
+  <trk>`)
+  })
+
   it('escapes names', () => {
-    const gpx = toGpx('A & B', [{ name: '<Pass> "Höhe"', points: [] }], time)
+    const gpx = toGpx('A & B', [{ name: 'Tom & Jerry', lngLat: [0, 0] }], [{ name: '<Pass> "Höhe"', points: [] }], time)
     expect(gpx).toContain('<name>A &amp; B</name>')
+    expect(gpx).toContain('<name>Tom &amp; Jerry</name>')
     expect(gpx).toContain('<name>&lt;Pass&gt; &quot;Höhe&quot;</name>')
   })
 
   it('keeps longitudes in [-180, 180)', () => {
-    const gpx = toGpx('x', [{ name: 't', points: [[180, 0], [-190, 0], [359, 0]] }], time)
+    const gpx = toGpx('x', [{ name: 'w', lngLat: [190, 0] }], [{ name: 't', points: [[180, 0], [-190, 0], [359, 0]] }], time)
+    expect(gpx).toContain('<wpt lat="0.000000" lon="-170.000000">')
     expect(gpx).toContain('lon="-180.000000"')
     expect(gpx).toContain('lon="170.000000"')
     expect(gpx).toContain('lon="-1.000000"')
@@ -71,6 +82,17 @@ describe('routePoints', () => {
   it('uses straight lines for legs that are not routed', () => {
     const partial = { ...route, legs: { 'car/1,1;2,2': '[[1,1],[1.5,1.2],[2,2]]' } }
     expect(routePoints(partial, decode)).toEqual([[1, 1], [1.5, 1.2], [2, 2], [3, 3]])
+  })
+})
+
+describe('namedPoints', () => {
+  it('collects the named points of all routes in order', () => {
+    const named = { ...route, waypoints: [route.waypoints[0], { ...route.waypoints[1], name: 'B' }, route.waypoints[2]] }
+    const other = { ...route, id: 'o', waypoints: [{ id: 'x', lngLat: [5, 5] as LngLat, name: 'X' }], legs: {} }
+    expect(namedPoints([named, route, other])).toEqual([
+      { name: 'B', lngLat: [2, 2] },
+      { name: 'X', lngLat: [5, 5] },
+    ])
   })
 })
 
