@@ -10,15 +10,16 @@ import { fromMarker } from './markers.ts'
 /** Mouse and keyboard handling on the map that depends on the current mode. */
 export function Interactions() {
   const map = useMap()
-  const container = map.getCanvasContainer()
 
   // MapLibre turns a touch held for 500 ms into a contextmenu event. The browser may still
   // send a click when that finger lifts; it must neither close the menu nor add a point.
+  // A press that closes an open menu only closes it: its click neither clears the
+  // selection (a point waiting for its match) nor adds a route point.
   let pointerType = 'mouse'
   let swallowClick = false
   const onPointerDown = (e: PointerEvent) => {
     pointerType = e.pointerType
-    swallowClick = false
+    swallowClick = menu() !== undefined && !(e.target instanceof Element && e.target.closest('.context-menu'))
   }
 
   const onContextMenu = (e: MapMouseEvent) => {
@@ -58,13 +59,14 @@ export function Interactions() {
     else setSelection(undefined)
   }
 
-  container.addEventListener('pointerdown', onPointerDown, true)
+  // On the window, so it runs before the menu closes itself on the same press.
+  window.addEventListener('pointerdown', onPointerDown, true)
   map.on('contextmenu', onContextMenu)
   map.on('click', onClick)
   map.on('movestart', onMoveStart)
   document.addEventListener('keydown', onKeyDown)
   onCleanup(() => {
-    container.removeEventListener('pointerdown', onPointerDown, true)
+    window.removeEventListener('pointerdown', onPointerDown, true)
     map.off('contextmenu', onContextMenu)
     map.off('click', onClick)
     map.off('movestart', onMoveStart)
