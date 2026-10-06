@@ -26,10 +26,11 @@ const project: Project = {
       name: 'Day 1',
       profile: 'bike',
       color: '#e8590c',
-      waypoints: [{ id: 'w1', lngLat: [11.5, 46.5] }],
+      points: [{ id: 'p1', lngLat: [11.5, 46.5] }],
       legs: {},
     },
   ],
+  waypoints: [{ id: 'w1', lngLat: [11.6, 46.6], name: 'Pass', description: 'Steep on the north side' }],
 }
 const imageBytes = new Uint8Array([0xff, 0xd8, 1, 2, 3, 0xff, 0xd9]).buffer
 
@@ -59,7 +60,7 @@ describe('project file', () => {
   })
 
   it('rejects other project versions', () => {
-    const file = zipSync({ 'project.json': strToU8(JSON.stringify({ ...project, version: 2 })) })
-    expect(() => decodeProjectFile(file)).toThrow(/version 2/)
+    const file = zipSync({ 'project.json': strToU8(JSON.stringify({ ...project, version: 1 })) })
+    expect(() => decodeProjectFile(file)).toThrow(/version 1/)
   })
 })

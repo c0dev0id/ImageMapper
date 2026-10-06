@@ -20,12 +20,16 @@ export class MarkerHandle {
   constructor(
     private readonly map: maplibregl.Map,
     content: Node,
-    options: { className: string; draggable?: boolean },
+    options: { className: string; draggable?: boolean; anchor?: maplibregl.PositionAnchor },
   ) {
     this.root = document.createElement('div')
     this.root.className = options.className
     this.root.append(content)
-    this.marker = new maplibregl.Marker({ element: this.root, draggable: options.draggable ?? false })
+    this.marker = new maplibregl.Marker({
+      element: this.root,
+      draggable: options.draggable ?? false,
+      anchor: options.anchor ?? 'center',
+    })
     if (options.draggable) {
       // MapLibre starts a marker drag with any button. A right-click opens a menu under the
       // pointer that receives the release, which MapLibre never sees: the marker would

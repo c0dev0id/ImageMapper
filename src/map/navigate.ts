@@ -30,7 +30,7 @@ export function flyToImage(map: MapLibreMap, warp: Warp): void {
 /** Moves the view to show the whole route, detours of routed legs included. */
 export function flyToRoute(map: MapLibreMap, route: Route): void {
   const plain = unwrap(route)
-  const bounds = boundsOf([...plain.waypoints.map((w) => w.lngLat), ...routePoints(plain, decodePolyline)])
+  const bounds = boundsOf([...plain.points.map((p) => p.lngLat), ...routePoints(plain, decodePolyline)])
   if (bounds) showBounds(map, bounds, 16)
 }
 

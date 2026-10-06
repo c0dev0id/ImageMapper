@@ -8,8 +8,8 @@ describe('parseProject', () => {
   })
 
   it('rejects other versions', () => {
-    const project = { ...emptyProject(), version: 2 }
-    expect(() => parseProject(JSON.stringify(project))).toThrow(/version 2 is not supported/)
+    const project = { ...emptyProject(), version: 1 }
+    expect(() => parseProject(JSON.stringify(project))).toThrow(/version 1 is not supported/)
   })
 
   it('rejects data that is not a project', () => {

@@ -39,7 +39,7 @@ const service = createRoot(() => {
     }
     return count
   })
-  // Tracks waypoints, profiles, cached legs and failures; starts the pump when work appears.
+  // Tracks route points, profiles, cached legs and failures; starts the pump when work appears.
   createEffect(() => {
     if (pendingLegs() > 0) void pump()
   })

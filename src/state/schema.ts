@@ -1,6 +1,6 @@
 import type { LngLat, Pair, Px } from '../geo/types.ts'
 
-export const PROJECT_VERSION = 1
+export const PROJECT_VERSION = 2
 
 export type Side = 'image' | 'map'
 export type Profile = 'car' | 'bike' | 'foot'
@@ -26,14 +26,10 @@ export interface ImageLayer {
   gcps: Gcp[]
 }
 
-/**
- * A point the route runs through (a waypoint in OSRM's terms). One with a name is a
- * waypoint in the GPX sense as well: a named place that is exported on its own.
- */
-export interface Waypoint {
+/** A point a route runs through. */
+export interface RoutePoint {
   id: string
   lngLat: LngLat
-  name?: string
 }
 
 export interface Route {
@@ -41,9 +37,18 @@ export interface Route {
   name: string
   profile: Profile
   color: string
-  waypoints: Waypoint[]
+  /** The points the route runs through, in order. */
+  points: RoutePoint[]
   /** Routed geometry per leg as polyline6, keyed by profile and both end points. */
   legs: Record<string, string>
+}
+
+/** A named place of its own (a GPX waypoint), independent of the routes. */
+export interface Waypoint {
+  id: string
+  lngLat: LngLat
+  name: string
+  description?: string
 }
 
 export interface View {
@@ -62,6 +67,7 @@ export interface Project {
   layers: ImageLayer[]
   activeLayerId?: string
   routes: Route[]
+  waypoints: Waypoint[]
 }
 
 export function emptyProject(): Project {
@@ -72,6 +78,7 @@ export function emptyProject(): Project {
     satellite: { visible: false, opacity: 1 },
     layers: [],
     routes: [],
+    waypoints: [],
   }
 }
 

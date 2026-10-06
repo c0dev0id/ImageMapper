@@ -1,7 +1,7 @@
 import type { MapMouseEvent } from 'maplibre-gl'
 import { onCleanup } from 'solid-js'
 import { roundLngLat } from '../routing/legs.ts'
-import { appendWaypoint, redo, undo } from '../state/project.ts'
+import { appendPoint, redo, undo } from '../state/project.ts'
 import { editingRouteId, menu, mode, setMenu, setSelection, stopDrawing, stopTransform } from '../state/ui.ts'
 import { useMap } from './context.ts'
 import { openGcpMenu } from './gcpMenu.ts'
@@ -38,7 +38,7 @@ export function Interactions() {
     const routeId = editingRouteId()
     if (mode() === 'route' && routeId) {
       const { lng, lat } = e.lngLat.wrap()
-      appendWaypoint(routeId, roundLngLat([lng, lat]))
+      appendPoint(routeId, roundLngLat([lng, lat]))
     } else setSelection(undefined)
   }
   const onMoveStart = () => setMenu(undefined)

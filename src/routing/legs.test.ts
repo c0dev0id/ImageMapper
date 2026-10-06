@@ -8,7 +8,7 @@ const route = (id: string, points: [number, number][], legs: Record<string, stri
   name: id,
   profile: 'bike',
   color: '#000',
-  waypoints: points.map((lngLat, i) => ({ id: `${id}${i}`, lngLat })),
+  points: points.map((lngLat, i) => ({ id: `${id}${i}`, lngLat })),
   legs,
 })
 

@@ -1,6 +1,6 @@
 import { For, Show } from 'solid-js'
 import { unwrap } from 'solid-js/store'
-import { namedPoints, routeTracks, toGpx } from '../export/gpx.ts'
+import { routeTracks, toGpx } from '../export/gpx.ts'
 import { decodePolyline } from '../routing/polyline.ts'
 import { useMapAccessor } from '../map/context.ts'
 import { flyToRoute } from '../map/navigate.ts'
@@ -26,7 +26,7 @@ function drawNewRoute() {
     name: `Route ${project.routes.length + 1}`,
     profile: project.routes.at(-1)?.profile ?? 'car',
     color: nextRouteColor(project.routes),
-    waypoints: [],
+    points: [],
     legs: {},
   })
   startDrawing(id)
@@ -40,14 +40,13 @@ function exportGpx() {
   ) {
     return
   }
-  const routes = unwrap(project.routes)
-  const tracks = routeTracks(routes, (geometry) => decodePolyline(geometry))
-  const gpx = toGpx(project.name, namedPoints(routes), tracks, new Date())
+  const tracks = routeTracks(unwrap(project.routes), (geometry) => decodePolyline(geometry))
+  const gpx = toGpx(project.name, unwrap(project.waypoints), tracks, new Date())
   downloadBlob(new Blob([gpx], { type: 'application/gpx+xml' }), `${fileBaseName(project.name)}.gpx`)
 }
 
 export function RoutesSection() {
-  const exportable = () => project.routes.some((r) => r.waypoints.length >= 2 || r.waypoints.some((w) => w.name))
+  const exportable = () => project.waypoints.length > 0 || project.routes.some((r) => r.points.length >= 2)
   return (
     <section class="section">
       <div class="row">
@@ -83,7 +82,6 @@ function RouteRow(props: { route: Route }) {
   const route = props.route
   const map = useMapAccessor()
   const editing = () => editingRouteId() === route.id
-  const named = () => route.waypoints.filter((w) => w.name).length
   return (
     <li class="route" classList={{ active: editing() }}>
       <div class="row">
@@ -93,7 +91,7 @@ function RouteRow(props: { route: Route }) {
           class="icon"
           title="Fly to route"
           aria-label="Fly to route"
-          disabled={!map() || route.waypoints.length === 0}
+          disabled={!map() || route.points.length === 0}
           onClick={() => {
             const m = map()
             if (m) flyToRoute(m, route)
@@ -114,8 +112,7 @@ function RouteRow(props: { route: Route }) {
       </div>
       <div class="row">
         <span class="grow muted">
-          {route.waypoints.length} {route.waypoints.length === 1 ? 'point' : 'points'}
-          {named() > 0 ? `, ${named()} ${named() === 1 ? 'waypoint' : 'waypoints'}` : ''}
+          {route.points.length} {route.points.length === 1 ? 'point' : 'points'}
         </span>
         <select
           aria-label="Routing profile"

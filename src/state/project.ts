@@ -11,6 +11,7 @@ import {
   type Project,
   type Route,
   type View,
+  type Waypoint,
 } from './schema.ts'
 import {
   editingRouteId,
@@ -237,7 +238,7 @@ export function renameRoute(id: string, name: string): void {
 }
 
 /**
- * Applies a pure edit to a route; reconciling by id keeps unchanged waypoints' identity.
+ * Applies a pure edit to a route; reconciling by id keeps unchanged points' identity.
  * Edits with a label are undo steps; routing results come without one.
  */
 function updateRoute(id: string, change: (route: Route) => Route, label?: string): void {
@@ -255,21 +256,40 @@ export function setRouteProfile(id: string, profile: Profile): void {
   updateRoute(id, (r) => (r.profile === profile ? r : edit.changeProfile(r, profile)), 'Change routing profile')
 }
 
-export function appendWaypoint(routeId: string, lngLat: LngLat): void {
-  updateRoute(routeId, (r) => edit.appendWaypoint(r, { id: crypto.randomUUID(), lngLat }), 'Add point')
+export function appendPoint(routeId: string, lngLat: LngLat): void {
+  updateRoute(routeId, (r) => edit.appendPoint(r, { id: crypto.randomUUID(), lngLat }), 'Add point')
 }
 
-export function moveWaypoint(routeId: string, waypointId: string, lngLat: LngLat): void {
-  updateRoute(routeId, (r) => edit.moveWaypoint(r, waypointId, lngLat), 'Move point')
+export function movePoint(routeId: string, pointId: string, lngLat: LngLat): void {
+  updateRoute(routeId, (r) => edit.movePoint(r, pointId, lngLat), 'Move point')
 }
 
-export function removeWaypoint(routeId: string, waypointId: string): void {
-  updateRoute(routeId, (r) => edit.removeWaypoint(r, waypointId), 'Remove point')
+export function removePoint(routeId: string, pointId: string): void {
+  updateRoute(routeId, (r) => edit.removePoint(r, pointId), 'Remove point')
 }
 
-/** Names a route point (making it a waypoint) or removes its name with undefined. */
-export function nameWaypoint(routeId: string, waypointId: string, name: string | undefined, label: string): void {
-  updateRoute(routeId, (r) => edit.nameWaypoint(r, waypointId, name), label)
+export function addWaypoint(waypoint: Waypoint): void {
+  recordEdit('Add waypoint')
+  setProject('waypoints', (list) => [...list, waypoint])
+  onChange()
+}
+
+/** Changes a waypoint's position, name or description; an empty description is dropped. */
+export function updateWaypoint(id: string, change: Partial<Omit<Waypoint, 'id'>>, label: string): void {
+  const index = project.waypoints.findIndex((w) => w.id === id)
+  if (index < 0) return
+  const next: Waypoint = { ...unwrap(project.waypoints[index]), ...change }
+  if (!next.description) delete next.description
+  recordEdit(label)
+  setProject('waypoints', index, reconcile(next, { merge: false }))
+  onChange()
+}
+
+export function removeWaypoint(id: string): void {
+  if (!project.waypoints.some((w) => w.id === id)) return
+  recordEdit('Delete waypoint')
+  setProject('waypoints', (list) => list.filter((w) => w.id !== id))
+  onChange()
 }
 
 export function setRouteLeg(routeId: string, key: string, geometry: string): void {

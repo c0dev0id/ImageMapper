@@ -367,11 +367,11 @@ button.icon svg {
   flex: none;
 }
 
-.waypoint-marker {
+.route-point-marker {
   cursor: grab;
 }
 
-.waypoint {
+.route-point {
   display: grid;
   place-items: center;
   width: 20px;
@@ -384,18 +384,26 @@ button.icon svg {
   user-select: none;
 }
 
-/* Waypoint names sit next to their point, outside the layout so the marker stays centred. */
-.route-point,
-.waypoint-label {
+/* Waypoints: a pin whose tip marks the place, with the name beside its head. */
+.waypoint-marker {
+  pointer-events: none;
+}
+
+.waypoint {
   position: relative;
+}
+
+.waypoint svg {
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
 }
 
 .waypoint-name {
   position: absolute;
-  top: 50%;
+  top: 11px;
   left: 100%;
   max-width: 180px;
-  margin-left: 4px;
+  margin-left: 2px;
   padding: 1px 6px;
   overflow: hidden;
   transform: translateY(-50%);
@@ -408,19 +416,6 @@ button.icon svg {
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
-}
-
-.waypoint-label-marker {
-  pointer-events: none;
-}
-
-.waypoint-dot {
-  box-sizing: border-box;
-  width: 12px;
-  height: 12px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* Handles to resize (corners) and rotate (top edge) the active image; padding enlarges the target. */
@@ -603,7 +598,7 @@ input[type='search'] {
     height: 24px;
   }
 
-  .waypoint {
+  .route-point {
     width: 28px;
     height: 28px;
     font-size: 12px;

@@ -1,5 +1,5 @@
 import type { LngLat } from '../geo/types.ts'
-import type { Profile, Route, Waypoint } from '../state/schema.ts'
+import type { Profile, Route, RoutePoint } from '../state/schema.ts'
 import { pruneLegs, routeLegs } from './legs.ts'
 
 /** Pure route edits. Each result keeps exactly the cached legs it still needs. */
@@ -8,34 +8,19 @@ function withPrunedLegs(route: Route): Route {
   return { ...route, legs: pruneLegs(route) }
 }
 
-export function appendWaypoint(route: Route, waypoint: Waypoint): Route {
-  return withPrunedLegs({ ...route, waypoints: [...route.waypoints, waypoint] })
+export function appendPoint(route: Route, point: RoutePoint): Route {
+  return withPrunedLegs({ ...route, points: [...route.points, point] })
 }
 
-export function moveWaypoint(route: Route, id: string, lngLat: LngLat): Route {
+export function movePoint(route: Route, id: string, lngLat: LngLat): Route {
   return withPrunedLegs({
     ...route,
-    waypoints: route.waypoints.map((w) => (w.id === id ? { ...w, lngLat } : w)),
+    points: route.points.map((p) => (p.id === id ? { ...p, lngLat } : p)),
   })
 }
 
-export function removeWaypoint(route: Route, id: string): Route {
-  return withPrunedLegs({ ...route, waypoints: route.waypoints.filter((w) => w.id !== id) })
-}
-
-/** Names a point, which makes it a waypoint, or removes the name for undefined. */
-export function nameWaypoint(route: Route, id: string, name: string | undefined): Route {
-  const target = route.waypoints.find((w) => w.id === id)
-  if (!target || target.name === name) return route
-  return {
-    ...route,
-    waypoints: route.waypoints.map((w) => {
-      if (w !== target) return w
-      const named = { ...w, name }
-      if (name === undefined) delete named.name
-      return named
-    }),
-  }
+export function removePoint(route: Route, id: string): Route {
+  return withPrunedLegs({ ...route, points: route.points.filter((p) => p.id !== id) })
 }
 
 export function changeProfile(route: Route, profile: Profile): Route {

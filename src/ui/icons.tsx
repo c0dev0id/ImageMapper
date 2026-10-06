@@ -24,3 +24,13 @@ export function PencilIcon() {
     </svg>
   )
 }
+
+/** The map pin of a waypoint; its tip marks the place. */
+export function WaypointPin() {
+  return (
+    <svg viewBox="0 0 22 28" width="22" height="28" aria-hidden="true">
+      <path d="M11 27s-9.5-9.2-9.5-15.6a9.5 9.5 0 0 1 19 0C20.5 17.8 11 27 11 27z" fill="#c92a2a" stroke="#fff" stroke-width="1.5" />
+      <circle cx="11" cy="11" r="3.5" fill="#fff" />
+    </svg>
+  )
+}

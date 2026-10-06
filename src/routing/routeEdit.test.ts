@@ -1,21 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { Route } from '../state/schema.ts'
-import {
-  addLeg,
-  appendWaypoint,
-  changeProfile,
-  moveWaypoint,
-  nameWaypoint,
-  nextRouteColor,
-  removeWaypoint,
-} from './routeEdit.ts'
+import { addLeg, appendPoint, changeProfile, movePoint, nextRouteColor, removePoint } from './routeEdit.ts'
 
 const base: Route = {
   id: 'r',
   name: 'Route 1',
   profile: 'car',
   color: '#e8590c',
-  waypoints: [
+  points: [
     { id: 'a', lngLat: [1, 1] },
     { id: 'b', lngLat: [2, 2] },
     { id: 'c', lngLat: [3, 3] },
@@ -24,52 +16,26 @@ const base: Route = {
 }
 
 describe('route edits', () => {
-  it('appends a waypoint and keeps all legs', () => {
-    const r = appendWaypoint(base, { id: 'd', lngLat: [4, 4] })
-    expect(r.waypoints.map((w) => w.id)).toEqual(['a', 'b', 'c', 'd'])
+  it('appends a point and keeps all legs', () => {
+    const r = appendPoint(base, { id: 'd', lngLat: [4, 4] })
+    expect(r.points.map((p) => p.id)).toEqual(['a', 'b', 'c', 'd'])
     expect(r.legs).toEqual(base.legs)
   })
 
-  it('drops both legs next to a moved waypoint', () => {
-    const r = moveWaypoint(base, 'b', [2.5, 2.5])
-    expect(r.waypoints[1].lngLat).toEqual([2.5, 2.5])
+  it('drops both legs next to a moved point', () => {
+    const r = movePoint(base, 'b', [2.5, 2.5])
+    expect(r.points[1].lngLat).toEqual([2.5, 2.5])
     expect(r.legs).toEqual({})
   })
 
-  it('drops the legs of a removed middle waypoint', () => {
-    const r = removeWaypoint(base, 'b')
-    expect(r.waypoints.map((w) => w.id)).toEqual(['a', 'c'])
+  it('drops the legs of a removed middle point', () => {
+    const r = removePoint(base, 'b')
+    expect(r.points.map((p) => p.id)).toEqual(['a', 'c'])
     expect(r.legs).toEqual({})
   })
 
-  it('keeps the remaining leg when the last waypoint is removed', () => {
-    expect(removeWaypoint(base, 'c').legs).toEqual({ 'car/1,1;2,2': 'ab' })
-  })
-
-  it('names a point without touching the routing', () => {
-    const r = nameWaypoint(base, 'b', 'Pass')
-    expect(r.waypoints[1]).toEqual({ id: 'b', lngLat: [2, 2], name: 'Pass' })
-    expect(r.waypoints[0]).toBe(base.waypoints[0])
-    expect(r.legs).toBe(base.legs)
-  })
-
-  it('removes a name without leaving the key behind', () => {
-    const named = nameWaypoint(base, 'b', 'Pass')
-    const plain = nameWaypoint(named, 'b', undefined)
-    expect(plain.waypoints[1]).toEqual({ id: 'b', lngLat: [2, 2] })
-    expect('name' in plain.waypoints[1]).toBe(false)
-  })
-
-  it('returns the route itself when nothing changes', () => {
-    const named = nameWaypoint(base, 'b', 'Pass')
-    expect(nameWaypoint(named, 'b', 'Pass')).toBe(named)
-    expect(nameWaypoint(base, 'b', undefined)).toBe(base)
-    expect(nameWaypoint(base, 'x', 'Nowhere')).toBe(base)
-  })
-
-  it('keeps the name of a moved point', () => {
-    const moved = moveWaypoint(nameWaypoint(base, 'b', 'Pass'), 'b', [2.5, 2.5])
-    expect(moved.waypoints[1]).toEqual({ id: 'b', lngLat: [2.5, 2.5], name: 'Pass' })
+  it('keeps the remaining leg when the last point is removed', () => {
+    expect(removePoint(base, 'c').legs).toEqual({ 'car/1,1;2,2': 'ab' })
   })
 
   it('drops every leg when the profile changes', () => {
@@ -79,14 +45,14 @@ describe('route edits', () => {
   })
 
   it('stores needed legs and ignores outdated results', () => {
-    const r = moveWaypoint(base, 'c', [9, 9])
+    const r = movePoint(base, 'c', [9, 9])
     expect(addLeg(r, 'car/2,2;9,9', 'new').legs).toEqual({ 'car/1,1;2,2': 'ab', 'car/2,2;9,9': 'new' })
     expect(addLeg(r, 'car/2,2;3,3', 'stale')).toBe(r)
   })
 
   it('does not modify its input', () => {
-    moveWaypoint(base, 'b', [5, 5])
-    expect(base.waypoints[1].lngLat).toEqual([2, 2])
+    movePoint(base, 'b', [5, 5])
+    expect(base.points[1].lngLat).toEqual([2, 2])
     expect(Object.keys(base.legs)).toHaveLength(2)
   })
 })

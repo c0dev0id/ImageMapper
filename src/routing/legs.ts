@@ -12,14 +12,14 @@ export interface Leg {
   to: LngLat
 }
 
-type RoutePath = Pick<Route, 'profile' | 'waypoints'>
+type RoutePath = Pick<Route, 'profile' | 'points'>
 
-/** The legs a route needs: one per pair of consecutive waypoints. */
+/** The legs a route needs: one per pair of consecutive points. */
 export function routeLegs(route: RoutePath): Leg[] {
   const legs: Leg[] = []
-  for (let i = 1; i < route.waypoints.length; i++) {
-    const from = route.waypoints[i - 1].lngLat
-    const to = route.waypoints[i].lngLat
+  for (let i = 1; i < route.points.length; i++) {
+    const from = route.points[i - 1].lngLat
+    const to = route.points[i].lngLat
     legs.push({ key: legKey(route.profile, from, to), from, to })
   }
   return legs
