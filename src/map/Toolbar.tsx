@@ -7,15 +7,15 @@ import type { ImageLayer, Side } from '../state/schema.ts'
 import { mode, selection, setTool, startTransform, stopTransform, tool, type Tool } from '../state/ui.ts'
 import {
   AppendIcon,
-  CrosshairIcon,
+  CenterOnImageIcon,
   DeleteIcon,
   InsertIcon,
-  MoveHereIcon,
+  MoveImageHereIcon,
   PinImageIcon,
   PinMapIcon,
   RedoIcon,
+  ResizeIcon,
   SkewIcon,
-  TransformIcon,
   UndoIcon,
   WaypointIcon,
 } from '../ui/icons.tsx'
@@ -138,7 +138,7 @@ function ImageTools(props: { layer: ImageLayer }) {
           active={mode() === 'transform'}
           onClick={() => (mode() === 'transform' ? stopTransform() : startTransform())}
         >
-          <TransformIcon />
+          <ResizeIcon />
         </ToolButton>
         <ToolButton
           label="Skew image to map"
@@ -155,14 +155,14 @@ function ImageTools(props: { layer: ImageLayer }) {
       </div>
       <div class="toolbar-group">
         <ToolButton label="Fly to image" title="Show the whole image" onClick={withWarp((warp) => flyToImage(map, warp))}>
-          <CrosshairIcon />
+          <CenterOnImageIcon />
         </ToolButton>
         <ToolButton
           label="Move image here"
           title="Move the image to the middle of the view, at the size of a new image"
           onClick={withWarp((warp) => moveImageHere(map, layer, warp))}
         >
-          <MoveHereIcon />
+          <MoveImageHereIcon />
         </ToolButton>
       </div>
     </>
