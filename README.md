@@ -26,10 +26,14 @@ It runs entirely in the browser; nothing is uploaded anywhere.
 4. With three or more pairs, press **Skew image to map**. Three pairs rotate, scale and
    skew the image; more pairs also bend it so that every pair matches exactly. Add pairs
    where the image is still off and skew again.
-5. **Draw route**: click or tap to add waypoints, drag them to move, right-click or
-   long-press one to remove it, press Esc or Done to finish. Each route is routed for car,
-   bike or foot.
-6. **Export GPX** writes all routes into one file, one track per route.
+5. **Draw route**: click or tap to add route points, drag them to move, press Esc or Done
+   to finish. Each route is routed for car, bike or foot. Right-click or long-press a
+   point to remove it or to **change it to a waypoint**: a named place such as a pass or
+   a café, asked for when you choose it. The same menu on a waypoint renames it or
+   changes it back. Waypoints stay part of the route and keep their name label on the
+   map after drawing.
+6. **Export GPX** writes all routes into one file, one track per route, with the
+   waypoints of all routes as GPX waypoints.
 
 Image and map points of a pair are shown as a numbered ring (image) and dot (map),
 joined by a dashed line until a skew makes them coincide. Right-clicking a point offers

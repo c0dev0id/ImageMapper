@@ -53,6 +53,13 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   as polyline6 strings. A pull-based pump fetches missing legs one at a time with at
   least 1.1 s between requests (FOSSGIS allows one request per second). Legs are
   persisted so reloading never re-routes on newer OSM data.
+- **Waypoints.** A waypoint is a route point with a name; the route still runs through
+  it. The name is optional on the stored point (whose list keeps OSRM's name,
+  `waypoints`, so existing projects load unchanged). Naming does not touch the routed
+  legs. The export writes named points as GPX `wpt` elements before the tracks. The name
+  is asked for with the browser's prompt, like the confirmations for New and Open.
+  Labels are DOM markers rather than a symbol layer, because the inline map style has no
+  glyph source for text; outside draw mode they take no pointer events.
 - **State updates.** All writes go through actions; results of pure functions are
   applied with `reconcile` at the narrowest path. Components that own MapLibre
   objects are keyed by id so edits never recreate map layers.
@@ -115,7 +122,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Context-menu driven GCP editing (right-click or long press) and "skew image to map"
   with fold/mirror checks.
 - Undo/redo of content edits.
-- Draw route mode: append, drag and remove waypoints; per-route OSRM profile.
-- GPX export of all routes as tracks.
+- Draw route mode: append, drag and remove route points; per-route OSRM profile.
+- Named route points (waypoints), shown on the map.
+- GPX export of all routes as tracks, with their waypoints.
 - Project save/open/new; automatic persistence in IndexedDB including map view.
 - Layout for phones and touch screens.
