@@ -100,6 +100,22 @@ describe('Warp', () => {
     expect(flipped).toBeLessThan(total)
   })
 
+  it('outlines the image border as a closed ring through the corners', () => {
+    const warp = new Warp(affinePairs, W, H, 8)
+    const ring = warp.outline()
+    expect(ring).toHaveLength(2 * (warp.cols + warp.rows) + 1)
+    expect(ring.at(-1)).toEqual(ring[0])
+    for (const [corner, index] of [
+      [corners[0], 0],
+      [corners[1], warp.cols],
+      [corners[2], warp.cols + warp.rows],
+      [corners[3], 2 * warp.cols + warp.rows],
+    ] as const) {
+      expect(ring[index][0]).toBeCloseTo(rotated(corner)[0], 9)
+      expect(ring[index][1]).toBeCloseTo(rotated(corner)[1], 9)
+    }
+  })
+
   it('builds a grid proportional to the image', () => {
     const warp = new Warp(affinePairs, W, H, 64)
     expect(warp.cols).toBe(64)

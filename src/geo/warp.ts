@@ -108,6 +108,21 @@ export class Warp {
     return undefined
   }
 
+  /** The image border as drawn, clockwise from the top-left corner, as a closed ring. */
+  outline(): LngLat[] {
+    const vertex = (i: number, j: number): LngLat => {
+      const k = 2 * (j * (this.cols + 1) + i)
+      return fromMercator([this.positions[k], this.positions[k + 1]])
+    }
+    const ring: LngLat[] = []
+    for (let i = 0; i < this.cols; i++) ring.push(vertex(i, 0))
+    for (let j = 0; j < this.rows; j++) ring.push(vertex(this.cols, j))
+    for (let i = this.cols; i > 0; i--) ring.push(vertex(i, this.rows))
+    for (let j = this.rows; j > 0; j--) ring.push(vertex(0, j))
+    ring.push(ring[0])
+    return ring
+  }
+
   /** Counts mesh triangles whose orientation is reversed on the map (folds or a mirror). */
   countFlippedTriangles(): { flipped: number; total: number } {
     const pos = this.positions
