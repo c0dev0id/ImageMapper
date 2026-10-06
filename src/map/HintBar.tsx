@@ -25,7 +25,7 @@ export function HintBar() {
         {(route) => (
           <div class="hint-bar interactive">
             <strong>{route().name}</strong>: click to add points, drag to move them, right-click or
-            long-press a point to remove it.{' '}
+            long-press a point to name it as a waypoint or remove it.{' '}
             <button class="primary" onClick={stopDrawing}>
               Done
             </button>

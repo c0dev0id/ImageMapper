@@ -78,6 +78,7 @@ export function RoutesSection() {
 function RouteRow(props: { route: Route }) {
   const route = props.route
   const editing = () => editingRouteId() === route.id
+  const named = () => route.waypoints.filter((w) => w.name).length
   return (
     <li class="route" classList={{ active: editing() }}>
       <div class="row">
@@ -99,6 +100,7 @@ function RouteRow(props: { route: Route }) {
       <div class="row">
         <span class="grow muted">
           {route.waypoints.length} {route.waypoints.length === 1 ? 'point' : 'points'}
+          {named() > 0 ? `, ${named()} ${named() === 1 ? 'waypoint' : 'waypoints'}` : ''}
         </span>
         <button onClick={() => (editing() ? stopDrawing() : startDrawing(route.id))}>
           {editing() ? 'Done' : 'Edit'}

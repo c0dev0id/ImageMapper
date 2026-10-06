@@ -360,6 +360,45 @@ input[type='range'] {
   user-select: none;
 }
 
+/* Waypoint names sit next to their point, outside the layout so the marker stays centred. */
+.route-point,
+.waypoint-label {
+  position: relative;
+}
+
+.waypoint-name {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  max-width: 180px;
+  margin-left: 4px;
+  padding: 1px 6px;
+  overflow: hidden;
+  transform: translateY(-50%);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color: #212529;
+  font: 600 12px/1.4 system-ui, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+.waypoint-label-marker {
+  pointer-events: none;
+}
+
+.waypoint-dot {
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
 /* Handles to resize (corners) and rotate (top edge) the active image; padding enlarges the target. */
 .transform-handle-marker {
   z-index: 3;
