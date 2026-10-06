@@ -223,6 +223,16 @@ export function skewImageToMap(layerId: string): void {
   setLayerNote(result.warning ? { layerId, kind: 'warning', text: result.warning } : undefined)
 }
 
+/** Replaces a layer's placement and point pairs in one undo step. */
+export function placeLayer(id: string, placement: Pair[], gcps: Gcp[], label: string): void {
+  const index = layerIndex(id)
+  if (index < 0) return
+  recordEdit(label)
+  setProject('layers', index, 'placement', placement)
+  setProject('layers', index, 'gcps', reconcile(gcps, { key: 'id', merge: false }))
+  onChange()
+}
+
 /** Records the current project as one undo step for a gesture made of several edits. */
 export function recordUndoStep(label: string): void {
   recordEdit(label)

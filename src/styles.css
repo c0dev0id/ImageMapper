@@ -807,3 +807,21 @@ input[type='search'] {
 .dialog textarea {
   resize: vertical;
 }
+
+/* Town names side by side, two per row. */
+.town-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.town-fields input {
+  margin-top: 0;
+}
+
+.dialog [role='status'] {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+}

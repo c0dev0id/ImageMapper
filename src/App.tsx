@@ -16,6 +16,7 @@ import { Waypoints } from './map/Waypoints.tsx'
 import { initPersistence } from './state/persistence.ts'
 import { errorMessage, notify } from './state/ui.ts'
 import { Panel } from './ui/Panel.tsx'
+import { MatchTownsDialog } from './match/MatchTownsDialog.tsx'
 import { WaypointDialog } from './ui/WaypointDialog.tsx'
 
 export function App() {
@@ -57,6 +58,7 @@ export function App() {
           </main>
         </div>
         <WaypointDialog />
+        <MatchTownsDialog />
       </MapContext.Provider>
     </Show>
   )

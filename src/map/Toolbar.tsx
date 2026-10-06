@@ -1,6 +1,7 @@
 import { createEffect, Show, type JSX } from 'solid-js'
 import { countPairs, pinEnabled } from '../gcp/gcps.ts'
 import type { Warp } from '../geo/warp.ts'
+import { openMatchTowns } from '../match/MatchTownsDialog.tsx'
 import { warpOf } from '../state/derived.ts'
 import { activeLayer, redo, redoLabel, skewImageToMap, undo, undoLabel } from '../state/project.ts'
 import type { ImageLayer, Side } from '../state/schema.ts'
@@ -10,6 +11,7 @@ import {
   CenterOnImageIcon,
   DeleteIcon,
   InsertIcon,
+  MatchTownsIcon,
   MoveImageHereIcon,
   PinImageIcon,
   PinMapIcon,
@@ -134,6 +136,13 @@ function ImageTools(props: { layer: ImageLayer }) {
           onClick={() => pick('image')}
         >
           <PinImageIcon />
+        </ToolButton>
+        <ToolButton
+          label="Match Towns"
+          title="Place the image by towns printed on it: name them, and they are looked for on the image and the map"
+          onClick={() => openMatchTowns(layer.id)}
+        >
+          <MatchTownsIcon />
         </ToolButton>
         <ToolButton
           label="Skew Image"

@@ -162,7 +162,7 @@ function dragToReorder(e: PointerEvent, layer: ImageLayer, entry: HTMLLIElement,
   handle.addEventListener('pointercancel', end)
 }
 
-/** Opacity, blend mode, point pairs and the outcome of the last skew of the active layer. */
+/** Opacity, blend mode, point pairs and the note of the last skew or town match of the active layer. */
 function ActiveLayer(props: { layer: ImageLayer }) {
   const layer = props.layer
   const blend = () => BLEND_MODES.find((m) => m.value === (layer.blend ?? 'normal')) ?? BLEND_MODES[0]
