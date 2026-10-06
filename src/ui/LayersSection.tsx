@@ -1,7 +1,11 @@
+import type { Map as MapLibreMap } from 'maplibre-gl'
 import { For, Show } from 'solid-js'
 import { unwrap } from 'solid-js/store'
 import { countPairs, prepareSkew } from '../gcp/gcps.ts'
+import type { Warp } from '../geo/warp.ts'
 import { useMapAccessor } from '../map/context.ts'
+import { flyToImage, moveImageHere } from '../map/findImage.ts'
+import { warpOf } from '../state/derived.ts'
 import {
   moveLayer,
   project,
@@ -78,6 +82,7 @@ function LayerRow(props: { layer: ImageLayer }) {
         <span class="grow name" title={layer.name} onClick={() => setActiveLayer(layer.id)}>
           {layer.name}
         </span>
+        <FindImage layer={layer} />
         <button
           class="icon"
           title="Move up"
@@ -156,6 +161,54 @@ function GeorefStatus(props: { layer: ImageLayer }) {
         </button>
       </div>
       <Show when={note()}>{(n) => <p class={`note ${n().kind}`}>{n().text}</p>}</Show>
+    </>
+  )
+}
+
+/** Brings an image that is far off into view: the view to the image, or the image here. */
+function FindImage(props: { layer: ImageLayer }) {
+  const map = useMapAccessor()
+  const layer = props.layer
+  const id = `find-image-${layer.id}`
+  let button!: HTMLButtonElement
+  let popup!: HTMLDivElement
+
+  // A popover lies above everything, so the panel cannot clip it; it opens beside the
+  // button, below it or (lower on the screen, as on phones) above it.
+  const place = (e: ToggleEvent) => {
+    if (e.newState !== 'open') return
+    const r = button.getBoundingClientRect()
+    const below = r.bottom < innerHeight / 2
+    popup.style.top = below ? `${r.bottom + 4}px` : 'auto'
+    popup.style.bottom = below ? 'auto' : `${innerHeight - r.top + 4}px`
+    popup.style.right = `${innerWidth - r.right}px`
+  }
+  const run = (action: (m: MapLibreMap, warp: Warp) => void) => {
+    popup.hidePopover()
+    const m = map()
+    const warp = warpOf(layer.id)
+    if (m && warp) action(m, warp)
+  }
+
+  return (
+    <>
+      <button
+        ref={button}
+        class="icon"
+        title="Find this image on the map"
+        aria-label="Find image"
+        popovertarget={id}
+        disabled={!map()}
+      >
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5" />
+          <path d="M8 0.5v4M8 11.5v4M0.5 8h4M11.5 8h4" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+      </button>
+      <div ref={popup} id={id} popover class="popup-menu" onBeforeToggle={place}>
+        <button onClick={() => run(flyToImage)}>Fly to image</button>
+        <button onClick={() => run((m, warp) => moveImageHere(m, layer, warp))}>Move image here</button>
+      </div>
     </>
   )
 }

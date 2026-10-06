@@ -286,7 +286,20 @@ input[type='range'] {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
 }
 
-.context-menu button {
+/* Menus opened from the panel are popovers: fixed, above everything, never clipped. */
+.popup-menu {
+  inset: auto;
+  margin: 0;
+  padding: 4px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: #212529;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.context-menu button,
+.popup-menu button {
   display: block;
   width: 100%;
   padding: 6px 12px;
@@ -296,8 +309,14 @@ input[type='range'] {
   text-align: left;
 }
 
-.context-menu button:hover:not(:disabled) {
+.context-menu button:hover:not(:disabled),
+.popup-menu button:hover:not(:disabled) {
   background: #e7f5ff;
+}
+
+button.icon svg {
+  display: block;
+  margin: 0 auto;
 }
 
 .hint-bar {
@@ -564,7 +583,8 @@ input[type='search'] {
     width: 240px;
   }
 
-  .context-menu button {
+  .context-menu button,
+  .popup-menu button {
     padding: 11px 14px;
   }
 
