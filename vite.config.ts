@@ -40,6 +40,13 @@ export default defineConfig({
     chunkSizeWarningLimit: 1500,
     // Minification drops licence comments, so the notices go into a file of their own.
     license: { fileName: LICENSES },
+    rolldownOptions: {
+      output: {
+        // Tesseract fetches its model by file name from a directory, so the model keeps its name.
+        assetFileNames: ({ names }) =>
+          names.some((name) => name.endsWith('.traineddata.gz')) ? 'assets/[name][extname]' : 'assets/[name]-[hash][extname]',
+      },
+    },
   },
   test: {
     // vite-plugin-solid switches tests to jsdom unless an environment is set.
