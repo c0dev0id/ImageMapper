@@ -3,8 +3,7 @@ import { roundLngLat } from '../routing/legs.ts'
 import { moveWaypoint, nameWaypoint, removeWaypoint, routeById } from '../state/project.ts'
 import { editingRouteId, mode, setMenu, type MenuItem } from '../state/ui.ts'
 import { useMap } from './context.ts'
-import { onLongPress } from './longPress.ts'
-import { MarkerHandle } from './markers.ts'
+import { MarkerHandle, onMarkerMenu } from './markers.ts'
 
 /** Draggable markers for the points of the route being drawn; only shown in draw route mode. */
 export function RouteEditor() {
@@ -51,24 +50,12 @@ function WaypointMarker(props: { routeId: string; waypointId: string }) {
     const { lng, lat } = handle.marker.getLngLat().wrap()
     moveWaypoint(routeId, waypointId, roundLngLat([lng, lat]))
   })
-  // Draggable markers swallow the map's contextmenu event and its long press, so the
-  // marker opens the menu itself: right-click for mice, a long press for touch and pens.
-  const openMenu = (clientX: number, clientY: number, touch: boolean) => {
+  const stopMenu = onMarkerMenu(handle, (clientX, clientY, touch) => {
     const rect = map.getContainer().getBoundingClientRect()
     setMenu({ x: clientX - rect.left, y: clientY - rect.top, touch, items: pointMenu(routeId, waypointId, name()) })
-  }
-  let pointerType = 'mouse'
-  handle.root.addEventListener('pointerdown', (e) => (pointerType = e.pointerType))
-  handle.root.addEventListener('contextmenu', (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    // Android also fires contextmenu on a long press; that one is handled below.
-    if (pointerType === 'mouse') openMenu(e.clientX, e.clientY, false)
   })
-  const stopLongPress = onLongPress(handle.root, (x, y) => openMenu(x, y, true))
-  handle.marker.on('dragstart', () => setMenu(undefined))
   onCleanup(() => {
-    stopLongPress()
+    stopMenu()
     handle.remove()
   })
   return null
