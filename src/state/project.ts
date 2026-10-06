@@ -276,6 +276,11 @@ export function appendPoint(routeId: string, lngLat: LngLat): void {
   updateRoute(routeId, (r) => edit.appendPoint(r, { id: crypto.randomUUID(), lngLat }), 'Add point')
 }
 
+/** Inserts a route point before the one at `index`. */
+export function insertPoint(routeId: string, index: number, lngLat: LngLat): void {
+  updateRoute(routeId, (r) => edit.insertPoint(r, index, { id: crypto.randomUUID(), lngLat }), 'Insert point')
+}
+
 export function movePoint(routeId: string, pointId: string, lngLat: LngLat): void {
   updateRoute(routeId, (r) => edit.movePoint(r, pointId, lngLat), 'Move point')
 }

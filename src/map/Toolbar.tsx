@@ -4,9 +4,12 @@ import type { Warp } from '../geo/warp.ts'
 import { warpOf } from '../state/derived.ts'
 import { activeLayer, redo, redoLabel, skewImageToMap, undo, undoLabel } from '../state/project.ts'
 import type { ImageLayer, Side } from '../state/schema.ts'
-import { mode, selection, setTool, startTransform, stopTransform, tool } from '../state/ui.ts'
+import { mode, selection, setTool, startTransform, stopTransform, tool, type Tool } from '../state/ui.ts'
 import {
+  AppendIcon,
   CrosshairIcon,
+  DeleteIcon,
+  InsertIcon,
   MoveHereIcon,
   PinImageIcon,
   PinMapIcon,
@@ -45,12 +48,19 @@ export function ToolButton(props: {
 /** The tools of the current scope over the map, with undo and redo always at hand. */
 export function Toolbar() {
   const map = useMap()
-  // The map shows a crosshair while a tool waits for a tap.
-  createEffect(() => map.getContainer().classList.toggle('tool-active', tool() !== undefined))
+  // The picked tool, for the cursor over the map (styles.css).
+  createEffect(() => {
+    const t = tool()
+    if (t) map.getContainer().dataset.tool = t
+    else delete map.getContainer().dataset.tool
+  })
   return (
     <div class="toolbar" role="toolbar" aria-label="Tools">
       <Show when={mode() !== 'route' && activeLayer()} keyed>
         {(layer) => <ImageTools layer={layer} />}
+      </Show>
+      <Show when={mode() === 'route'}>
+        <RouteTools />
       </Show>
       <div class="toolbar-group">
         <ToolButton
@@ -156,5 +166,21 @@ function ImageTools(props: { layer: ImageLayer }) {
         </ToolButton>
       </div>
     </>
+  )
+}
+
+/** Tools of the route being drawn; one of them is always picked. */
+function RouteTools() {
+  const button = (t: Tool, label: string, title: string, icon: JSX.Element) => (
+    <ToolButton label={label} title={title} active={tool() === t} onClick={() => setTool(t)}>
+      {icon}
+    </ToolButton>
+  )
+  return (
+    <div class="toolbar-group">
+      {button('append', 'Append points', 'Tap the map to add points at the end of the route', <AppendIcon />)}
+      {button('insert', 'Insert point', 'Tap the route line to insert a point there', <InsertIcon />)}
+      {button('delete', 'Delete point', 'Tap a route point to delete it', <DeleteIcon />)}
+    </div>
   )
 }

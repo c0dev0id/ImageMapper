@@ -12,6 +12,11 @@ export function appendPoint(route: Route, point: RoutePoint): Route {
   return withPrunedLegs({ ...route, points: [...route.points, point] })
 }
 
+/** Inserts a point before the one at `index`, splitting the leg that led there. */
+export function insertPoint(route: Route, index: number, point: RoutePoint): Route {
+  return withPrunedLegs({ ...route, points: [...route.points.slice(0, index), point, ...route.points.slice(index)] })
+}
+
 export function movePoint(route: Route, id: string, lngLat: LngLat): Route {
   return withPrunedLegs({
     ...route,

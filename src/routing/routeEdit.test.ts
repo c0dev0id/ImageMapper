@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Route } from '../state/schema.ts'
-import { addLeg, appendPoint, changeProfile, movePoint, nextRouteColor, removePoint } from './routeEdit.ts'
+import { addLeg, appendPoint, changeProfile, insertPoint, movePoint, nextRouteColor, removePoint } from './routeEdit.ts'
 
 const base: Route = {
   id: 'r',
@@ -20,6 +20,12 @@ describe('route edits', () => {
     const r = appendPoint(base, { id: 'd', lngLat: [4, 4] })
     expect(r.points.map((p) => p.id)).toEqual(['a', 'b', 'c', 'd'])
     expect(r.legs).toEqual(base.legs)
+  })
+
+  it('inserts a point and keeps only the legs it does not split', () => {
+    const r = insertPoint(base, 1, { id: 'x', lngLat: [1.5, 1.5] })
+    expect(r.points.map((p) => p.id)).toEqual(['a', 'x', 'b', 'c'])
+    expect(r.legs).toEqual({ 'car/2,2;3,3': 'bc' })
   })
 
   it('drops both legs next to a moved point', () => {

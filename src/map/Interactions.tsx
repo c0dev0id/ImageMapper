@@ -15,6 +15,7 @@ import {
 } from '../state/ui.ts'
 import { useMap } from './context.ts'
 import { openGcpMenu, placePin } from './gcpMenu.ts'
+import { insertPointOnLine } from './routeTools.ts'
 import { fromMarker } from './markers.ts'
 
 /** Mouse and keyboard handling on the map that depends on the current mode. */
@@ -49,7 +50,8 @@ export function Interactions() {
     const t = tool()
     if (mode() === 'route' && routeId) {
       const { lng, lat } = e.lngLat.wrap()
-      appendPoint(routeId, roundLngLat([lng, lat]))
+      if (t === 'insert') insertPointOnLine(map, routeId, [e.point.x, e.point.y], pointerType === 'mouse' ? 10 : 24)
+      else if (t === 'append' || t === undefined) appendPoint(routeId, roundLngLat([lng, lat]))
     } else if (t === 'pin-map' || t === 'pin-image') placePin(t === 'pin-map' ? 'map' : 'image', e.lngLat)
     else setSelection(undefined)
   }
@@ -66,7 +68,11 @@ export function Interactions() {
     }
     if (e.key !== 'Escape') return
     if (menu()) setMenu(undefined)
-    else if (mode() === 'route') stopDrawing()
+    else if (mode() === 'route') {
+      // The other route tools fall back to appending; Esc while appending ends drawing.
+      if (tool() !== 'append') setTool('append')
+      else stopDrawing()
+    }
     else if (mode() === 'transform') stopTransform()
     else if (tool()) setTool(undefined)
     else setSelection(undefined)

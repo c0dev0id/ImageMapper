@@ -1,7 +1,7 @@
 import { createEffect, createMemo, For, onCleanup } from 'solid-js'
 import { roundLngLat } from '../routing/legs.ts'
 import { movePoint, removePoint, routeById } from '../state/project.ts'
-import { editingRouteId, mode, setMenu } from '../state/ui.ts'
+import { editingRouteId, mode, setMenu, tool } from '../state/ui.ts'
 import { useMap } from './context.ts'
 import { MarkerHandle, onMarkerMenu } from './markers.ts'
 
@@ -45,6 +45,9 @@ function PointMarker(props: { routeId: string; pointId: string }) {
   handle.marker.on('dragend', () => {
     const { lng, lat } = handle.marker.getLngLat().wrap()
     movePoint(routeId, pointId, roundLngLat([lng, lat]))
+  })
+  handle.root.addEventListener('click', () => {
+    if (tool() === 'delete') removePoint(routeId, pointId)
   })
   const stopMenu = onMarkerMenu(handle, (clientX, clientY, touch) => {
     const rect = map.getContainer().getBoundingClientRect()

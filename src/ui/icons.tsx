@@ -89,6 +89,29 @@ export const MoveHereIcon = () => (
   </Icon>
 )
 
+/** Append points: a route ending in a plus. */
+export const AppendIcon = () => (
+  <Icon>
+    <path d="M1.5 13.5 5 9l3.5 2" />
+    <path d="M12 3v7M8.5 6.5h7" />
+  </Icon>
+)
+
+/** Insert a point: a plus above a line. */
+export const InsertIcon = () => (
+  <Icon>
+    <path d="M1.5 13.5h13" />
+    <path d="M8 2.5v7M4.5 6h7" />
+  </Icon>
+)
+
+/** Delete: a bin. */
+export const DeleteIcon = () => (
+  <Icon>
+    <path d="M2.5 4h11M6 4V2.5h4V4M4 4l.7 9.5h6.6L12 4M6.5 7v4M9.5 7v4" />
+  </Icon>
+)
+
 /** The map pin of a waypoint; its tip marks the place. */
 export function WaypointPin() {
   return (

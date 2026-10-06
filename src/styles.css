@@ -404,9 +404,14 @@ button.icon svg {
   user-select: none;
 }
 
-/* While a tool waits for a tap, the map shows a crosshair instead of the grab hand. */
-.tool-active .maplibregl-canvas-container.maplibregl-interactive {
+/* While a tool waits for a tap, the map shows a crosshair instead of the grab hand;
+   with the delete tool, markers show they can be clicked. */
+.map[data-tool] .maplibregl-canvas-container.maplibregl-interactive {
   cursor: crosshair;
+}
+
+.map[data-tool='delete'] .route-point-marker {
+  cursor: pointer;
 }
 
 /* The toolbar floats over the map, above the scale bar and the attribution. */
