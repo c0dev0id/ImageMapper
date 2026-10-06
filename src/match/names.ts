@@ -74,3 +74,47 @@ export function findName(name: string, words: readonly TextWord[], limit = 3): T
   }
   return hits.sort((a, b) => a.distance - b.distance).slice(0, limit)
 }
+
+/** A word with letters in it, with stray punctuation at its ends removed ("‚Maulsbach:" → "Maulsbach"). */
+function cleanWord(text: string): string {
+  return /\p{L}/u.test(text) ? text.replace(/^[^\p{L}(]+|[^\p{L})]+$/gu, '') : ''
+}
+
+/**
+ * The name printed where the user tapped: the word under the tap (or within half its
+ * height of it), joined with the words beside it on the same printed line, such as "Bad
+ * Marienberg" or "Neustadt (Wied)". Undefined when no word was read there.
+ */
+export function labelAt(words: readonly TextWord[], [x, y]: Px): { text: string; at: Px } | undefined {
+  const lettered = words.map((w) => ({ ...w, text: cleanWord(w.text) })).filter((w) => w.text)
+  let hit: TextWord | undefined
+  let nearest = Infinity
+  for (const word of lettered) {
+    const [left, top, right, bottom] = word.box
+    const distance = Math.hypot(Math.max(left - x, 0, x - right), Math.max(top - y, 0, y - bottom))
+    if (distance <= (bottom - top) / 2 && distance < nearest) {
+      hit = word
+      nearest = distance
+    }
+  }
+  if (!hit) return undefined
+
+  // Words of the same line: about the same height, overlapping vertically, close by.
+  const height = hit.box[3] - hit.box[1]
+  const sameLine = (w: TextWord) => {
+    const h = w.box[3] - w.box[1]
+    const overlap = Math.min(w.box[3], hit.box[3]) - Math.max(w.box[1], hit.box[1])
+    return h > height * 0.6 && h < height * 1.6 && overlap > Math.min(h, height) / 2
+  }
+  const line = lettered.filter(sameLine).sort((a, b) => a.box[0] - b.box[0])
+  let first = line.indexOf(hit)
+  let last = first
+  while (first > 0 && line[first].box[0] - line[first - 1].box[2] <= height) first--
+  while (last < line.length - 1 && line[last + 1].box[0] - line[last].box[2] <= height) last++
+  const group = line.slice(first, last + 1)
+  const left = Math.min(...group.map((w) => w.box[0]))
+  const top = Math.min(...group.map((w) => w.box[1]))
+  const right = Math.max(...group.map((w) => w.box[2]))
+  const bottom = Math.max(...group.map((w) => w.box[3]))
+  return { text: group.map((w) => w.text).join(' '), at: [(left + right) / 2, (top + bottom) / 2] }
+}
