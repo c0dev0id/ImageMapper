@@ -17,7 +17,8 @@ export interface Selection {
 export interface Notice {
   id: number
   text: string
-  action?: { label: string; run: () => void | Promise<void> }
+  /** A button for the notice; `confirm` is asked first, for actions that cannot be undone. */
+  action?: { label: string; run: () => void | Promise<void>; confirm?: string }
 }
 
 /**

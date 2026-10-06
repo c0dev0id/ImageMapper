@@ -13,6 +13,8 @@ export function Notices() {
                 {(action) => (
                   <button
                     onClick={async () => {
+                      const question = action().confirm
+                      if (question && !confirm(question)) return
                       await action().run()
                       dismissNotice(notice.id)
                     }}

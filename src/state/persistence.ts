@@ -56,6 +56,7 @@ export async function initPersistence(): Promise<void> {
       notify(`The project stored in this browser could not be loaded: ${errorMessage(error)}`, {
         label: 'Discard stored project',
         run: discardStoredProject,
+        confirm: 'Discard the project stored in this browser? This cannot be undone.',
       })
       return
     }
