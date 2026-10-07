@@ -1,6 +1,7 @@
 import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap } from 'maplibre-gl'
 import type { Warp } from '../geo/warp.ts'
 import type { BlendMode } from '../state/schema.ts'
+import { Backdrop, linkProgram } from './gl.ts'
 
 const VERTEX_SHADER = `#version 300 es
 uniform mat4 u_matrix;
@@ -105,8 +106,7 @@ export class WarpedImageLayer implements CustomLayerInterface {
   private opacity = 1
   private blend: BlendMode = 'normal'
   /** Copy of what was drawn below this layer, for blend modes other than normal. */
-  private backdrop?: WebGLTexture
-  private backdropSize: [number, number] = [0, 0]
+  private readonly backdrop = new Backdrop()
 
   constructor(
     readonly id: string,
@@ -149,12 +149,10 @@ export class WarpedImageLayer implements CustomLayerInterface {
       gl.deleteBuffer(this.gl.indices)
     }
     if (this.texture) gl.deleteTexture(this.texture)
-    if (this.backdrop) gl.deleteTexture(this.backdrop)
+    this.backdrop.delete(gl)
     this.pendingBitmap?.close()
     this.gl = undefined
     this.texture = undefined
-    this.backdrop = undefined
-    this.backdropSize = [0, 0]
     this.pendingBitmap = undefined
     this.map = undefined
   }
@@ -176,7 +174,7 @@ export class WarpedImageLayer implements CustomLayerInterface {
     const res = this.gl
     const mode = MODE_NUMBERS[this.blend]
     if (mode !== 0) {
-      this.copyBackdrop(gl)
+      this.backdrop.copy(gl, 1)
       // The shader writes the blended colour itself; MapLibre restores its state afterwards.
       gl.disable(gl.BLEND)
     }
@@ -191,26 +189,6 @@ export class WarpedImageLayer implements CustomLayerInterface {
     gl.bindVertexArray(res.vao)
     gl.drawElements(gl.TRIANGLES, this.indexCount, this.indexType, 0)
     gl.bindVertexArray(null)
-  }
-
-  /**
-   * Copies the framebuffer (everything drawn below this layer) into the backdrop texture
-   * on unit 1. RGB is a subset of any framebuffer format, so the copy is always allowed;
-   * MapLibre's canvas is not multisampled, which a copy would not allow.
-   */
-  private copyBackdrop(gl: WebGL2RenderingContext): void {
-    const width = gl.drawingBufferWidth
-    const height = gl.drawingBufferHeight
-    gl.activeTexture(gl.TEXTURE1)
-    if (!this.backdrop || this.backdropSize[0] !== width || this.backdropSize[1] !== height) {
-      this.backdrop ??= gl.createTexture()
-      gl.bindTexture(gl.TEXTURE_2D, this.backdrop)
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB8, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, null)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-      this.backdropSize = [width, height]
-    } else gl.bindTexture(gl.TEXTURE_2D, this.backdrop)
-    gl.copyTexSubImage2D(gl.TEXTURE_2D, 0, 0, 0, 0, 0, width, height)
   }
 
   private async decode(): Promise<void> {
@@ -290,8 +268,7 @@ export class WarpedImageLayer implements CustomLayerInterface {
   private readonly onContextLost = () => {
     this.gl = undefined
     this.texture = undefined
-    this.backdrop = undefined
-    this.backdropSize = [0, 0]
+    this.backdrop.forget()
     this.indexCount = 0
   }
 
@@ -302,18 +279,7 @@ export class WarpedImageLayer implements CustomLayerInterface {
 }
 
 function createResources(gl: WebGL2RenderingContext): GlResources {
-  const program = gl.createProgram()
-  const vertexShader = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER)
-  const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER)
-  gl.attachShader(program, vertexShader)
-  gl.attachShader(program, fragmentShader)
-  gl.linkProgram(program)
-  // Flagged for deletion; they go away together with the program.
-  gl.deleteShader(vertexShader)
-  gl.deleteShader(fragmentShader)
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    throw new Error(`Linking the image shader failed: ${gl.getProgramInfoLog(program)}`)
-  }
+  const program = linkProgram(gl, VERTEX_SHADER, FRAGMENT_SHADER, 'image')
   const vao = gl.createVertexArray()
   const positions = gl.createBuffer()
   const uvs = gl.createBuffer()
@@ -341,14 +307,4 @@ function createResources(gl: WebGL2RenderingContext): GlResources {
     uvs,
     indices,
   }
-}
-
-function compileShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
-  const shader = gl.createShader(type)!
-  gl.shaderSource(shader, source)
-  gl.compileShader(shader)
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    throw new Error(`Compiling the image shader failed: ${gl.getShaderInfoLog(shader)}`)
-  }
-  return shader
 }
