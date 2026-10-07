@@ -6,6 +6,9 @@ import { searchViewbox } from '../map/navigate.ts'
 import { searchPlaces, type Place } from '../search/nominatim.ts'
 import { layerById } from '../state/project.ts'
 import { cancelTapRequest, errorMessage, requestTap, tapRequest, type TapRequest } from '../state/ui.ts'
+import { HelpButton } from '../help/HelpDialog.tsx'
+import { showHelpOnce } from '../help/help.ts'
+import { MATCH_TOWNS_HELP } from '../help/topics.tsx'
 import { GripIcon, PinImageIcon } from '../ui/icons.tsx'
 import { PlaceResults } from '../ui/PlaceResults.tsx'
 import { matchTowns } from './matchTowns.ts'
@@ -32,7 +35,8 @@ export function openMatchTowns(id: string): void {
  * from the results, and its spot is tapped on the image. The dialog does not block the
  * map, so the image can be panned, zoomed and tapped, and it can be dragged aside by its
  * title bar. It stays open until every town it was given is used, saying per row what is
- * missing; Close or Esc closes it.
+ * missing; Close or Esc closes it. The first time, the help on placing images comes with it;
+ * the (?) in the title bar shows it again.
  */
 export function MatchTownsDialog() {
   const map = useMap()
@@ -70,6 +74,7 @@ export function MatchTownsDialog() {
       <div class="dialog-bar" title="Drag to move" onPointerDown={(e) => dragDialog(e, dialog)}>
         <GripIcon />
         <h2>Match towns</h2>
+        <HelpButton label="Explain Match Towns" help={() => MATCH_TOWNS_HELP} />
       </div>
       <Show when={layerId()} keyed>
         {(id) => <TownForm layerId={id} onClose={close} />}
@@ -98,7 +103,11 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
     return open && open === pick?.request ? pick.row : undefined
   }
   let firstInput!: HTMLInputElement
-  onMount(() => firstInput.focus())
+  onMount(() => {
+    firstInput.focus()
+    // After the focus, so that closing the help returns to the first town.
+    showHelpOnce('match-towns', MATCH_TOWNS_HELP)
+  })
   // The form goes when the dialog closes or turns to another layer; its pick goes with
   // it, and its rows are kept for the next time.
   onCleanup(() => {
@@ -185,10 +194,6 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
         submit()
       }}
     >
-      <p class="muted hint">
-        For each town, search for it and pick it from the results, then tap its spot on the image with the image pin.
-        Towns far apart work best; they give the image a first placement.
-      </p>
       <ol class="town-rows">
         <For each={rows}>
           {(row, i) => (
@@ -337,9 +342,9 @@ function placeDialog(dialog: HTMLDialogElement, map: DOMRect): void {
   )
 }
 
-/** Drags the dialog by its title bar, with mouse, touch or pen. */
+/** Drags the dialog by its title bar, with mouse, touch or pen; the bar's buttons stay buttons. */
 function dragDialog(e: PointerEvent, dialog: HTMLDialogElement): void {
-  if (!e.isPrimary || e.button !== 0) return
+  if (!e.isPrimary || e.button !== 0 || (e.target as Element).closest('button')) return
   const handle = e.currentTarget as HTMLElement
   handle.setPointerCapture(e.pointerId)
   const start = dialog.getBoundingClientRect()

@@ -1,7 +1,19 @@
 import type { BlendMode, ImageColors } from '../state/schema.ts'
 import { BLEND_MODES } from '../ui/blendModes.ts'
 import { IMAGE_COLORS } from '../ui/imageColors.ts'
-import { Banner, MapDrawing, Panel, Plus, PrintDrawing, Then } from './drawings.tsx'
+import {
+  Banner,
+  Dot,
+  Link,
+  MapDrawing,
+  Panel,
+  placement,
+  Plus,
+  PrintDrawing,
+  Ring,
+  Then,
+  TOWN_POINTS,
+} from './drawings.tsx'
 import type { Help } from './help.ts'
 import { inverted, tinted, vivid } from './paint.ts'
 
@@ -89,4 +101,66 @@ export function colorsHelp(colors: ImageColors, tint: string): Help {
       },
     ],
   }
+}
+
+/** Where Match Towns puts an image: close, but a little turned, enlarged and shifted. */
+const ROUGH = placement(-6, 1.08, [4, -3])
+
+/** How an image gets into place: Match Towns first, then point pairs and a skew. */
+export const MATCH_TOWNS_HELP: Help = {
+  title: 'Placing an image',
+  steps: [
+    {
+      title: 'Match towns',
+      banner: () => (
+        <Banner>
+          <Panel caption="Towns on the image">
+            <PrintDrawing />
+            {TOWN_POINTS.slice(0, 3).map((p) => (
+              <Ring at={p} />
+            ))}
+          </Panel>
+          <Then />
+          <Panel caption="A first placement">
+            <Blended mode="multiply" transform={ROUGH.transform} />
+          </Panel>
+        </Banner>
+      ),
+      text:
+        'Search for up to four towns on the image, far apart, pick each from the results and tap where it is on the image. ' +
+        'Match places the image by them, roughly.',
+    },
+    {
+      title: 'Pin and skew',
+      banner: () => (
+        <Banner>
+          <Panel caption="Pairs where it is off">
+            <Blended mode="multiply" transform={ROUGH.transform} />
+            {TOWN_POINTS.map((p) => (
+              <Link from={ROUGH.apply(p)} to={p} />
+            ))}
+            {TOWN_POINTS.map((p) => (
+              <Ring at={ROUGH.apply(p)} />
+            ))}
+            {TOWN_POINTS.map((p) => (
+              <Dot at={p} />
+            ))}
+          </Panel>
+          <Then />
+          <Panel caption="Skewed to fit">
+            <Blended mode="multiply" />
+            {TOWN_POINTS.map((p) => (
+              <Ring at={p} />
+            ))}
+            {TOWN_POINTS.map((p) => (
+              <Dot at={p} />
+            ))}
+          </Panel>
+        </Banner>
+      ),
+      text:
+        'Where the image is still off, pin point pairs with Pin: a spot on the image, then its place on the map. ' +
+        'Skew Image fits the image to its pairs; add pairs where it is still off and skew again.',
+    },
+  ],
 }

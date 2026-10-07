@@ -53,7 +53,9 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      fit the others (a namesake picked by mistake, a tap in the wrong spot) is left out
      and marked. The dialog stays open until every town it was given is used and says
      what is missing for each; it does not block the map, so the image can be zoomed and
-     tapped, and it can be dragged aside by its title bar, the grip showing where.
+     tapped, and it can be dragged aside by its title bar, the grip showing where. The
+     first time, a help comes with it: how an image gets into place, from the towns to a
+     skew. The (?) in the title bar shows it again.
    - **Skew Image** (three or more pairs) fits the image to its pairs. Three pairs rotate,
      scale and skew it; more pairs also bend it so that every pair matches exactly. Add
      pairs where the image is still off and skew again.
@@ -106,7 +108,8 @@ away to give the map more room. The toolbar takes up to two rows there.
 The pencil next to the project name at the top of the panel renames the project; the
 name is used for the saved file and the GPX export. The project is kept in the browser's
 IndexedDB and restored on the next visit. Clearing the browser's site data removes it,
-and Safari may delete it after seven days without a visit. **Save** downloads the whole
+and Safari may delete it after seven days without a visit. Which helps were already shown
+once is kept in the browser's localStorage, apart from the project. **Save** downloads the whole
 project, images included, as a `.mappic` file (a plain ZIP archive with `project.json`
 and the original images); **Open** loads such a file again. Projects in the format of
 earlier versions (format 1, before waypoints became places of their own) cannot be

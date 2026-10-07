@@ -244,7 +244,10 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   tapped while it is open; it is dragged by its title bar (a grip and a move cursor show
   where to hold it), stays partly on screen and keeps its position, and it stays open
   while a row is incomplete or left out, saying per row what is missing. Its searches
-  prefer the visible area, as the panel's search does.
+  prefer the visible area, as the panel's search does. The first time it opens, the
+  help on placing an image comes with it, in two steps: towns for a first placement,
+  then pairs and a skew. The (?) in its title bar shows that help again, which replaced
+  the paragraph of instructions at the top of the dialog.
   What a row still needs is worked out from the row itself (`rowNote`); only "does not
   fit" is stored, by the match. Everything lives in `src/match/`, its styles included,
   so the feature can be taken out in one piece.
@@ -297,7 +300,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
   reordering, visibility, opacity, blend modes, colours and an active layer.
-- Help with drawn pictures: on the picked blend mode and colours, behind a (?).
+- Help with drawn pictures: on the picked blend mode and colours, behind a (?), and on
+  placing an image, shown with Match Towns the first time.
 - A map toolbar with captioned tools of the active image or the route being drawn.
 - GCP editing with the Pin tool (image first, then map) or context menus (right-click or
   long press), and "skew image to map" with fold/mirror checks.
