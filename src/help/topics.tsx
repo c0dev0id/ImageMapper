@@ -1,15 +1,19 @@
+import { nextRouteColor } from '../routing/routeEdit.ts'
 import type { BlendMode, ImageColors } from '../state/schema.ts'
 import { BLEND_MODES } from '../ui/blendModes.ts'
 import { IMAGE_COLORS } from '../ui/imageColors.ts'
 import {
   Banner,
   Dot,
+  GpxBadge,
   Link,
   MapDrawing,
   Panel,
+  PhotoDrawing,
   placement,
   Plus,
   PrintDrawing,
+  RouteDrawing,
   Ring,
   Then,
   TOWN_POINTS,
@@ -163,6 +167,43 @@ export const MATCH_TOWNS_HELP: Help = {
         'Pin adds point pairs, always image first: tap a spot on the image (ring), then the same place on the map ' +
         '(dot). Skew Image fits the image to its pairs: three turn, scale and slant it; more also bend it until ' +
         'every pair matches. Where it is still off, add pairs or drag a ring or dot, then skew again.',
+    },
+  ],
+}
+
+/** What mappic is for: shown on the first visit, and from the (i) beside the title. */
+export const ABOUT_HELP: Help = {
+  title: 'About mappic',
+  steps: [
+    {
+      banner: () => (
+        <Banner>
+          <Panel caption="Add an image">
+            <PhotoDrawing />
+          </Panel>
+          <Then />
+          <Panel caption="Pin and skew">
+            <Blended mode="multiply" />
+            {TOWN_POINTS.map((p) => (
+              <Ring at={p} />
+            ))}
+            {TOWN_POINTS.map((p) => (
+              <Dot at={p} />
+            ))}
+          </Panel>
+          <Then />
+          <Panel caption="Draw the route">
+            <MapDrawing />
+            <RouteDrawing color={nextRouteColor([])} />
+            <GpxBadge />
+          </Panel>
+        </Banner>
+      ),
+      text:
+        'mappic turns a tour printed in a magazine, or a photo of one, into a GPX track for a navigation device or ' +
+        'app. Printed maps are simplified and stretched, so the image is first fitted onto the real map with pairs ' +
+        'of points that mark the same place on both. The route traced over it then follows the roads. Images and ' +
+        'projects stay in this browser.',
     },
   ],
 }

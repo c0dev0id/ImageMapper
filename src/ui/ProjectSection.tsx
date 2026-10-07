@@ -1,4 +1,6 @@
 import { unwrap } from 'solid-js/store'
+import { setHelp } from '../help/help.ts'
+import { ABOUT_HELP } from '../help/topics.tsx'
 import { useMapAccessor } from '../map/context.ts'
 import { allImageBytes } from '../state/images.ts'
 import { adoptProject } from '../state/persistence.ts'
@@ -8,6 +10,7 @@ import { emptyProject, hasContent } from '../state/schema.ts'
 import { errorMessage, notify, panelCollapsed, setPanelCollapsed } from '../state/ui.ts'
 import { downloadBlob, fileBaseName } from './download.ts'
 import { EditableName } from './EditableName.tsx'
+import { InfoIcon } from './icons.tsx'
 
 export function ProjectSection() {
   const map = useMapAccessor()
@@ -40,7 +43,15 @@ export function ProjectSection() {
   return (
     <header class="section panel-header">
       <div class="row title-row">
-        <h1 class="grow">mappic</h1>
+        <h1>mappic</h1>
+        <button
+          class="icon help-button about-button"
+          title="About mappic"
+          aria-label="About mappic"
+          onClick={() => setHelp(ABOUT_HELP)}
+        >
+          <InfoIcon />
+        </button>
         <button
           class="icon panel-toggle"
           aria-label={panelCollapsed() ? 'Show panel' : 'Hide panel'}

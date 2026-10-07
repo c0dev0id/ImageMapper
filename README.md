@@ -7,7 +7,8 @@ an angle. mappic overlays photos or scans of such maps on OpenStreetMap, warps t
 place using point pairs you mark on the image and on the map (georeferencing with a thin
 plate spline), and lets you trace the route on top with OSRM routing.
 
-It runs entirely in the browser; nothing is uploaded anywhere.
+It runs entirely in the browser; nothing is uploaded anywhere. The first visit opens with
+what the app is for; the (i) beside the name at the top of the panel shows it again.
 
 ## Workflow
 

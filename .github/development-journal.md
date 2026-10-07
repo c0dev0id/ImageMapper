@@ -207,12 +207,15 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   dialog is used. A help can also come once, the first time a feature is used: that it
   was shown is noted in localStorage (`mappic.help.<id>`), not in the project, so it
   lasts until the site data is cleared, or for the session where storage is blocked. The
-  dialog closes with its button, Esc or a click beside it (`closedby="any"`); while a
-  modal dialog is open, the map's keys (Esc, undo) leave it alone. Its title takes the
-  focus when it opens (`tabindex="-1"` and `autofocus`; Chrome ignores `autofocus` on the
-  dialog element itself), so reading starts there instead of at a ringed close button. On
-  narrow screens three pictures take two lines, and their + and arrows are dropped, as one
-  would end the first line pointing at nothing.
+  About mappic is a help as well: what the app is for, under three pictures (an image
+  added, pinned and skewed, the route traced and exported). It comes on the first visit
+  and from the (i) beside the title. The dialog closes with its button, Esc or a click
+  beside it (`closedby="any"`); while a modal dialog is open, the map's keys (Esc, undo)
+  leave it alone. Its title takes the focus when it opens (`tabindex="-1"` and
+  `autofocus`; Chrome ignores `autofocus` on the dialog element itself), so reading
+  starts there instead of at a ringed close button. On narrow screens three pictures take
+  two lines, and their + and arrows are dropped, as one would end the first line pointing
+  at nothing.
 - **Bringing things into view** lives in `map/navigate.ts`: one `showBounds` (padding,
   current rotation kept) behind place search, fly to image and fly to route; move image
   here is there too. Fly to
@@ -313,8 +316,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
   reordering, visibility, opacity, blend modes, colours and an active layer.
-- Help with drawn pictures: on the picked blend mode and colours, behind a (?), and on
-  placing an image, shown with Match Towns the first time.
+- Help with drawn pictures: on the picked blend mode and colours, behind a (?), on
+  placing an image, shown with Match Towns the first time, and About, shown on the first
+  visit and from the (i) beside the title.
 - A map toolbar with captioned tools of the active image or the route being drawn.
 - GCP editing with the Pin tool (image first, then map) or context menus (right-click or
   long press), and "skew image to map" with fold/mirror checks.

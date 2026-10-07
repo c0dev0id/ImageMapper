@@ -114,6 +114,51 @@ export function PrintDrawing(props: { paint?: (hex: string) => string }) {
   )
 }
 
+/** The printed map as a photo of the page: a little turned, lying on a grey ground. */
+export function PhotoDrawing() {
+  return (
+    <g>
+      <rect width={W} height={H} fill="#dee2e6" />
+      <g transform="rotate(-5 80 50) translate(80 50) scale(0.8) translate(-80 -50)">
+        <rect x="2.5" y="3.5" width={W} height={H} fill="#000000" opacity="0.18" />
+        <PrintDrawing />
+      </g>
+    </g>
+  )
+}
+
+/** Route points of the drawn route: the towns and a point on each long leg. */
+const ROUTE_POINTS: readonly Point[] = [TOWNS[0].at, [76.5, 26.3], TOWNS[1].at, TOWNS[2].at, [83.5, 76], TOWNS[3].at]
+
+/** The tour traced as a route, drawn as the map draws routes: a coloured line on white, with its points. */
+export function RouteDrawing(props: { color: string }) {
+  return (
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      {TOUR.map((d) => (
+        <path d={d} stroke="#ffffff" stroke-width="3.6" stroke-opacity="0.85" />
+      ))}
+      {TOUR.map((d) => (
+        <path d={d} stroke={props.color} stroke-width="2" />
+      ))}
+      {ROUTE_POINTS.map((p) => (
+        <circle cx={p[0]} cy={p[1]} r="2.6" fill={props.color} stroke="#ffffff" stroke-width="0.9" />
+      ))}
+    </g>
+  )
+}
+
+/** A label in the corner: the route as a GPX file. */
+export function GpxBadge() {
+  return (
+    <g>
+      <rect x="124" y="5" width="30" height="13" rx="3" fill="#ffffff" stroke="#adb5bd" stroke-width="0.6" />
+      <text x="139" y="14.4" text-anchor="middle" font-family="system-ui, sans-serif" font-size="7" font-weight="700" fill="#495057">
+        GPX
+      </text>
+    </g>
+  )
+}
+
 /** The image point of a pair: a ring, as on the map. */
 export function Ring(props: { at: Point }) {
   return (

@@ -60,6 +60,11 @@ select {
   margin-bottom: 4px;
 }
 
+/* Beside the name; the panel toggle, where there is one, stays at the right. */
+.about-button {
+  margin-right: auto;
+}
+
 .panel-toggle {
   display: none;
 }

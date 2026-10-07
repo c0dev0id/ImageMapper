@@ -14,6 +14,8 @@ import { MapView } from './map/MapView.tsx'
 import { Toolbar } from './map/Toolbar.tsx'
 import { Waypoints } from './map/Waypoints.tsx'
 import { HelpDialog } from './help/HelpDialog.tsx'
+import { showHelpOnce } from './help/help.ts'
+import { ABOUT_HELP } from './help/topics.tsx'
 import { initPersistence } from './state/persistence.ts'
 import { errorMessage, notify } from './state/ui.ts'
 import { Panel } from './ui/Panel.tsx'
@@ -32,6 +34,8 @@ export function App() {
       notify(`Browser storage failed, work will not be kept: ${errorMessage(error)}`)
     } finally {
       setLoaded(true)
+      // The first visit starts with what mappic is for.
+      showHelpOnce('about', ABOUT_HELP)
     }
   })
 
