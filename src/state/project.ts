@@ -7,6 +7,7 @@ import * as edit from '../routing/routeEdit.ts'
 import { History, withCurrentDisplay } from './history.ts'
 import {
   type BlendMode,
+  type ImageColors,
   emptyProject,
   type Gcp,
   type ImageLayer,
@@ -199,6 +200,20 @@ export function setLayerBlend(id: string, blend: BlendMode): void {
   const index = layerIndex(id)
   if (index < 0) return
   setProject('layers', index, 'blend', blend)
+  onChange()
+}
+
+export function setLayerColors(id: string, colors: ImageColors): void {
+  const index = layerIndex(id)
+  if (index < 0) return
+  setProject('layers', index, 'colors', colors)
+  onChange()
+}
+
+export function setLayerTint(id: string, tint: string): void {
+  const index = layerIndex(id)
+  if (index < 0) return
+  setProject('layers', index, 'tint', tint)
   onChange()
 }
 

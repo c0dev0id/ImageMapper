@@ -134,6 +134,12 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   (`DesaturateLayer`) sits between the base layers and the images: it copies what is
   drawn below it and draws it again in grey, mixed by the slider. It draws nothing at
   full colour. Images, routes and pins lie above it and keep their colours.
+- **Image colours.** Before blending, the image shader can show an image vivid (its
+  saturation doubled) or in one colour: a pixel counts as ink when it is dark or strongly
+  coloured, so yellow roads and black text take the colour while paper and pale fills
+  stay white. Recolouring before the blend works with every blend mode, normal included,
+  and needs no extra pass. A display setting per layer (`colors`, `tint`), like blend
+  and opacity.
 - **Taps versus drags.** A click on the map only counts 150 ms after it was made
   (`TapFilter`): a drag that starts at the tap within that time takes it back, and a
   click where a drag ended no more than 150 ms before is dropped. The first is a mouse

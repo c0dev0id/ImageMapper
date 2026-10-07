@@ -271,6 +271,17 @@ button.layer-select:hover:not(:disabled) {
   white-space: nowrap;
 }
 
+/* The colour of a tinted image, as a swatch beside its select. */
+input.tint {
+  width: 34px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+
 /* The base map reads like a name with its pencil, but is a select without its box: the
    pencil takes the place of the arrow and lets clicks through, so a click on the name or
    the pencil opens the browser's own list. */

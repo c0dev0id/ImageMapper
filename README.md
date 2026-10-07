@@ -27,6 +27,10 @@ It runs entirely in the browser; nothing is uploaded anywhere.
    layer. **Multiply** makes white paper transparent while printed lines stay, so the map
    shows through a scan; **Difference** cancels out where image and map match, so
    misaligned lines stand out after a skew. Each mode explains itself below the list.
+   **Colours** shows the image as printed, **Vivid** (stronger colours, so a printed
+   route stays the route), or in **One colour** you pick: all printed lines and text in
+   that colour, the paper staying white. Against a grey base map (**Colour** in the Base
+   map section) the image then stands out at a glance.
 3. The **toolbar** at the bottom of the map holds the tools of the active image, each with
    a short caption and a tooltip that says more.
    - **Pin** marks point pairs, always image first: tap a spot on the image (a dashed ring

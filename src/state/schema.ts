@@ -17,6 +17,15 @@ export type BlendMode =
   | 'difference'
 export type Profile = 'car' | 'bike' | 'foot'
 
+/**
+ * How an image's own colours are shown before it is blended with the map: as printed,
+ * vivid (more saturated), or tinted (all ink in one colour, the paper staying white).
+ */
+export type ImageColors = 'printed' | 'vivid' | 'tinted'
+
+/** The colour of tinted images unless another is picked: a pink that no route, pin or map uses. */
+export const DEFAULT_TINT = '#d6336c'
+
 /** A ground control point: a spot on the image and its place on the map. */
 export interface Gcp extends Pair {
   id: string
@@ -33,6 +42,10 @@ export interface ImageLayer {
   opacity: number
   /** Absent means normal. */
   blend?: BlendMode
+  /** Absent means as printed. */
+  colors?: ImageColors
+  /** The colour of a tinted image, as #rrggbb; absent means DEFAULT_TINT. */
+  tint?: string
   /** The pairs the displayed warp is fitted on (at least 3). */
   placement: Pair[]
   gcps: Gcp[]

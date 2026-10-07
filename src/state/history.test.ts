@@ -73,7 +73,7 @@ describe('withCurrentDisplay', () => {
       baseMap: 'osm',
       baseMapSaturation: 0.2,
       satellite: { visible: true, opacity: 0.4 },
-      layers: [{ ...layer('a', false, 0.3), blend: 'multiply' }],
+      layers: [{ ...layer('a', false, 0.3), blend: 'multiply', colors: 'tinted', tint: '#123456' }],
     }
     const merged = withCurrentDisplay(state, current)
     expect(merged.name).toBe('old')
@@ -81,9 +81,9 @@ describe('withCurrentDisplay', () => {
     expect(merged.baseMap).toBe('osm')
     expect(merged.baseMapSaturation).toBe(0.2)
     expect(merged.satellite).toEqual(current.satellite)
-    expect(merged.layers.map((l) => [l.id, l.visible, l.opacity, l.blend])).toEqual([
-      ['a', false, 0.3, 'multiply'],
-      ['deleted', true, 1, undefined],
+    expect(merged.layers.map((l) => [l.id, l.visible, l.opacity, l.blend, l.colors, l.tint])).toEqual([
+      ['a', false, 0.3, 'multiply', 'tinted', '#123456'],
+      ['deleted', true, 1, undefined, undefined, undefined],
     ])
   })
 })

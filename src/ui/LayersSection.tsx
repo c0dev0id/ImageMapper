@@ -7,14 +7,17 @@ import {
   removeLayer,
   setActiveLayer,
   setLayerBlend,
+  setLayerColors,
   setLayerOpacity,
+  setLayerTint,
   setLayerVisible,
 } from '../state/project.ts'
-import type { BlendMode, ImageLayer } from '../state/schema.ts'
+import { DEFAULT_TINT, type BlendMode, type ImageColors, type ImageLayer } from '../state/schema.ts'
 import { layerNote } from '../state/ui.ts'
 import { addImages, IMAGE_TYPES } from './addImages.ts'
 import { BLEND_MODES } from './blendModes.ts'
 import { EyeIcon, EyeOffIcon, GripIcon } from './icons.tsx'
+import { IMAGE_COLORS } from './imageColors.ts'
 import { reorderTarget } from './reorder.ts'
 import { thumbnailUrl } from './thumbnails.ts'
 
@@ -197,6 +200,27 @@ function ActiveLayer(props: { layer: ImageLayer }) {
         </select>
       </div>
       <p class="muted hint">{blend().description}</p>
+      <div class="row">
+        <span class="muted">Colours</span>
+        <select
+          class="grow"
+          aria-label={`Colours of ${layer.name}`}
+          value={layer.colors ?? 'printed'}
+          onChange={(e) => setLayerColors(layer.id, e.currentTarget.value as ImageColors)}
+        >
+          <For each={IMAGE_COLORS}>{(c) => <option value={c.value}>{c.label}</option>}</For>
+        </select>
+        <Show when={layer.colors === 'tinted'}>
+          <input
+            type="color"
+            class="tint"
+            aria-label={`Colour of ${layer.name}`}
+            title="The colour all printed lines and text are shown in"
+            value={layer.tint ?? DEFAULT_TINT}
+            onInput={(e) => setLayerTint(layer.id, e.currentTarget.value)}
+          />
+        </Show>
+      </div>
       <div class="row">
         <span class="grow muted">
           {pairs()} {pairs() === 1 ? 'pair' : 'pairs'}

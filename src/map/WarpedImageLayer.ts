@@ -1,6 +1,7 @@
 import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap } from 'maplibre-gl'
 import type { Warp } from '../geo/warp.ts'
-import type { BlendMode } from '../state/schema.ts'
+import { DEFAULT_TINT, type BlendMode, type ImageColors } from '../state/schema.ts'
+import { hexToRgb } from './color.ts'
 import { Backdrop, linkProgram } from './gl.ts'
 
 const VERTEX_SHADER = `#version 300 es
@@ -15,15 +16,28 @@ void main() {
 
 // Blend modes after the W3C Compositing and Blending spec, with b the backdrop (what lies
 // below) and s the image colour. Mode 0 (normal) relies on MapLibre's blending; the other
-// modes read the backdrop from a copy of the framebuffer and write the final colour.
+// modes read the backdrop from a copy of the framebuffer and write the final colour. The
+// image's colours are first shown as printed, vivid or tinted (u_colors 0, 1, 2).
 const FRAGMENT_SHADER = `#version 300 es
 precision highp float;
 uniform sampler2D u_texture;
 uniform sampler2D u_backdrop;
 uniform float u_opacity;
 uniform int u_mode;
+uniform int u_colors;
+uniform vec3 u_tint;
 in vec2 v_uv;
 out vec4 color;
+
+float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+// How much of a pixel is ink rather than paper: dark or strongly coloured, so that yellow
+// roads count while pale fills mostly do not.
+float ink(vec3 c) { return max(1.0 - luma(c), max(max(c.r, c.g), c.b) - min(min(c.r, c.g), c.b)); }
+vec3 recolor(vec3 s) {
+  if (u_colors == 1) return clamp(mix(vec3(luma(s)), s, 2.0), 0.0, 1.0);
+  if (u_colors == 2) return mix(vec3(1.0), u_tint, smoothstep(0.15, 0.6, ink(s)));
+  return s;
+}
 
 vec3 screen(vec3 b, vec3 s) { return b + s - b * s; }
 vec3 hardLight(vec3 b, vec3 s) { return mix(b * 2.0 * s, screen(b, 2.0 * s - 1.0), step(0.5, s)); }
@@ -35,12 +49,12 @@ vec3 softLight(vec3 b, vec3 s) {
 void main() {
   // The texture is premultiplied, matching MapLibre's ONE, ONE_MINUS_SRC_ALPHA blending.
   vec4 src = texture(u_texture, v_uv);
+  vec3 s = recolor(src.a > 0.0 ? src.rgb / src.a : vec3(0.0));
   if (u_mode == 0) {
-    color = src * u_opacity;
+    color = vec4(s * src.a, src.a) * u_opacity;
     return;
   }
   vec3 b = texelFetch(u_backdrop, ivec2(gl_FragCoord.xy), 0).rgb;
-  vec3 s = src.a > 0.0 ? src.rgb / src.a : vec3(0.0);
   vec3 mixed;
   if (u_mode == 1) mixed = b * s;
   else if (u_mode == 2) mixed = min(b, s);
@@ -64,6 +78,8 @@ const MODE_NUMBERS: Record<BlendMode, number> = {
   difference: 7,
 }
 
+const COLOR_NUMBERS: Record<ImageColors, number> = { printed: 0, vivid: 1, tinted: 2 }
+
 /** Longest texture side: about 350 dpi for an A4 page while bounding GPU memory per layer. */
 const MAX_TEXTURE_SIDE = 4096
 
@@ -74,6 +90,8 @@ interface GlResources {
   backdrop: WebGLUniformLocation | null
   opacity: WebGLUniformLocation | null
   mode: WebGLUniformLocation | null
+  colors: WebGLUniformLocation | null
+  tint: WebGLUniformLocation | null
   vao: WebGLVertexArrayObject
   positions: WebGLBuffer
   uvs: WebGLBuffer
@@ -105,6 +123,8 @@ export class WarpedImageLayer implements CustomLayerInterface {
   private origin: [number, number] = [0, 0]
   private opacity = 1
   private blend: BlendMode = 'normal'
+  private colors: ImageColors = 'printed'
+  private tint = hexToRgb(DEFAULT_TINT)
   /** Copy of what was drawn below this layer, for blend modes other than normal. */
   private readonly backdrop = new Backdrop()
 
@@ -126,6 +146,13 @@ export class WarpedImageLayer implements CustomLayerInterface {
 
   setBlend(blend: BlendMode): void {
     this.blend = blend
+    this.map?.triggerRepaint()
+  }
+
+  /** How the image's own colours are shown; `tint` (#rrggbb) is the colour of a tinted image. */
+  setColors(colors: ImageColors, tint: string): void {
+    this.colors = colors
+    this.tint = hexToRgb(tint)
     this.map?.triggerRepaint()
   }
 
@@ -182,6 +209,8 @@ export class WarpedImageLayer implements CustomLayerInterface {
     gl.uniformMatrix4fv(res.matrix, false, matrix)
     gl.uniform1f(res.opacity, this.opacity)
     gl.uniform1i(res.mode, mode)
+    gl.uniform1i(res.colors, COLOR_NUMBERS[this.colors])
+    gl.uniform3f(res.tint, ...this.tint)
     gl.uniform1i(res.texture, 0)
     gl.uniform1i(res.backdrop, 1)
     gl.activeTexture(gl.TEXTURE0)
@@ -302,6 +331,8 @@ function createResources(gl: WebGL2RenderingContext): GlResources {
     backdrop: gl.getUniformLocation(program, 'u_backdrop'),
     opacity: gl.getUniformLocation(program, 'u_opacity'),
     mode: gl.getUniformLocation(program, 'u_mode'),
+    colors: gl.getUniformLocation(program, 'u_colors'),
+    tint: gl.getUniformLocation(program, 'u_tint'),
     vao,
     positions,
     uvs,

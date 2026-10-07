@@ -2,6 +2,7 @@ import { createEffect, createMemo, For, onCleanup } from 'solid-js'
 import { layerIds, warpOf } from '../state/derived.ts'
 import { imageBlob } from '../state/images.ts'
 import { layerById } from '../state/project.ts'
+import { DEFAULT_TINT } from '../state/schema.ts'
 import { useMap } from './context.ts'
 import { FIRST_OVERLAY_LAYER } from './style.ts'
 import { WarpedImageLayer } from './WarpedImageLayer.ts'
@@ -38,6 +39,7 @@ function ImageLayer(props: { id: string }) {
   })
   createEffect(() => glLayer.setOpacity(layer()?.opacity ?? 0))
   createEffect(() => glLayer.setBlend(layer()?.blend ?? 'normal'))
+  createEffect(() => glLayer.setColors(layer()?.colors ?? 'printed', layer()?.tint ?? DEFAULT_TINT))
   createEffect(() => {
     map.setLayoutProperty(id, 'visibility', layer()?.visible ? 'visible' : 'none')
   })
