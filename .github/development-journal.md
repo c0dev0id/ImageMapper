@@ -25,8 +25,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Vitest 5 for unit tests of the pure modules.
 - Icons from Tabler Icons (MIT), copied as SVG paths into `src/ui/icons.tsx` rather than
   added as a dependency; the licence text is in `src/ui/tabler-icons-license.txt`.
-- External services: base maps (OSM standard tiles; OpenFreeMap and VersaTiles vector
-  tiles with their styles), Esri World Imagery tiles, FOSSGIS OSRM routing servers
+- External services: base maps (OSM standard, OpenTopoMap and BKG TopPlusOpen raster
+  tiles; OpenFreeMap and VersaTiles vector tiles with their styles), Esri World Imagery
+  tiles, FOSSGIS OSRM routing servers
   (routing.openstreetmap.de), Nominatim search.
 - Deployment: GitHub Actions to GitHub Pages.
 
@@ -41,7 +42,10 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   icons; `setStyle` is no option, because serialising a style drops the custom image
   layers. A style's projection, sky and light are ignored, so the Mercator image layers
   stay right. A raster entry is turned into a one-layer style, so both kinds take the
-  same path. The pick is a display setting in the project (`baseMap`), like the
+  same path; it carries the highest zoom its server renders (OpenTopoMap 17,
+  TopPlusOpen 18), beyond which MapLibre enlarges the last tiles. Raster maps are not
+  all small-print: OpenTopoMap and TopPlusOpen bake in large labels and are offered
+  next to the vector maps. The pick is a display setting in the project (`baseMap`), like the
   satellite: kept in files, not undone. Liberty is the default, also for projects saved
   before the choice existed: OpenFreeMap needs no key and sets no usage limits.
 
@@ -239,8 +243,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 
 ## Core features
 
-- A base map to pick (OSM Standard; OpenFreeMap Liberty and Bright, VersaTiles Colorful
-  as vector maps) and an Esri satellite layer with visibility and opacity on top.
+- A base map to pick (OSM Standard, OpenTopoMap, TopPlusOpen as raster maps; OpenFreeMap
+  Liberty and Bright, VersaTiles Colorful as vector maps) and an Esri satellite layer
+  with visibility and opacity on top.
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
   reordering, visibility, opacity, blend modes and an active layer.

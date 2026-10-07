@@ -5,10 +5,10 @@ import type { BaseMap } from '../config.ts'
 const PREFIX = 'base/'
 
 /** A raster base map as a style of its own, so that both kinds are shown the same way. */
-export function rasterStyle(tiles: string, attribution: string): StyleSpecification {
+export function rasterStyle(tiles: string, attribution: string, maxzoom = 19): StyleSpecification {
   return {
     version: 8,
-    sources: { tiles: { type: 'raster', tiles: [tiles], tileSize: 256, maxzoom: 19, attribution } },
+    sources: { tiles: { type: 'raster', tiles: [tiles], tileSize: 256, maxzoom, attribution } },
     layers: [{ id: 'tiles', type: 'raster', source: 'tiles' }],
   }
 }
@@ -64,7 +64,7 @@ export class BaseMapSwitcher {
 
   async show(base: BaseMap): Promise<void> {
     const ticket = ++this.latest
-    const style = 'style' in base ? await loadStyle(base.style) : rasterStyle(base.tiles, base.attribution)
+    const style = 'style' in base ? await loadStyle(base.style) : rasterStyle(base.tiles, base.attribution, base.maxzoom)
     if (ticket !== this.latest) return
     for (const id of this.layers) this.map.removeLayer(id)
     for (const id of this.sources) this.map.removeSource(id)

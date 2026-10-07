@@ -39,4 +39,9 @@ describe('rasterStyle', () => {
       layers: [{ id: 'tiles', type: 'raster', source: 'tiles' }],
     })
   })
+
+  it('stops loading tiles beyond the highest zoom a server renders', () => {
+    const style = rasterStyle('https://tiles.example.org/{z}/{x}/{y}.png', '© Example', 17)
+    expect(style.sources.tiles).toMatchObject({ maxzoom: 17 })
+  })
 })

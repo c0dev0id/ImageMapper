@@ -13,9 +13,10 @@ It runs entirely in the browser; nothing is uploaded anywhere.
 
 1. Move the map to the area of the tour: search for a place or address at the top of the
    panel, or use the locate button below the zoom buttons. The base map is picked in the
-   panel: OSM Standard, or the vector maps OpenFreeMap Liberty, OpenFreeMap Bright and
-   VersaTiles Colorful, whose labels are larger and stay sharp on any screen. The
-   satellite imagery can be laid over any of them.
+   panel: the raster maps OSM Standard, OpenTopoMap (with contour lines and hill shading)
+   and TopPlusOpen, the latter two with large labels, or the vector maps OpenFreeMap
+   Liberty, OpenFreeMap Bright and VersaTiles Colorful, whose labels stay sharp on any
+   screen. The satellite imagery can be laid over any of them.
 2. **Add images** (JPEG, PNG, WebP). Each image becomes a layer, listed with a preview.
    Click an entry to make it the active layer, the one you work on. Drag an entry by its
    handle to change the order (or press the arrow keys on the handle); the eye hides a
@@ -104,9 +105,13 @@ opened: there are no migrations before version 1.0.
 mappic uses public services directly from the browser. Please respect their terms:
 
 - **Base maps**: [OpenStreetMap tile servers](https://operations.osmfoundation.org/policies/tiles/)
-  for OSM Standard; [OpenFreeMap](https://openfreemap.org/) for Liberty and Bright (no
-  key, no usage limits, © OpenMapTiles); [VersaTiles](https://versatiles.org/) for
-  Colorful (also © ESA WorldCover). All show data © OpenStreetMap contributors. The list
+  for OSM Standard; [OpenTopoMap](https://opentopomap.org/about) (CC-BY-SA; free to use
+  as long as the server is not strained by mass downloads, no availability guarantee);
+  [TopPlusOpen](https://gdz.bkg.bund.de/) by the German Federal Agency for Cartography and
+  Geodesy (free under dl-de/by-2-0 with its source note); [OpenFreeMap](https://openfreemap.org/)
+  for Liberty and Bright (no key, no usage limits, © OpenMapTiles); [VersaTiles](https://versatiles.org/)
+  for Colorful (also © ESA WorldCover). All but TopPlusOpen show data © OpenStreetMap
+  contributors. The list
   is `BASE_MAPS` in `src/config.ts`: a raster map is a tile URL with its attribution, a
   vector map the URL of its MapLibre style.
 - **Satellite imagery**: Esri World Imagery via its keyless legacy endpoint. Esri's terms
