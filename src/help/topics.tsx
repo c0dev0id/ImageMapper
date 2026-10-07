@@ -55,7 +55,7 @@ export function blendHelp(mode: BlendMode): Help {
               <MapDrawing />
             </Panel>
             <Then />
-            <Panel caption={label}>
+            <Panel caption="Result">
               <Blended mode={mode} paint={paint} transform={transform} />
             </Panel>
           </Banner>
@@ -127,8 +127,9 @@ export const MATCH_TOWNS_HELP: Help = {
         </Banner>
       ),
       text:
-        'Search for up to four towns on the image, far apart, pick each from the results and tap where it is on the image. ' +
-        'Match places the image by them, roughly.',
+        "Type a town's name, press Enter and pick the place from the results, then tap the town on the image with " +
+        "the row's image pin. Two towns are enough; with three or more, far apart, a wrong pick is found and left " +
+        'out. Towns are too rough to skew by, so the match keeps no point pairs.',
     },
     {
       title: 'Pin and skew',
@@ -159,8 +160,9 @@ export const MATCH_TOWNS_HELP: Help = {
         </Banner>
       ),
       text:
-        'Where the image is still off, pin point pairs with Pin: a spot on the image, then its place on the map. ' +
-        'Skew Image fits the image to its pairs; add pairs where it is still off and skew again.',
+        'Pin adds point pairs, always image first: tap a spot on the image (ring), then the same place on the map ' +
+        '(dot). Skew Image fits the image to its pairs: three turn, scale and slant it; more also bend it until ' +
+        'every pair matches. Where it is still off, add pairs or drag a ring or dot, then skew again.',
     },
   ],
 }

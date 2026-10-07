@@ -194,17 +194,21 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   rather become simpler. The banners are SVG drawings of one made-up region, as a map
   shows it and as a magazine prints it, in the same frame, so that the two match where an
   image fits (`help/drawings.tsx`). Blend modes are shown by the browser's own
-  `mix-blend-mode`, which follows the same W3C formulas as the image shader; vivid and one
-  colour recolour the drawing with the shader's formulas (`help/paint.ts`). Screen is
+  `mix-blend-mode`, which follows the same W3C formulas as the image shader; vivid and
+  one colour recolour the drawing with the shader's formulas (`help/paint.ts`). Screen is
   drawn with a dark image, which it is for, and Difference with the image a little off,
-  which it reveals. Drawings rather than screenshots: sharp on any screen, a few KB, no printed
-  map or map tiles to license, nothing to retake when the look changes. The texts are the
-  descriptions of the options (`BLEND_MODES`, `IMAGE_COLORS`). A help can also come once,
-  the first time a feature is used: that it was shown is noted in localStorage
-  (`mappic.help.<id>`), not in the project, so it lasts until the site data is cleared,
-  or for the session where storage is blocked. The dialog closes with its button, Esc or
-  a click beside it (`closedby="any"`); while a modal dialog is open, the map's keys (Esc,
-  undo) leave it alone.
+  which it reveals. Drawings rather than screenshots: sharp on any screen, a few KB, no
+  printed map or map tiles to license, nothing to retake when the look changes. The texts
+  of the settings are the descriptions of their options (`BLEND_MODES`, `IMAGE_COLORS`).
+  Help texts are plain and structured: a few sentences on purpose, what the options do
+  and an example where it helps, nothing the title or the captions already say and
+  nothing obvious (how a slider works). The effort goes where a feature is hard to
+  discover: the order of a pin pair, why a town match keeps no pairs, how the Match Towns
+  dialog is used. A help can also come once, the first time a feature is used: that it
+  was shown is noted in localStorage (`mappic.help.<id>`), not in the project, so it
+  lasts until the site data is cleared, or for the session where storage is blocked. The
+  dialog closes with its button, Esc or a click beside it (`closedby="any"`); while a
+  modal dialog is open, the map's keys (Esc, undo) leave it alone.
 - **Bringing things into view** lives in `map/navigate.ts`: one `showBounds` (padding,
   current rotation kept) behind place search, fly to image and fly to route; move image
   here is there too. Fly to
