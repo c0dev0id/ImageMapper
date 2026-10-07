@@ -60,6 +60,11 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   key. The pick is a display setting in the project (`baseMap`), like the
   satellite: kept in files, not undone. Liberty is the default, also for projects saved
   before the choice existed: OpenFreeMap needs no key and sets no usage limits.
+- **Missing tiles show the zoom below, enlarged.** A raster tile that fails to load (a
+  404 where a server has no data at that zoom) is replaced by MapLibre with its parent
+  tile, scaled up; only a tile that loads but is empty is drawn as it is. Esri's
+  satellite imagery answers missing zooms with a grey "Map data not yet available" tile;
+  `blankTile=false` in its URL turns those into 404s.
 
 - **Thin plate spline, own implementation.** TPS interpolates every GCP exactly; with
   three pairs it is the affine transform. It is fitted in Web Mercator (the display

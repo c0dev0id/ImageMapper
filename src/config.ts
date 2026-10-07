@@ -170,10 +170,12 @@ export const DEFAULT_BASE_MAP: BaseMapId = 'liberty'
 
 /**
  * Esri World Imagery through the keyless legacy endpoint. Esri's terms cover this only
- * together with Esri software or an ArcGIS subscription; see the README.
+ * together with Esri software or an ArcGIS subscription; see the README. Where a zoom has no
+ * imagery, `blankTile=false` makes the server answer 404 instead of a grey "Map data not yet
+ * available" tile, so that MapLibre shows the tile of the zoom below, enlarged.
  */
 export const SATELLITE_TILES =
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}?blankTile=false'
 export const SATELLITE_ATTRIBUTION =
   'Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community · Powered by <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a>'
 
