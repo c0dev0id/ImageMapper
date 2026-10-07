@@ -26,9 +26,9 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      shows it), then tap its place on the map; the next pair can follow right away. A
      ring waiting for its place is only kept once that place is tapped: Esc, Cancel or
      another tool drops it, and a second Esc stops pinning. Right-click (or long-press on
-     a touch screen) starts a pair the same way, and also matches or removes existing
-     points. Rings belong to the image and travel with it; dots belong to the map and
-     stay where they are.
+     a touch screen) starts a pair the same way, and also matches a selected point anew
+     or removes a pair. Rings belong to the image and travel with it; dots belong to the
+     map and stay where they are.
    - **Match Towns** gives a newly added image a first placement from up to four towns
      (or other places you can find on it), as far apart as possible. For each, type its
      name and press Enter or Search, pick the right place from the results, then press
@@ -72,9 +72,8 @@ Image and map points of a pair are shown as a numbered ring (image) and dot (map
 joined by a dashed line until a skew makes them coincide. Drag a point to correct it: a
 dot moves on the map, a ring moves to another spot of the image (dropped beside the
 image, it goes back). Where a pair coincides, the centre grabs the dot and the ring's
-edge grabs the ring. Skew again to apply the change. Right-clicking a point offers to
-remove it; removing one side of a pair selects the other side so it can be matched
-again.
+edge grabs the ring. Skew again to apply the change. Right-clicking a ring or dot
+offers to remove its pair: ring and dot go together.
 
 **Undo** and **Redo** (the arrows in the toolbar, or Ctrl+Z and Ctrl+Shift+Z) step
 through the edits of the current session: images, placements, points, skews, routes,

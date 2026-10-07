@@ -1,6 +1,6 @@
 import type { LngLat as MapLibreLngLat, Map as MapLibreMap } from 'maplibre-gl'
 import { unwrap } from 'solid-js/store'
-import { applyGcpAction, gcpMenu, hitTest, roundImagePoint, roundMapPoint, type SideRef } from '../gcp/gcps.ts'
+import { applyGcpAction, gcpMenu, hitTest, roundImagePoint, roundMapPoint } from '../gcp/gcps.ts'
 import type { LngLat, Px } from '../geo/types.ts'
 import type { Warp } from '../geo/warp.ts'
 import { warpOf } from '../state/derived.ts'
@@ -57,22 +57,22 @@ export function openGcpMenu(
   const warp = warpOf(layer?.id)
   const at = gcpPointAt(lngLat, newPointWarp(layer))
 
-  const sides: (SideRef & { x: number; y: number })[] = []
+  const markers: { gcpId: string; x: number; y: number }[] = []
   for (const g of layer?.gcps ?? []) {
     if (g.image && warp) {
       const p = map.project(warp.imageToMap([g.image[0], g.image[1]]))
-      sides.push({ gcpId: g.id, side: 'image', x: p.x, y: p.y })
+      markers.push({ gcpId: g.id, x: p.x, y: p.y })
     }
     if (g.map) {
       const p = map.project([g.map[0], g.map[1]])
-      sides.push({ gcpId: g.id, side: 'map', x: p.x, y: p.y })
+      markers.push({ gcpId: g.id, x: p.x, y: p.y })
     }
   }
   const sel = selection()
   const entries = gcpMenu({
     gcps: layer && unwrap(layer.gcps),
     selected: sel && sel.layerId === layer?.id ? { gcpId: sel.gcpId, side: sel.side } : undefined,
-    hits: hitTest(sides, point.x, point.y, touch ? 22 : 10),
+    hit: hitTest(markers, point.x, point.y, touch ? 22 : 10),
     onImage: at.image !== undefined,
   })
 

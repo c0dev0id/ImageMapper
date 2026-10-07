@@ -22,18 +22,18 @@ const mapOnly: Gcp = { id: 'c', map: [11.1, 48.1] }
 
 describe('gcpMenu', () => {
   it('starts a new pair on the image only, without a selection', () => {
-    const entries = gcpMenu({ gcps: [], selected: undefined, hits: [], onImage: true })
+    const entries = gcpMenu({ gcps: [], selected: undefined, hit: undefined, onImage: true })
     expect(labels(entries)).toEqual(['Pin point on image'])
     expect(entries[0].action).toEqual({ kind: 'pin' })
   })
 
   it('disables starting a pair when the click is not on the image', () => {
-    const entries = gcpMenu({ gcps: [], selected: undefined, hits: [], onImage: false })
+    const entries = gcpMenu({ gcps: [], selected: undefined, hit: undefined, onImage: false })
     expect(labels(entries)).toEqual(['Pin point on image (disabled)'])
   })
 
   it('disables everything without an active layer', () => {
-    const entries = gcpMenu({ gcps: undefined, selected: undefined, hits: [], onImage: false })
+    const entries = gcpMenu({ gcps: undefined, selected: undefined, hit: undefined, onImage: false })
     expect(labels(entries)).toEqual(['Pin point on image (disabled)'])
   })
 
@@ -41,7 +41,7 @@ describe('gcpMenu', () => {
     const entries = gcpMenu({
       gcps: [imageOnly],
       selected: { gcpId: 'b', side: 'image' },
-      hits: [],
+      hit: undefined,
       onImage: true,
     })
     expect(labels(entries)).toEqual(['Match point on map'])
@@ -49,12 +49,12 @@ describe('gcpMenu', () => {
   })
 
   it('offers matching on the image when a map point is selected', () => {
-    const entries = gcpMenu({ gcps: [mapOnly], selected: { gcpId: 'c', side: 'map' }, hits: [], onImage: true })
+    const entries = gcpMenu({ gcps: [mapOnly], selected: { gcpId: 'c', side: 'map' }, hit: undefined, onImage: true })
     expect(labels(entries)).toEqual(['Match point on image'])
   })
 
   it('offers no new point beside the image while a map point waits for its match', () => {
-    const entries = gcpMenu({ gcps: [mapOnly], selected: { gcpId: 'c', side: 'map' }, hits: [], onImage: false })
+    const entries = gcpMenu({ gcps: [mapOnly], selected: { gcpId: 'c', side: 'map' }, hit: undefined, onImage: false })
     expect(labels(entries)).toEqual(['Match point on image (disabled)'])
   })
 
@@ -62,50 +62,29 @@ describe('gcpMenu', () => {
     const entries = gcpMenu({
       gcps: [paired, imageOnly],
       selected: { gcpId: 'b', side: 'image' },
-      hits: [{ gcpId: 'a', side: 'map', distance: 3 }],
+      hit: 'a',
       onImage: true,
     })
-    expect(labels(entries)).toEqual(['Match point on map', 'Remove point'])
+    expect(labels(entries)).toEqual(['Match point on map', 'Remove point pair 1'])
   })
 
   it('also offers matching for a selected side of a complete pair', () => {
-    const entries = gcpMenu({ gcps: [paired], selected: { gcpId: 'a', side: 'map' }, hits: [], onImage: true })
+    const entries = gcpMenu({ gcps: [paired], selected: { gcpId: 'a', side: 'map' }, hit: undefined, onImage: true })
     expect(entries[0].action).toEqual({ kind: 'match', side: 'image', gcpId: 'a' })
   })
 
   it('ignores a selection that does not belong to the layer', () => {
-    const entries = gcpMenu({ gcps: [paired], selected: { gcpId: 'zz', side: 'image' }, hits: [], onImage: true })
+    const entries = gcpMenu({ gcps: [paired], selected: { gcpId: 'zz', side: 'image' }, hit: undefined, onImage: true })
     expect(labels(entries)).toEqual(['Pin point on image'])
   })
 
-  it('offers removing the nearest hit point', () => {
-    const entries = gcpMenu({
-      gcps: [paired, imageOnly],
-      selected: undefined,
-      hits: [
-        { gcpId: 'a', side: 'map', distance: 6 },
-        { gcpId: 'b', side: 'image', distance: 2 },
-      ],
-      onImage: true,
-    })
+  it('offers removing the pair under the click, named by its number', () => {
+    const entries = gcpMenu({ gcps: [paired, imageOnly], selected: undefined, hit: 'b', onImage: true })
     expect(entries.at(-1)).toEqual({
-      label: 'Remove point',
-      action: { kind: 'remove', side: 'image', gcpId: 'b' },
+      label: 'Remove point pair 2',
+      action: { kind: 'remove', gcpId: 'b' },
       enabled: true,
     })
-  })
-
-  it('asks which side to remove when both sides of a pair are hit', () => {
-    const entries = gcpMenu({
-      gcps: [paired],
-      selected: undefined,
-      hits: [
-        { gcpId: 'a', side: 'image', distance: 0 },
-        { gcpId: 'a', side: 'map', distance: 0 },
-      ],
-      onImage: true,
-    })
-    expect(labels(entries).slice(1)).toEqual(['Remove image point', 'Remove map point'])
   })
 })
 
@@ -123,27 +102,15 @@ describe('applyGcpAction', () => {
     expect(result.gcps).toEqual([{ id: 'a', image: [5, 6], map: [11, 48] }])
   })
 
-  it('removes one side and selects the remaining partner', () => {
-    const result = applyGcpAction([paired, imageOnly], { kind: 'remove', side: 'map', gcpId: 'a' }, at)
-    expect(result.gcps).toEqual([{ id: 'a', image: [10, 10] }, imageOnly])
-    expect(result.gcps[0]).not.toHaveProperty('map')
-    expect(result.selected).toEqual({ gcpId: 'a', side: 'image' })
-  })
-
-  it('keeps what else the point carries when removing one side', () => {
-    const result = applyGcpAction([{ ...paired, town: 'Kleve' }], { kind: 'remove', side: 'map', gcpId: 'a' }, at)
-    expect(result.gcps).toEqual([{ id: 'a', image: [10, 10], town: 'Kleve' }])
-  })
-
-  it('deletes the point when its last side is removed', () => {
-    const result = applyGcpAction([paired, imageOnly], { kind: 'remove', side: 'image', gcpId: 'b' }, at)
-    expect(result.gcps).toEqual([paired])
+  it('removes both sides of a pair and clears the selection', () => {
+    const result = applyGcpAction([paired, imageOnly], { kind: 'remove', gcpId: 'a' }, at)
+    expect(result.gcps).toEqual([imageOnly])
     expect(result.selected).toBeUndefined()
   })
 
   it('does not modify its input', () => {
     const gcps = [paired]
-    applyGcpAction(gcps, { kind: 'remove', side: 'map', gcpId: 'a' }, at)
+    applyGcpAction(gcps, { kind: 'remove', gcpId: 'a' }, at)
     expect(gcps).toEqual([{ id: 'a', image: [10, 10], map: [11, 48] }])
   })
 })
@@ -163,20 +130,19 @@ describe('moveGcpSide', () => {
 })
 
 describe('hitTest', () => {
-  it('returns sides within the radius with their distance', () => {
-    const hits = hitTest(
-      [
-        { gcpId: 'a', side: 'image', x: 100, y: 100 },
-        { gcpId: 'a', side: 'map', x: 106, y: 108 },
-        { gcpId: 'b', side: 'map', x: 300, y: 300 },
-      ],
-      100,
-      100,
-    )
-    expect(hits).toEqual([
-      { gcpId: 'a', side: 'image', distance: 0 },
-      { gcpId: 'a', side: 'map', distance: 10 },
-    ])
+  const markers = [
+    { gcpId: 'a', x: 106, y: 108 },
+    { gcpId: 'b', x: 103, y: 104 },
+    { gcpId: 'c', x: 300, y: 300 },
+  ]
+
+  it('returns the point with the nearest marker', () => {
+    expect(hitTest(markers, 100, 100)).toBe('b')
+  })
+
+  it('reaches as far as the radius and no farther', () => {
+    expect(hitTest([markers[0]], 100, 100)).toBe('a')
+    expect(hitTest([markers[0]], 100, 100, 9)).toBeUndefined()
   })
 })
 

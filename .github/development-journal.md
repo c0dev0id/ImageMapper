@@ -57,8 +57,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   request, pins its place and stores the pair in one undo step. Leaving the flow (Esc,
   Cancel, another tool, a mode or layer change) drops the waiting ring, so no half pair
   is left behind. Selection is one side of one GCP of the active layer: the menu then
-  matches its other side (sets or replaces it at the click) or removes one side and
-  selects the remaining one. Esc or a click on the empty map deselects on purpose; the
+  matches its other side (sets or replaces it at the click). Removing always takes the
+  whole pair, named by its number: removing a single side was not used in practice and
+  only left half pairs behind. Esc or a click on the empty map deselects on purpose; the
   click that only closes an open menu does not. Both markers can be
   dragged to correct a point. A map dot keeps the dropped position; an image ring takes
   the pixel under the drop through the drawn mesh (the same inverse as a click) and goes

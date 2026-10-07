@@ -22,13 +22,8 @@ export interface SideRef {
   side: Side
 }
 
-export interface Hit extends SideRef {
-  /** Screen distance from the click in CSS pixels. */
-  distance: number
-}
-
-/** An edit of an existing point: set or replace one of its sides, or remove one. */
-export type PointEdit = { kind: 'match'; side: Side; gcpId: string } | { kind: 'remove'; side: Side; gcpId: string }
+/** An edit of an existing point: set or replace one of its sides, or remove the whole pair. */
+export type PointEdit = { kind: 'match'; side: Side; gcpId: string } | { kind: 'remove'; gcpId: string }
 
 /** What a menu entry does: start a new pair (its image point first), or edit a point. */
 export type GcpAction = { kind: 'pin' } | PointEdit
@@ -44,20 +39,20 @@ export interface MenuInput {
   gcps: readonly Gcp[] | undefined
   /** The selected side, if it belongs to the active layer. */
   selected: SideRef | undefined
-  hits: readonly Hit[]
+  /** The GCP whose ring or dot is under the click, if any. */
+  hit: string | undefined
   /** Whether the click lies on the active, visible image. */
   onImage: boolean
 }
-
-const other = (side: Side): Side => (side === 'image' ? 'map' : 'image')
 
 /**
  * Context menu entries for a right-click in georeferencing mode. A new pair always starts
  * with its image point, at the click; its place on the map is the next tap. While one side
  * of a point is selected, the menu matches it on the other side instead, which sets (or
- * replaces) that side at the click. Removing stays possible.
+ * replaces) that side at the click. A ring or dot under the click offers to remove its pair,
+ * named by its number: both sides go together.
  */
-export function gcpMenu({ gcps, selected, hits, onImage }: MenuInput): MenuEntry[] {
+export function gcpMenu({ gcps, selected, hit, onImage }: MenuInput): MenuEntry[] {
   const hasLayer = gcps !== undefined
   const sel = selected && gcps?.some((g) => g.id === selected.gcpId) ? selected : undefined
   const entries: MenuEntry[] = !sel
@@ -65,24 +60,12 @@ export function gcpMenu({ gcps, selected, hits, onImage }: MenuInput): MenuEntry
     : sel.side === 'map'
       ? [{ label: 'Match point on image', action: { kind: 'match', side: 'image', gcpId: sel.gcpId }, enabled: onImage }]
       : [{ label: 'Match point on map', action: { kind: 'match', side: 'map', gcpId: sel.gcpId }, enabled: true }]
-  const nearest = [...hits].sort((a, b) => a.distance - b.distance)[0]
-  if (nearest) {
-    const sides = new Set(hits.filter((h) => h.gcpId === nearest.gcpId).map((h) => h.side))
-    if (sides.size === 2) {
-      for (const side of ['image', 'map'] as const) {
-        entries.push({
-          label: `Remove ${side} point`,
-          action: { kind: 'remove', side, gcpId: nearest.gcpId },
-          enabled: true,
-        })
-      }
-    } else {
-      entries.push({
-        label: 'Remove point',
-        action: { kind: 'remove', side: nearest.side, gcpId: nearest.gcpId },
-        enabled: true,
-      })
-    }
+  if (hit && gcps) {
+    entries.push({
+      label: `Remove point pair ${gcpNumber(gcps, hit)}`,
+      action: { kind: 'remove', gcpId: hit },
+      enabled: true,
+    })
   }
   return entries
 }
@@ -94,8 +77,7 @@ export interface ActionResult {
 
 /**
  * Applies an edit of an existing point. `at` is the clicked position: map coordinates and,
- * when the click is on the image, the image pixel there. Removing one side of a pair keeps
- * the other side and selects it, so it can be matched again.
+ * when the click is on the image, the image pixel there.
  */
 export function applyGcpAction(gcps: readonly Gcp[], action: PointEdit, at: { image?: Px; map: LngLat }): ActionResult {
   switch (action.kind) {
@@ -107,20 +89,8 @@ export function applyGcpAction(gcps: readonly Gcp[], action: PointEdit, at: { im
         selected: undefined,
       }
     }
-    case 'remove': {
-      const gcp = gcps.find((g) => g.id === action.gcpId)
-      if (!gcp) return { gcps: [...gcps], selected: undefined }
-      const remaining = other(action.side)
-      if (gcp[remaining] === undefined) {
-        return { gcps: gcps.filter((g) => g.id !== gcp.id), selected: undefined }
-      }
-      const kept: Gcp = { ...gcp }
-      delete kept[action.side]
-      return {
-        gcps: gcps.map((g) => (g.id === gcp.id ? kept : g)),
-        selected: { gcpId: gcp.id, side: remaining },
-      }
-    }
+    case 'remove':
+      return { gcps: gcps.filter((g) => g.id !== action.gcpId), selected: undefined }
   }
 }
 
@@ -129,16 +99,19 @@ export function moveGcpSide(gcps: readonly Gcp[], gcpId: string, side: Side, val
   return gcps.map((g) => (g.id === gcpId && g[side] ? { ...g, [side]: value } : g))
 }
 
-/** GCP sides within `radius` CSS pixels of a click. */
+/** The GCP whose marker (ring or dot) is nearest to a click, if one lies within `radius` CSS pixels. */
 export function hitTest(
-  points: readonly (SideRef & { x: number; y: number })[],
+  markers: readonly { gcpId: string; x: number; y: number }[],
   x: number,
   y: number,
   radius = 10,
-): Hit[] {
-  return points
-    .map((p) => ({ gcpId: p.gcpId, side: p.side, distance: Math.hypot(p.x - x, p.y - y) }))
-    .filter((h) => h.distance <= radius)
+): string | undefined {
+  let nearest: { gcpId: string; distance: number } | undefined
+  for (const m of markers) {
+    const distance = Math.hypot(m.x - x, m.y - y)
+    if (distance <= radius && (!nearest || distance < nearest.distance)) nearest = { gcpId: m.gcpId, distance }
+  }
+  return nearest?.gcpId
 }
 
 /** Number shown on a GCP's markers (1-based position in the layer). */

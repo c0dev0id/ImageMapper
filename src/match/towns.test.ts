@@ -81,7 +81,7 @@ describe('replaceTownPairs', () => {
     const gcps: Gcp[] = [
       { id: 'hand', image: [10, 10], map: [7, 50] },
       { id: 'old', image: [880, 260], map: [7.82, 50.66], town: 'Hachenburg' },
-      // A pair of the previous match with its image side removed by the user.
+      // A pair of the previous match that lacks its image side.
       { id: 'half', map: [7.97, 50.56], town: 'Westerburg' },
     ]
     const towns = [
