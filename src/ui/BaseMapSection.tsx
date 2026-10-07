@@ -2,7 +2,12 @@ import { BASE_MAPS, type BaseMapId } from '../config.ts'
 import { project, setBaseMap, setBaseMapSaturation, setSatelliteOpacity } from '../state/project.ts'
 import { EditableChoice } from './EditableChoice.tsx'
 
-const BASE_MAP_CHOICES = Object.entries(BASE_MAPS).map(([id, base]) => ({ value: id as BaseMapId, label: base.label }))
+/** The base maps by region, the world first. */
+const BASE_MAP_CHOICES = Object.entries(BASE_MAPS).map(([id, base]) => ({
+  value: id as BaseMapId,
+  label: base.label,
+  group: base.region,
+}))
 
 export function BaseMapSection() {
   return (

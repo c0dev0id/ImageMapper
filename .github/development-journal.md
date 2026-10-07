@@ -48,7 +48,16 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   next to the vector maps. A map earns its place by what it shows, not by its colour:
   outdoor detail (tracks, trails, their surface and difficulty) is what the vector maps
   leave out, so CyclOSM was added after a comparison of one trail-dense area, while a
-  copy of an existing map in another style (OSM.de) was not. The pick is a display setting in the project (`baseMap`), like the
+  copy of an existing map in another style (OSM.de) was not. Official topographic maps
+  by region come below the maps of the world, grouped in the menu (`region`, an
+  `<optgroup>` per run): a few countries and German states, more on request rather than a
+  hundred. They must serve Web Mercator with CORS headers, which WebGL needs for the
+  tiles: WMTS and XYZ services as templates, WMS as a GetMap request with
+  `{bbox-epsg-3857}`, which MapLibre fills in per tile, so no proxy is needed. Each has
+  `bounds`, so nothing is fetched beyond its region, and the zooms its server renders
+  (the Bavarian WMS draws nothing at small scales, hence `minzoom` 12). Candidates came
+  from the WMSproxy library; France's SCAN 25 was left out, as it is refused without a
+  key. The pick is a display setting in the project (`baseMap`), like the
   satellite: kept in files, not undone. Liberty is the default, also for projects saved
   before the choice existed: OpenFreeMap needs no key and sets no usage limits.
 
@@ -320,7 +329,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 
 ## Core features
 
-- A base map to pick (OSM Standard, OpenTopoMap, TopPlusOpen, CyclOSM as raster maps; OpenFreeMap
+- A base map to pick, with official topographic maps for Austria, France, Germany and
+  four German states, Norway, Switzerland and the USA below the maps of the world
+  (OSM Standard, OpenTopoMap, TopPlusOpen, CyclOSM as raster maps; OpenFreeMap
   Liberty, Bright and Positron, VersaTiles Colorful as vector maps) and an Esri
   satellite layer on top, set by one opacity slider that turns it off at 0 (the
   default; the layer is then hidden and fetches no tiles).

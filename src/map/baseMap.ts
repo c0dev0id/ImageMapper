@@ -1,14 +1,27 @@
 import type { LayerSpecification, Map as MapLibreMap, SourceSpecification, StyleSpecification } from 'maplibre-gl'
-import type { BaseMap } from '../config.ts'
+import type { BaseMap, RasterBaseMap } from '../config.ts'
 
 /** Ids of the base map's sources and layers start with this, apart from the app's own. */
 const PREFIX = 'base/'
 
-/** A raster base map as a style of its own, so that both kinds are shown the same way. */
-export function rasterStyle(tiles: string, attribution: string, maxzoom = 19): StyleSpecification {
+/**
+ * A raster base map as a one-layer style: its tiles fetched between its zooms and within its
+ * bounds, where a regional map has data, and shown enlarged beyond its highest zoom.
+ */
+export function rasterStyle({ tiles, attribution, minzoom, maxzoom = 19, bounds }: RasterBaseMap): StyleSpecification {
   return {
     version: 8,
-    sources: { tiles: { type: 'raster', tiles: [tiles], tileSize: 256, maxzoom, attribution } },
+    sources: {
+      tiles: {
+        type: 'raster',
+        tiles: [tiles],
+        tileSize: 256,
+        ...(minzoom !== undefined && { minzoom }),
+        maxzoom,
+        ...(bounds && { bounds: [...bounds] }),
+        attribution,
+      },
+    },
     layers: [{ id: 'tiles', type: 'raster', source: 'tiles' }],
   }
 }
@@ -64,7 +77,7 @@ export class BaseMapSwitcher {
 
   async show(base: BaseMap): Promise<void> {
     const ticket = ++this.latest
-    const style = 'style' in base ? await loadStyle(base.style) : rasterStyle(base.tiles, base.attribution, base.maxzoom)
+    const style = 'style' in base ? await loadStyle(base.style) : rasterStyle(base)
     if (ticket !== this.latest) return
     for (const id of this.layers) this.map.removeLayer(id)
     for (const id of this.sources) this.map.removeSource(id)

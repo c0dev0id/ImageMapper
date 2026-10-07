@@ -19,8 +19,13 @@ what the app is for; the (i) beside the name at the top of the panel shows it ag
    trails with their surface and difficulty, or the vector maps OpenFreeMap
    Liberty, OpenFreeMap Bright, OpenFreeMap Positron and VersaTiles Colorful, whose
    labels stay sharp on any screen. Positron is light grey, so the coloured lines of an
-   image in Multiply stand out against it. The **Satellite** slider lays Esri imagery over
-   any of them; all the way to the left, as it starts, turns it off. **Colour** takes the
+   image in Multiply stand out against it. Below the maps of the world, the menu lists
+   official maps by region: basemap.at (Austria), Plan IGN (France), basemap.de and the
+   state topographic maps of Baden-Württemberg, Bavaria, North Rhine-Westphalia and
+   Rhineland-Palatinate (Germany), Kartverket Topo (Norway), the swisstopo National Map
+   (Switzerland) and USGS Topo (USA). They show only their own region, the Bavarian map
+   only from zoom 12. The **Satellite** slider lays Esri imagery over any of them; all
+   the way to the left, as it starts, turns it off. **Colour** takes the
    colour out of the base map and the satellite, down to grey, so that any base map shows
    the images above it clearly.
 2. **Add images** (JPEG, PNG, WebP). Each image becomes a layer, listed with a preview.
@@ -134,10 +139,20 @@ mappic uses public services directly from the browser. Please respect their term
   Geodesy (free under dl-de/by-2-0 with its source note); [CyclOSM](https://www.cyclosm.org/),
   hosted by OpenStreetMap France under a fair-use policy; [OpenFreeMap](https://openfreemap.org/)
   for Liberty, Bright and Positron (no key, no usage limits, © OpenMapTiles); [VersaTiles](https://versatiles.org/)
-  for Colorful (also © ESA WorldCover). All but TopPlusOpen show data © OpenStreetMap
-  contributors. The list
-  is `BASE_MAPS` in `src/config.ts`: a raster map is a tile URL with its attribution, a
-  vector map the URL of its MapLibre style.
+  for Colorful (also © ESA WorldCover). All but TopPlusOpen and the regional maps show
+  data © OpenStreetMap contributors. The regional maps are the official open data of
+  their agencies: [basemap.at](https://basemap.at) (CC BY 4.0),
+  [IGN](https://geoservices.ign.fr) (Licence Ouverte Etalab 2.0),
+  [basemap.de](https://basemap.de) (CC BY 4.0), LGL Baden-Württemberg and LVermGeo
+  Rhineland-Palatinate (Datenlizenz Deutschland, by 2.0), the Bavarian surveying
+  administration (CC BY 4.0), Geobasis NRW (Datenlizenz Deutschland, zero 2.0),
+  [Kartverket](https://www.kartverket.no) (CC BY 4.0),
+  [swisstopo](https://www.swisstopo.admin.ch) (free geodata) and the
+  [USGS National Map](https://www.usgs.gov/programs/national-geospatial-program/national-map)
+  (public domain). The German state maps come from WMS servers that draw each tile on
+  request, so they load more slowly than the rest. The list is `BASE_MAPS` in
+  `src/config.ts`: a raster map is a tile URL with its attribution, a vector map the URL
+  of its MapLibre style.
 - **Satellite imagery**: Esri World Imagery via its keyless legacy endpoint. Esri's terms
   only cover this together with Esri software or an ArcGIS subscription; the URL is a
   single constant in `src/config.ts`.
