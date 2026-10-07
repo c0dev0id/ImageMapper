@@ -11,7 +11,9 @@ export type Region = 'World' | 'Austria' | 'France' | 'Germany' | 'Norway' | 'Sw
  * A raster base map: 256 px tiles, an XYZ template or a WMS GetMap request with
  * `{bbox-epsg-3857}`. Tiles are fetched from `minzoom` (0 by default) to `maxzoom` (19 by
  * default; enlarged beyond) and only within `bounds` (west, south, east, north), where a
- * regional map has data.
+ * regional map has data. `transparentGaps` marks a server that answers zooms it has no data
+ * for in some areas with transparent tiles: a tile that is not fully opaque is treated as
+ * missing, so the tile of the zoom below shows, enlarged.
  */
 export interface RasterBaseMap {
   tiles: string
@@ -19,6 +21,7 @@ export interface RasterBaseMap {
   minzoom?: number
   maxzoom?: number
   bounds?: readonly [number, number, number, number]
+  transparentGaps?: boolean
 }
 
 /** A base map: raster tiles, or a MapLibre style, which brings its own attribution. */
@@ -62,7 +65,9 @@ export const BASE_MAPS = {
     label: 'TopPlusOpen',
     region: 'World',
     tiles: 'https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web/default/WEBMERCATOR/{z}/{y}/{x}.png',
+    // Data to z18 in central Europe, z16 in the rest of Europe, z13 elsewhere.
     maxzoom: 18,
+    transparentGaps: true,
     attribution: TOPPLUSOPEN_ATTRIBUTION,
   },
   cyclosm: {

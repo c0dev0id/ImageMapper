@@ -1,20 +1,22 @@
 import type { LayerSpecification, Map as MapLibreMap, SourceSpecification, StyleSpecification } from 'maplibre-gl'
 import type { BaseMap, RasterBaseMap } from '../config.ts'
+import { GAPS_SCHEME } from './tileGaps.ts'
 
 /** Ids of the base map's sources and layers start with this, apart from the app's own. */
 const PREFIX = 'base/'
 
 /**
  * A raster base map as a one-layer style: its tiles fetched between its zooms and within its
- * bounds, where a regional map has data, and shown enlarged beyond its highest zoom.
+ * bounds, where a regional map has data, and shown enlarged beyond its highest zoom. Tiles
+ * of a map with transparent gaps go through the `gaps` loader, which reports them missing.
  */
-export function rasterStyle({ tiles, attribution, minzoom, maxzoom = 19, bounds }: RasterBaseMap): StyleSpecification {
+export function rasterStyle({ tiles, attribution, minzoom, maxzoom = 19, bounds, transparentGaps }: RasterBaseMap): StyleSpecification {
   return {
     version: 8,
     sources: {
       tiles: {
         type: 'raster',
-        tiles: [tiles],
+        tiles: [transparentGaps ? tiles.replace(/^https:/, `${GAPS_SCHEME}:`) : tiles],
         tileSize: 256,
         ...(minzoom !== undefined && { minzoom }),
         maxzoom,

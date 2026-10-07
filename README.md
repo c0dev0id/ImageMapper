@@ -19,15 +19,17 @@ what the app is for; the (i) beside the name at the top of the panel shows it ag
    trails with their surface and difficulty, or the vector maps OpenFreeMap
    Liberty, OpenFreeMap Bright, OpenFreeMap Positron and VersaTiles Colorful, whose
    labels stay sharp on any screen. Positron is light grey, so the coloured lines of an
-   image in Multiply stand out against it. Below the maps of the world, the menu lists
-   official maps by region: basemap.at (Austria), Plan IGN (France), basemap.de and the
-   state topographic maps of Baden-Württemberg, Bavaria, North Rhine-Westphalia and
-   Rhineland-Palatinate (Germany), Kartverket Topo (Norway), the swisstopo National Map
-   (Switzerland) and USGS Topo (USA). They show only their own region, the Bavarian map
-   only from zoom 12. The **Satellite** slider lays Esri imagery over any of them; all
-   the way to the left, as it starts, turns it off. **Colour** takes the
-   colour out of the base map and the satellite, down to grey, so that any base map shows
-   the images above it clearly.
+   image in Multiply stand out against it. TopPlusOpen has its full detail in central
+   Europe; elsewhere it ends at a lower zoom. Where a map or the satellite imagery has no
+   tiles for a zoom, the last zoom with data is shown enlarged. Below the maps of the
+   world, the menu lists official maps by region: basemap.at (Austria), Plan IGN (France),
+   basemap.de and the state topographic maps of Baden-Württemberg, Bavaria, North
+   Rhine-Westphalia and Rhineland-Palatinate (Germany), Kartverket Topo (Norway), the
+   swisstopo National Map (Switzerland) and USGS Topo (USA). They show only their own
+   region, the Bavarian map only from zoom 12. The **Satellite** slider lays Esri imagery
+   over any of them; all the way to the left, as it starts, turns it off. **Colour** takes
+   the colour out of the base map and the satellite, down to grey, so that any base map
+   shows the images above it clearly.
 2. **Add images** (JPEG, PNG, WebP). Each image becomes a layer, listed with a preview.
    Click an entry to make it the active layer, the one you work on. Drag an entry by its
    handle to change the order (or press the arrow keys on the handle); the eye hides a

@@ -62,9 +62,23 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   before the choice existed: OpenFreeMap needs no key and sets no usage limits.
 - **Missing tiles show the zoom below, enlarged.** A raster tile that fails to load (a
   404 where a server has no data at that zoom) is replaced by MapLibre with its parent
-  tile, scaled up; only a tile that loads but is empty is drawn as it is. Esri's
-  satellite imagery answers missing zooms with a grey "Map data not yet available" tile;
-  `blankTile=false` in its URL turns those into 404s.
+  tile, scaled up; only a tile that loads but is empty is drawn as it is. The highest
+  zoom with data depends on the place, not only on the server, so a fixed `maxzoom` would
+  either give up detail where it exists or leave gaps elsewhere. Esri's satellite imagery
+  (z19 in Freiburg, z18 in Norway's mountains, z17 in the Sahara) answers missing zooms
+  with a grey "Map data not yet available" tile; `blankTile=false` in its URL turns those
+  into 404s. These 404s carry no CORS headers, so the browser reports a network error,
+  after which MapLibre fetches the parent only at its next update: a gap can stay blank
+  until the map moves, which is accepted over capping the zoom. TopPlusOpen (z18 in
+  central Europe, z16 in the rest of Europe, z13 elsewhere) answers with transparent
+  tiles. Its tiles go through a `gaps://` protocol (`transparentGaps`), which reports any
+  tile that is not fully opaque as a 404 (MapLibre's `AJAXError`, the only error after
+  which it goes on to the parent by itself). Base map tiles with data are opaque; edge
+  tiles of a coverage area and translucent open ocean are replaced by the zoom below. The
+  decoded image is handed to MapLibre, so the check costs one pixel scan, not a second
+  decode. A file size check was rejected: it breaks when the server re-encodes its empty
+  tile. Three stacked copies of the map, each capped at one area's zoom, were rejected
+  too: more requests and hand-drawn area boxes for the same result.
 
 - **Thin plate spline, own implementation.** TPS interpolates every GCP exactly; with
   three pairs it is the affine transform. It is fitted in Web Mercator (the display

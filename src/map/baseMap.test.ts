@@ -55,4 +55,12 @@ describe('rasterStyle', () => {
     }).sources.tiles
     expect(source).toMatchObject({ minzoom: 12, maxzoom: 17, bounds: [8.9, 47.2, 13.9, 50.6] })
   })
+
+  it('loads the tiles of a map with transparent gaps through the gaps loader', () => {
+    const tiles = (transparentGaps: boolean) =>
+      rasterStyle({ tiles: 'https://tiles.example.org/{z}/{x}/{y}.png', attribution: '© Example', transparentGaps })
+        .sources.tiles
+    expect(tiles(true)).toMatchObject({ tiles: ['gaps://tiles.example.org/{z}/{x}/{y}.png'] })
+    expect(tiles(false)).toMatchObject({ tiles: ['https://tiles.example.org/{z}/{x}/{y}.png'] })
+  })
 })

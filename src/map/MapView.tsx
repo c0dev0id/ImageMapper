@@ -7,8 +7,10 @@ import { ROUTING_ATTRIBUTION } from '../config.ts'
 import { project, setView } from '../state/project.ts'
 import { notify } from '../state/ui.ts'
 import { baseStyle } from './style.ts'
+import { GAPS_SCHEME, loadTileWithGaps } from './tileGaps.ts'
 
 maplibregl.setWorkerUrl(workerUrl)
+maplibregl.addProtocol(GAPS_SCHEME, loadTileWithGaps)
 
 const round = (value: number, digits: number) => Math.round(value * 10 ** digits) / 10 ** digits
 
