@@ -1,10 +1,13 @@
 import type { MapOptions } from 'maplibre-gl'
 import type { FeatureCollection } from 'geojson'
-import { OSM_ATTRIBUTION, OSM_TILES, SATELLITE_ATTRIBUTION, SATELLITE_TILES } from '../config.ts'
+import { SATELLITE_ATTRIBUTION, SATELLITE_TILES } from '../config.ts'
 
 type StyleSpecification = Exclude<MapOptions['style'], string | undefined>
 
 export const EMPTY_COLLECTION: FeatureCollection = { type: 'FeatureCollection', features: [] }
+
+/** The base map's layers are inserted below this one, the lowest of the app's own layers. */
+export const SATELLITE_LAYER = 'satellite'
 
 /** Image layers are inserted directly below this layer, so routes are always drawn on top. */
 export const FIRST_OVERLAY_LAYER = 'routes-casing'
@@ -18,13 +21,6 @@ export function baseStyle(): StyleSpecification {
   return {
     version: 8,
     sources: {
-      osm: {
-        type: 'raster',
-        tiles: [OSM_TILES],
-        tileSize: 256,
-        maxzoom: 19,
-        attribution: OSM_ATTRIBUTION,
-      },
       satellite: {
         type: 'raster',
         tiles: [SATELLITE_TILES],
@@ -37,8 +33,7 @@ export function baseStyle(): StyleSpecification {
       'image-frame': { type: 'geojson', data: EMPTY_COLLECTION },
     },
     layers: [
-      { id: 'osm', type: 'raster', source: 'osm' },
-      { id: 'satellite', type: 'raster', source: 'satellite', layout: { visibility: 'none' } },
+      { id: SATELLITE_LAYER, type: 'raster', source: 'satellite', layout: { visibility: 'none' } },
       {
         id: 'routes-casing',
         type: 'line',

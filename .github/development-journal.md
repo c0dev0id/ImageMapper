@@ -25,11 +25,25 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Vitest 5 for unit tests of the pure modules.
 - Icons from Tabler Icons (MIT), copied as SVG paths into `src/ui/icons.tsx` rather than
   added as a dependency; the licence text is in `src/ui/tabler-icons-license.txt`.
-- External services: OSM standard tiles, Esri World Imagery tiles, FOSSGIS OSRM
-  routing servers (routing.openstreetmap.de), Nominatim search.
+- External services: base maps (OSM standard tiles; OpenFreeMap and VersaTiles vector
+  tiles with their styles), Esri World Imagery tiles, FOSSGIS OSRM routing servers
+  (routing.openstreetmap.de), Nominatim search.
 - Deployment: GitHub Actions to GitHub Pages.
 
 ## Key decisions
+
+- **Base maps.** A dropdown picks the base map from `BASE_MAPS`: raster entries are a
+  tile URL, vector entries a MapLibre style URL. OSM's raster tiles have their labels
+  baked in at about 11 px and are upscaled, blurry, on high-density screens; vector
+  styles draw labels in CSS pixels at any density, so they are larger and sharp. The
+  switch swaps the base map's sources and layers inside the running style (ids prefixed
+  `base/`, inserted below the satellite layer) and takes over the style's fonts and
+  icons; `setStyle` is no option, because serialising a style drops the custom image
+  layers. A style's projection, sky and light are ignored, so the Mercator image layers
+  stay right. A raster entry is turned into a one-layer style, so both kinds take the
+  same path. The pick is a display setting in the project (`baseMap`), like the
+  satellite: kept in files, not undone. Liberty is the default, also for projects saved
+  before the choice existed: OpenFreeMap needs no key and sets no usage limits.
 
 - **Thin plate spline, own implementation.** TPS interpolates every GCP exactly; with
   three pairs it is the affine transform. It is fitted in Web Mercator (the display
@@ -225,7 +239,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 
 ## Core features
 
-- OSM base map, Esri satellite layer with visibility and opacity.
+- A base map to pick (OSM Standard; OpenFreeMap Liberty and Bright, VersaTiles Colorful
+  as vector maps) and an Esri satellite layer with visibility and opacity on top.
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
   reordering, visibility, opacity, blend modes and an active layer.

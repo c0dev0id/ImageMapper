@@ -4,6 +4,24 @@ export const OSM_TILES = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
 export const OSM_ATTRIBUTION =
   '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
 
+/** A base map: raster tiles, or a MapLibre style (which brings its own attribution). */
+export type BaseMap = { label: string } & ({ tiles: string; attribution: string } | { style: string })
+
+/**
+ * The base maps to pick from, in menu order. Vector styles draw their labels at any
+ * screen density, so they stay larger and sharper than the labels baked into raster tiles.
+ */
+export const BASE_MAPS = {
+  osm: { label: 'OSM Standard', tiles: OSM_TILES, attribution: OSM_ATTRIBUTION },
+  liberty: { label: 'OpenFreeMap Liberty', style: 'https://tiles.openfreemap.org/styles/liberty' },
+  bright: { label: 'OpenFreeMap Bright', style: 'https://tiles.openfreemap.org/styles/bright' },
+  colorful: { label: 'VersaTiles Colorful', style: 'https://tiles.versatiles.org/assets/styles/colorful/style.json' },
+} as const satisfies Record<string, BaseMap>
+
+export type BaseMapId = keyof typeof BASE_MAPS
+
+export const DEFAULT_BASE_MAP: BaseMapId = 'liberty'
+
 /**
  * Esri World Imagery through the keyless legacy endpoint. Esri's terms cover this only
  * together with Esri software or an ArcGIS subscription; see the README.

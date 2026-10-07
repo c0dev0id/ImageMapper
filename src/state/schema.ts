@@ -1,3 +1,4 @@
+import { DEFAULT_BASE_MAP, type BaseMapId } from '../config.ts'
 import type { LngLat, Pair } from '../geo/types.ts'
 
 export const PROJECT_VERSION = 2
@@ -73,6 +74,8 @@ export interface Project {
   version: typeof PROJECT_VERSION
   name: string
   view: View
+  /** The base map below everything; an id that is no longer offered shows the default. */
+  baseMap: BaseMapId
   satellite: { visible: boolean; opacity: number }
   /** Bottom layer first. */
   layers: ImageLayer[]
@@ -86,6 +89,7 @@ export function emptyProject(): Project {
     version: PROJECT_VERSION,
     name: 'Untitled',
     view: { center: [0, 30], zoom: 2, bearing: 0, pitch: 0 },
+    baseMap: DEFAULT_BASE_MAP,
     satellite: { visible: false, opacity: 1 },
     layers: [],
     routes: [],

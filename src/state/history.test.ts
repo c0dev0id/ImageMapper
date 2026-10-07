@@ -60,7 +60,7 @@ describe('withCurrentDisplay', () => {
     gcps: [],
   })
 
-  it('keeps the current view, satellite and layer display settings', () => {
+  it('keeps the current view, base map, satellite and layer display settings', () => {
     const state: Project = {
       ...emptyProject(),
       name: 'old',
@@ -70,12 +70,14 @@ describe('withCurrentDisplay', () => {
       ...emptyProject(),
       name: 'new',
       view: { center: [11, 48], zoom: 12, bearing: 30, pitch: 40 },
+      baseMap: 'osm',
       satellite: { visible: true, opacity: 0.4 },
       layers: [{ ...layer('a', false, 0.3), blend: 'multiply' }],
     }
     const merged = withCurrentDisplay(state, current)
     expect(merged.name).toBe('old')
     expect(merged.view).toEqual(current.view)
+    expect(merged.baseMap).toBe('osm')
     expect(merged.satellite).toEqual(current.satellite)
     expect(merged.layers.map((l) => [l.id, l.visible, l.opacity, l.blend])).toEqual([
       ['a', false, 0.3, 'multiply'],

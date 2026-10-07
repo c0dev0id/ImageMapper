@@ -12,7 +12,10 @@ It runs entirely in the browser; nothing is uploaded anywhere.
 ## Workflow
 
 1. Move the map to the area of the tour: search for a place or address at the top of the
-   panel, or use the locate button below the zoom buttons.
+   panel, or use the locate button below the zoom buttons. The base map is picked in the
+   panel: OSM Standard, or the vector maps OpenFreeMap Liberty, OpenFreeMap Bright and
+   VersaTiles Colorful, whose labels are larger and stay sharp on any screen. The
+   satellite imagery can be laid over any of them.
 2. **Add images** (JPEG, PNG, WebP). Each image becomes a layer, listed with a preview.
    Click an entry to make it the active layer, the one you work on. Drag an entry by its
    handle to change the order (or press the arrow keys on the handle); the eye hides a
@@ -75,8 +78,8 @@ offers to remove its pair: ring and dot go together.
 
 **Undo** and **Redo** (the arrows in the toolbar, or Ctrl+Z and Ctrl+Shift+Z) step
 through the edits of the current session: images, placements, points, skews, routes,
-waypoints and names. The map view, the satellite layer and layer visibility, opacity
-and blend mode are not part of it, and opening a file, starting a new project or
+waypoints and names. The map view, the base map, the satellite layer and layer
+visibility, opacity and blend mode are not part of it, and opening a file, starting a new project or
 reloading starts a new history. Deleting a layer, route, point or waypoint is an undo
 step like any other edit. What cannot be undone asks first: **New** and **Open** when
 the current project holds anything, and discarding a stored project that cannot be
@@ -100,8 +103,12 @@ opened: there are no migrations before version 1.0.
 
 mappic uses public services directly from the browser. Please respect their terms:
 
-- **Map tiles**: [OpenStreetMap tile servers](https://operations.osmfoundation.org/policies/tiles/),
-  © OpenStreetMap contributors.
+- **Base maps**: [OpenStreetMap tile servers](https://operations.osmfoundation.org/policies/tiles/)
+  for OSM Standard; [OpenFreeMap](https://openfreemap.org/) for Liberty and Bright (no
+  key, no usage limits, © OpenMapTiles); [VersaTiles](https://versatiles.org/) for
+  Colorful (also © ESA WorldCover). All show data © OpenStreetMap contributors. The list
+  is `BASE_MAPS` in `src/config.ts`: a raster map is a tile URL with its attribution, a
+  vector map the URL of its MapLibre style.
 - **Satellite imagery**: Esri World Imagery via its keyless legacy endpoint. Esri's terms
   only cover this together with Esri software or an ArcGIS subscription; the URL is a
   single constant in `src/config.ts`.

@@ -1,5 +1,6 @@
 import { createSignal } from 'solid-js'
 import { createStore, reconcile, unwrap } from 'solid-js/store'
+import type { BaseMapId } from '../config.ts'
 import type { LngLat, Pair } from '../geo/types.ts'
 import { prepareSkew } from '../gcp/gcps.ts'
 import * as edit from '../routing/routeEdit.ts'
@@ -46,8 +47,8 @@ export function serializeProject(): string {
 }
 
 /**
- * Undo history of content edits. Display settings (map view, satellite, layer visibility
- * and opacity), routing results and the active-layer switch are not recorded.
+ * Undo history of content edits. Display settings (map view, base map, satellite, layer
+ * visibility and opacity), routing results and the active-layer switch are not recorded.
  */
 const history = new History<Project>()
 const [historyVersion, setHistoryVersion] = createSignal(0)
@@ -126,6 +127,11 @@ export function setProjectName(name: string): void {
 
 export function setView(view: View): void {
   setProject('view', reconcile(view))
+  onChange()
+}
+
+export function setBaseMap(id: BaseMapId): void {
+  setProject('baseMap', id)
   onChange()
 }
 
