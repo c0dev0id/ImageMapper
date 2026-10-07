@@ -90,12 +90,12 @@ offers to remove its pair: ring and dot go together.
 
 **Undo** and **Redo** (the arrows in the toolbar, or Ctrl+Z and Ctrl+Shift+Z) step
 through the edits of the current session: images, placements, points, skews, routes,
-waypoints and names. The map view, the base map, the satellite layer and layer
-visibility, opacity and blend mode are not part of it, and opening a file, starting a new project or
-reloading starts a new history. Deleting a layer, route, point or waypoint is an undo
-step like any other edit. What cannot be undone asks first: **New** and **Open** when
-the current project holds anything, and discarding a stored project that cannot be
-read.
+waypoints and names. The map view, the base map and its colour, the satellite layer and
+the visibility, opacity, blend mode and colours of a layer are not part of it, and
+opening a file, starting a new project or reloading starts a new history. Deleting a
+layer, route, point or waypoint is an undo step like any other edit. What cannot be
+undone asks first: **New** and **Open** when the current project holds anything, and
+discarding a stored project that cannot be read.
 
 On a phone the panel sits below the map; the arrow at the top of the panel folds it
 away to give the map more room. The toolbar takes up to two rows there.

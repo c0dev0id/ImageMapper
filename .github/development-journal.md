@@ -122,12 +122,13 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   objects are keyed by id so edits never recreate map layers.
 - **Undo.** Snapshots of the project are taken before every content edit (images, GCPs,
   skews, routes, waypoints, names) and restored with `reconcile`. Display settings (map
-  view, satellite, layer visibility, opacity and blend mode) keep their current values
-  on undo, so toggling an image while looking for map features does not fill the
-  history. Routing results are not steps. Open/New/reload start a new history. Every deletion is
-  an undo step and is not confirmed; what cannot be undone asks first: New and Open
-  while the project holds layers, routes or waypoints, and discarding a stored project
-  that cannot be read (a notice action can carry such a question).
+  view, base map and its colour, satellite, and each layer's visibility, opacity, blend
+  mode and colours) keep their current values on undo (`withCurrentDisplay`), so
+  toggling an image while looking for map features does not fill the history. Routing
+  results are not steps. Open/New/reload start a new history. Every deletion is an undo
+  step and is not confirmed; what cannot be undone asks first: New and Open while the
+  project holds layers, routes or waypoints, and discarding a stored project that
+  cannot be read (a notice action can carry such a question).
 - **Base map colour.** A slider takes the colour out of the base map and the satellite,
   so that images stand out. MapLibre can desaturate raster layers (`raster-saturation`),
   but vector styles keep their colours in hundreds of layers, so a small custom layer
