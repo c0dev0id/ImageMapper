@@ -20,6 +20,7 @@ import { useMap } from './context.ts'
 import { openGcpMenu, startPin } from './gcpMenu.ts'
 import { insertPointOnLine } from './routeTools.ts'
 import { fromMarker } from './markers.ts'
+import { TapFilter, type PointerSample } from './tapFilter.ts'
 
 /** Mouse and keyboard handling on the map that depends on the current mode. */
 export function Interactions() {
@@ -41,9 +42,20 @@ export function Interactions() {
   // adds a route point.
   let pointerType = 'mouse'
   let swallowClick = false
+  // Clicks that come with dragging the map are no taps (a mouse button that bounces, a
+  // browser's click after a touch pan): every tap waits a moment first.
+  const taps = new TapFilter()
+  const sample = (e: MouseEvent): PointerSample => ({ x: e.clientX, y: e.clientY, t: e.timeStamp, touch: pointerType !== 'mouse' })
   const onPointerDown = (e: PointerEvent) => {
     pointerType = e.pointerType
     swallowClick = menu() !== undefined && !(e.target instanceof Element && e.target.closest('.context-menu'))
+    if (e.isPrimary) taps.down(sample(e))
+  }
+  const onPointerMove = (e: PointerEvent) => {
+    if (e.isPrimary) taps.move(sample(e))
+  }
+  const onPointerUp = (e: PointerEvent) => {
+    if (e.isPrimary) taps.up(sample(e))
   }
 
   const onContextMenu = (e: MapMouseEvent) => {
@@ -57,6 +69,10 @@ export function Interactions() {
       swallowClick = false
       return
     }
+    taps.click(sample(e.originalEvent), () => onTap(e))
+  }
+  /** A click that proved to be a tap: it answers a tap request, or the current tool acts. */
+  const onTap = (e: MapMouseEvent) => {
     const { lng, lat } = e.lngLat.wrap()
     // A requested tap comes before the tools; markers let it through meanwhile (styles.css).
     if (deliverTap([lng, lat]) || fromMarker(e.originalEvent)) return
@@ -70,6 +86,8 @@ export function Interactions() {
     } else if (t === 'pin') startPin(e.lngLat)
   }
   const onMoveStart = () => setMenu(undefined)
+  // A tap made before a key comes first, so that Esc or Undo act on it, here or in a dialog.
+  const onKeyDownFirst = () => taps.flush()
   const onKeyDown = (e: KeyboardEvent) => {
     // Keys a dialog has handled are done; text fields keep their own undo and Escape handling.
     if (e.defaultPrevented || isTextField(e.target)) return
@@ -94,12 +112,20 @@ export function Interactions() {
 
   // On the window, so it runs before the menu closes itself on the same press.
   window.addEventListener('pointerdown', onPointerDown, true)
+  window.addEventListener('pointermove', onPointerMove, true)
+  window.addEventListener('pointerup', onPointerUp, true)
+  window.addEventListener('pointercancel', onPointerUp, true)
   map.on('contextmenu', onContextMenu)
   map.on('click', onClick)
   map.on('movestart', onMoveStart)
+  window.addEventListener('keydown', onKeyDownFirst, true)
   document.addEventListener('keydown', onKeyDown)
   onCleanup(() => {
+    window.removeEventListener('keydown', onKeyDownFirst, true)
     window.removeEventListener('pointerdown', onPointerDown, true)
+    window.removeEventListener('pointermove', onPointerMove, true)
+    window.removeEventListener('pointerup', onPointerUp, true)
+    window.removeEventListener('pointercancel', onPointerUp, true)
     map.off('contextmenu', onContextMenu)
     map.off('click', onClick)
     map.off('movestart', onMoveStart)

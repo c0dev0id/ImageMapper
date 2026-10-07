@@ -31,7 +31,10 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      ring waiting for its place is only kept once that place is tapped: Esc, Cancel or
      another tool drops it, and a second Esc stops pinning. Right-click (or long-press on
      a touch screen) starts a pair the same way. Rings belong to the image and travel
-     with it; dots belong to the map and stay where they are.
+     with it; dots belong to the map and stay where they are. Dragging the map between
+     taps is safe: a click right before or right after a drag (a bouncing mouse button,
+     or the click some browsers send when a touch pan ends) neither pins nor adds a route
+     point, which is why taps on the map take effect after 0.15 s.
    - **Match Towns** gives a newly added image a first placement from up to four towns
      (or other places you can find on it), as far apart as possible. For each, type its
      name and press Enter or Search, pick the right place from the results, then press

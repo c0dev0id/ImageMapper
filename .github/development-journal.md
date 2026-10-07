@@ -128,6 +128,16 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   an undo step and is not confirmed; what cannot be undone asks first: New and Open
   while the project holds layers, routes or waypoints, and discarding a stored project
   that cannot be read (a notice action can carry such a question).
+- **Taps versus drags.** A click on the map only counts 150 ms after it was made
+  (`TapFilter`): a drag that starts at the tap within that time takes it back, and a
+  click where a drag ended no more than 150 ms before is dropped. The first is a mouse
+  button bouncing as it is pressed to drag; the second a bounce on release, or the click
+  some browsers send when a touch pan ends, which lands on the grabbed spot because that
+  stays under the pointer. MapLibre's own check cannot see either: each is a separate
+  press without movement. Holding the tap back instead of undoing its effect keeps every
+  tool simple (a pin, a route point, a waypoint, an answer to a tap request): nothing has
+  to be revoked. A press made at the tap in time decides when it ends, however long it
+  is held.
 - **Touch.** MapLibre fires `contextmenu` for a 500 ms touch on the map; the app drops the
   click that may follow the lifting finger, and a long-press menu only reacts to a new
   tap. Draggable markers block MapLibre's long press, so they detect their own with
