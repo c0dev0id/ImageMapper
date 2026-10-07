@@ -18,6 +18,7 @@ export function MapView(props: { onLoad: (map: maplibregl.Map) => void }) {
 
   onMount(() => {
     const { center, zoom, bearing, pitch } = unwrap(project.view)
+    const credits = new maplibregl.AttributionControl({ compact: true, customAttribution: ROUTING_ATTRIBUTION })
     const map = new maplibregl.Map({
       container,
       style: baseStyle(),
@@ -27,8 +28,9 @@ export function MapView(props: { onLoad: (map: maplibregl.Map) => void }) {
       pitch,
       // The warped image layers draw a single world copy; keep everything else consistent.
       renderWorldCopies: false,
-      attributionControl: { compact: true, customAttribution: ROUTING_ATTRIBUTION },
+      attributionControl: false,
     })
+    map.addControl(credits)
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right')
     // One-shot "locate me": centres the map on the device position and marks it.
     const geolocate = new maplibregl.GeolocateControl({
@@ -44,7 +46,11 @@ export function MapView(props: { onLoad: (map: maplibregl.Map) => void }) {
     })
     map.addControl(geolocate, 'top-right')
     map.addControl(new maplibregl.ScaleControl(), 'bottom-left')
-    map.on('load', () => props.onLoad(map))
+    let stopFolding: (() => void) | undefined
+    map.on('load', () => {
+      stopFolding = foldCredits(map, credits)
+      props.onLoad(map)
+    })
     map.on('moveend', () => {
       const c = map.getCenter()
       setView({
@@ -54,8 +60,32 @@ export function MapView(props: { onLoad: (map: maplibregl.Map) => void }) {
         pitch: round(map.getPitch(), 2),
       })
     })
-    onCleanup(() => map.remove())
+    onCleanup(() => {
+      stopFolding?.()
+      map.remove()
+    })
   })
 
   return <div ref={container} class="map" />
+}
+
+/**
+ * The map credits start open and fold into their (i) after five seconds or at the first
+ * pan, zoom or click, as the OSMF attribution guidelines allow. MapLibre's compact control
+ * folds by itself only at a drag; the other cases call the same method. Returns the clean-up.
+ */
+function foldCredits(map: maplibregl.Map, credits: maplibregl.AttributionControl): () => void {
+  const fold = () => {
+    stop()
+    credits._updateCompactMinimize()
+  }
+  const stop = () => {
+    clearTimeout(timer)
+    map.off('movestart', fold)
+    map.off('click', fold)
+  }
+  const timer = setTimeout(fold, 5000)
+  map.on('movestart', fold)
+  map.on('click', fold)
+  return stop
 }

@@ -282,7 +282,12 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   FOSSGIS terms (one request per second, attribution, operator contact shown in the
   app). Esri World Imagery is used through the keyless legacy URL; Esri's terms only
   cover use with Esri software or an ArcGIS subscription. The URL is a single
-  constant in `src/config.ts`.
+  constant in `src/config.ts`. The credits start open and fold into their (i) after five
+  seconds or at the first pan, zoom or click: the OSMF attribution guidelines allow
+  folding on a dismiss click, on map interaction, after five seconds, or with the credits
+  on a start-up splash, but not hidden from the start. MapLibre's compact control folds by
+  itself only at a drag; `foldCredits` calls the same method (`_updateCompactMinimize`)
+  for the other cases.
 - **Licence notices in a file.** Minification drops licence comments, so the bundle
   itself carries no notices. Vite's `build.license` writes `licenses.txt` with the
   licences of all bundled packages; a small plugin in `vite.config.ts` appends the Tabler

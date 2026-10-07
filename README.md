@@ -139,6 +139,11 @@ mappic uses public services directly from the browser. Please respect their term
   foot). At most one request per second; mappic waits 1.1 s between requests. The terms
   require the operator's contact address to be shown, which the app does in its panel.
 
+The credits of all of these sit at the bottom right of the map. They start open and fold
+into their (i) after five seconds or at the first pan, zoom or click, as the
+[OSMF attribution guidelines](https://osmfoundation.org/wiki/Licence/Attribution_Guidelines)
+allow; the (i) opens them again.
+
 ## Development
 
 Requires Node.js 22.12 or newer.
