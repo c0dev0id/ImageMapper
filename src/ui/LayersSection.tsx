@@ -14,6 +14,8 @@ import {
 } from '../state/project.ts'
 import { DEFAULT_TINT, type ImageLayer } from '../state/schema.ts'
 import { layerNote } from '../state/ui.ts'
+import { HelpButton } from '../help/HelpDialog.tsx'
+import { blendHelp, colorsHelp } from '../help/topics.tsx'
 import { addImages, IMAGE_TYPES } from './addImages.ts'
 import { BLEND_MODES } from './blendModes.ts'
 import { EditableChoice } from './EditableChoice.tsx'
@@ -165,10 +167,11 @@ function dragToReorder(e: PointerEvent, layer: ImageLayer, entry: HTMLLIElement,
   handle.addEventListener('pointercancel', end)
 }
 
-/** Opacity, blend mode, point pairs and the note of the last skew or town match of the active layer. */
+/** Opacity, blend mode, colours, point pairs and the note of the last skew or town match of the active layer. */
 function ActiveLayer(props: { layer: ImageLayer }) {
   const layer = props.layer
   const blend = () => BLEND_MODES.find((m) => m.value === (layer.blend ?? 'normal')) ?? BLEND_MODES[0]
+  const colors = () => IMAGE_COLORS.find((c) => c.value === (layer.colors ?? 'original')) ?? IMAGE_COLORS[0]
   const pairs = () => layer.gcps.length
   const note = () => {
     const n = layerNote()
@@ -191,6 +194,7 @@ function ActiveLayer(props: { layer: ImageLayer }) {
       </div>
       <div class="row">
         <span class="muted">Blend</span>
+        <HelpButton label={`Explain ${blend().label}`} help={() => blendHelp(blend().value)} />
         <EditableChoice
           value={blend().value}
           options={BLEND_MODES}
@@ -199,9 +203,12 @@ function ActiveLayer(props: { layer: ImageLayer }) {
           onChange={(mode) => setLayerBlend(layer.id, mode)}
         />
       </div>
-      <p class="muted hint">{blend().description}</p>
       <div class="row">
         <span class="muted">Colours</span>
+        <HelpButton
+          label={`Explain ${colors().label}`}
+          help={() => colorsHelp(colors().value, layer.tint ?? DEFAULT_TINT)}
+        />
         <Show when={layer.colors === 'tinted'}>
           <input
             type="color"
@@ -213,7 +220,7 @@ function ActiveLayer(props: { layer: ImageLayer }) {
           />
         </Show>
         <EditableChoice
-          value={layer.colors ?? 'original'}
+          value={colors().value}
           options={IMAGE_COLORS}
           label={`Colours of ${layer.name}`}
           title="Change how the colours of the image are shown"

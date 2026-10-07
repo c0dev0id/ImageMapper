@@ -204,6 +204,24 @@ export const EyeOffIcon = () => (
   </Icon>
 )
 
+/** Explain what a setting or tool does (Tabler's help-circle). */
+export const HelpIcon = () => (
+  <Icon>
+    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+    <path d="M12 16v.01" />
+    <path d="M12 13a2 2 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
+  </Icon>
+)
+
+/** One thing turns into the next (Tabler's arrow-right). */
+export const ArrowRightIcon = () => (
+  <Icon>
+    <path d="M5 12l14 0" />
+    <path d="M13 18l6 -6" />
+    <path d="M13 6l6 6" />
+  </Icon>
+)
+
 /** A handle to drag a list item (Tabler's grip-vertical). */
 export const GripIcon = () => (
   <Icon>

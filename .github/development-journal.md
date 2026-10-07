@@ -187,6 +187,24 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   `showPicker()`, which not every browser supports, while a tap on the select itself
   opens the browser's own list everywhere. The swatch of a tinted image stays a colour
   input, before the name, so the pencils keep one column.
+- **Help.** A (?) beside a setting opens a help on the picked option in a big modal
+  dialog: a banner of pictures that shows the change, and its text. A help has one step
+  or up to three side by side (one below the other on narrow screens), each a banner with
+  its text; the type allows no more, as whatever needs more steps to explain should
+  rather become simpler. The banners are SVG drawings of one made-up region, as a map
+  shows it and as a magazine prints it, in the same frame, so that the two match where an
+  image fits (`help/drawings.tsx`). Blend modes are shown by the browser's own
+  `mix-blend-mode`, which follows the same W3C formulas as the image shader; vivid and one
+  colour recolour the drawing with the shader's formulas (`help/paint.ts`). Screen is
+  drawn with a dark image, which it is for, and Difference with the image a little off,
+  which it reveals. Drawings rather than screenshots: sharp on any screen, a few KB, no printed
+  map or map tiles to license, nothing to retake when the look changes. The texts are the
+  descriptions of the options (`BLEND_MODES`, `IMAGE_COLORS`). A help can also come once,
+  the first time a feature is used: that it was shown is noted in localStorage
+  (`mappic.help.<id>`), not in the project, so it lasts until the site data is cleared,
+  or for the session where storage is blocked. The dialog closes with its button, Esc or
+  a click beside it (`closedby="any"`); while a modal dialog is open, the map's keys (Esc,
+  undo) leave it alone.
 - **Bringing things into view** lives in `map/navigate.ts`: one `showBounds` (padding,
   current rotation kept) behind place search, fly to image and fly to route; move image
   here is there too. Fly to
@@ -277,7 +295,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   default; the layer is then hidden and fetches no tiles).
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
-  reordering, visibility, opacity, blend modes and an active layer.
+  reordering, visibility, opacity, blend modes, colours and an active layer.
+- Help with drawn pictures: on the picked blend mode and colours, behind a (?).
 - A map toolbar with captioned tools of the active image or the route being drawn.
 - GCP editing with the Pin tool (image first, then map) or context menus (right-click or
   long press), and "skew image to map" with fold/mirror checks.

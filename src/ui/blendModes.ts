@@ -1,8 +1,12 @@
 import type { BlendMode } from '../state/schema.ts'
 
-/** The blend modes offered for image layers, with what each is good for here. */
+/** The blend modes offered for image layers, with what each is good for here (shown in its help). */
 export const BLEND_MODES: readonly { value: BlendMode; label: string; description: string }[] = [
-  { value: 'normal', label: 'Normal', description: 'The image as it is.' },
+  {
+    value: 'normal',
+    label: 'Normal',
+    description: 'The image as it is, covering the map; lower its opacity to see the map through it.',
+  },
   {
     value: 'multiply',
     label: 'Multiply',

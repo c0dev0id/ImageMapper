@@ -13,6 +13,7 @@ import { RouteLayers } from './map/RouteLayers.tsx'
 import { MapView } from './map/MapView.tsx'
 import { Toolbar } from './map/Toolbar.tsx'
 import { Waypoints } from './map/Waypoints.tsx'
+import { HelpDialog } from './help/HelpDialog.tsx'
 import { initPersistence } from './state/persistence.ts'
 import { errorMessage, notify } from './state/ui.ts'
 import { Panel } from './ui/Panel.tsx'
@@ -61,6 +62,7 @@ export function App() {
         <Show when={map()}>
           <MatchTownsDialog />
         </Show>
+        <HelpDialog />
       </MapContext.Provider>
     </Show>
   )
