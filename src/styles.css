@@ -271,6 +271,31 @@ button.layer-select:hover:not(:disabled) {
   white-space: nowrap;
 }
 
+/* The base map reads like a name with its pencil, but is a select without its box: the
+   pencil takes the place of the arrow and lets clicks through, so a click on the name or
+   the pencil opens the browser's own list. */
+.base-map {
+  position: relative;
+}
+
+.base-map select {
+  appearance: none;
+  padding: 0 30px 0 0;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+
+.base-map svg {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
 .note {
   margin: 4px 0 0;
   padding: 4px 6px;
@@ -718,6 +743,15 @@ input[type='search'] {
   :where(.panel, .context-menu, .hint-bar, .dialog) button.icon {
     min-width: 34px;
     min-height: 34px;
+  }
+
+  /* In line with the pencils of the wider icon buttons. */
+  .base-map select {
+    padding-right: 34px;
+  }
+
+  .base-map svg {
+    right: 8px;
   }
 
   input[type='checkbox'],

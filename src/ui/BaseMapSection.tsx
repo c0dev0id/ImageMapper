@@ -1,20 +1,23 @@
 import { For } from 'solid-js'
 import { BASE_MAPS, type BaseMapId } from '../config.ts'
 import { project, setBaseMap, setSatellite } from '../state/project.ts'
+import { PencilIcon } from './icons.tsx'
 
 export function BaseMapSection() {
   return (
     <section class="section">
       <h2>Base map</h2>
-      <div class="row">
+      <div class="row base-map">
         <select
           class="grow"
           aria-label="Base map"
+          title="Change the base map"
           value={project.baseMap}
           onChange={(e) => setBaseMap(e.currentTarget.value as BaseMapId)}
         >
           <For each={Object.entries(BASE_MAPS)}>{([id, base]) => <option value={id}>{base.label}</option>}</For>
         </select>
+        <PencilIcon />
       </div>
       <div class="row">
         <label class="grow">
