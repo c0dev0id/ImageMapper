@@ -21,7 +21,6 @@ import {
   setEditingRouteId,
   setMenu,
   setMode,
-  setSelection,
   setLayerNote,
   setTool,
   stopDrawing,
@@ -83,7 +82,6 @@ export function redo(): void {
 
 function restore(state: Project | undefined): void {
   if (!state) return
-  setSelection(undefined)
   setMenu(undefined)
   setLayerNote(undefined)
   setProject(reconcile(withCurrentDisplay(state, unwrap(project)), { key: 'id', merge: false }))
@@ -107,7 +105,6 @@ export function activeLayer(): ImageLayer | undefined {
 
 /** Replaces the whole project (open, new, startup) and resets the transient UI state. */
 export function replaceProject(next: Project): void {
-  setSelection(undefined)
   setEditingRouteId(undefined)
   setMode('georef')
   setTool(undefined)
@@ -175,7 +172,6 @@ export function setActiveLayer(id: string | undefined): void {
   if (project.activeLayerId === id) return
   // A pin waiting for its place belongs to the layer that was active.
   cancelTapRequest()
-  setSelection(undefined)
   setMenu(undefined)
   setProject('activeLayerId', id)
   onChange()

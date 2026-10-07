@@ -16,17 +16,8 @@ export function roundMapPoint([lng, lat]: LngLat): LngLat {
   return [round(lng, 7), round(lat, 7)]
 }
 
-/** One side of one ground control point. */
-export interface SideRef {
-  gcpId: string
-  side: Side
-}
-
-/** An edit of an existing point: set or replace one of its sides, or remove the whole pair. */
-export type PointEdit = { kind: 'match'; side: Side; gcpId: string } | { kind: 'remove'; gcpId: string }
-
-/** What a menu entry does: start a new pair (its image point first), or edit a point. */
-export type GcpAction = { kind: 'pin' } | PointEdit
+/** What a menu entry does: start a new pair (its image point first), or remove a pair. */
+export type GcpAction = { kind: 'pin' } | { kind: 'remove'; gcpId: string }
 
 export interface MenuEntry {
   label: string
@@ -37,8 +28,6 @@ export interface MenuEntry {
 export interface MenuInput {
   /** GCPs of the active layer; undefined when there is no active layer. */
   gcps: readonly Gcp[] | undefined
-  /** The selected side, if it belongs to the active layer. */
-  selected: SideRef | undefined
   /** The GCP whose ring or dot is under the click, if any. */
   hit: string | undefined
   /** Whether the click lies on the active, visible image. */
@@ -47,19 +36,13 @@ export interface MenuInput {
 
 /**
  * Context menu entries for a right-click in georeferencing mode. A new pair always starts
- * with its image point, at the click; its place on the map is the next tap. While one side
- * of a point is selected, the menu matches it on the other side instead, which sets (or
- * replaces) that side at the click. A ring or dot under the click offers to remove its pair,
- * named by its number: both sides go together.
+ * with its image point, at the click; its place on the map is the next tap. A ring or dot
+ * under the click offers to remove its pair, named by its number: both sides go together.
  */
-export function gcpMenu({ gcps, selected, hit, onImage }: MenuInput): MenuEntry[] {
-  const hasLayer = gcps !== undefined
-  const sel = selected && gcps?.some((g) => g.id === selected.gcpId) ? selected : undefined
-  const entries: MenuEntry[] = !sel
-    ? [{ label: 'Pin point on image', action: { kind: 'pin' }, enabled: hasLayer && onImage }]
-    : sel.side === 'map'
-      ? [{ label: 'Match point on image', action: { kind: 'match', side: 'image', gcpId: sel.gcpId }, enabled: onImage }]
-      : [{ label: 'Match point on map', action: { kind: 'match', side: 'map', gcpId: sel.gcpId }, enabled: true }]
+export function gcpMenu({ gcps, hit, onImage }: MenuInput): MenuEntry[] {
+  const entries: MenuEntry[] = [
+    { label: 'Pin point on image', action: { kind: 'pin' }, enabled: gcps !== undefined && onImage },
+  ]
   if (hit && gcps) {
     entries.push({
       label: `Remove point pair ${gcpNumber(gcps, hit)}`,
@@ -68,30 +51,6 @@ export function gcpMenu({ gcps, selected, hit, onImage }: MenuInput): MenuEntry[
     })
   }
   return entries
-}
-
-export interface ActionResult {
-  gcps: Gcp[]
-  selected: SideRef | undefined
-}
-
-/**
- * Applies an edit of an existing point. `at` is the clicked position: map coordinates and,
- * when the click is on the image, the image pixel there.
- */
-export function applyGcpAction(gcps: readonly Gcp[], action: PointEdit, at: { image?: Px; map: LngLat }): ActionResult {
-  switch (action.kind) {
-    case 'match': {
-      const value = action.side === 'image' ? at.image : at.map
-      if (!value) return { gcps: [...gcps], selected: undefined }
-      return {
-        gcps: gcps.map((g) => (g.id === action.gcpId ? { ...g, [action.side]: value } : g)),
-        selected: undefined,
-      }
-    }
-    case 'remove':
-      return { gcps: gcps.filter((g) => g.id !== action.gcpId), selected: undefined }
-  }
 }
 
 /** Moves one existing side of a GCP, as when its marker is dragged; the other side stays. */

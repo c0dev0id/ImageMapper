@@ -1,18 +1,11 @@
 import { createSignal } from 'solid-js'
 import type { LngLat, Px } from '../geo/types.ts'
-import type { Side } from './schema.ts'
 
 /**
  * Transient UI state; never persisted. Modes: marking point pairs (`georef`), drawing a
  * route (`route`) and moving/rotating/resizing the active image (`transform`).
  */
 export type Mode = 'georef' | 'route' | 'transform'
-
-export interface Selection {
-  layerId: string
-  gcpId: string
-  side: Side
-}
 
 export interface Notice {
   id: number
@@ -36,7 +29,6 @@ export const [pendingPin, setPendingPin] = createSignal<{ layerId: string; image
 export const [mode, setMode] = createSignal<Mode>('georef')
 export const [tool, setTool] = createSignal<Tool>()
 export const [editingRouteId, setEditingRouteId] = createSignal<string>()
-export const [selection, setSelection] = createSignal<Selection>()
 export const [notices, setNotices] = createSignal<Notice[]>([])
 /** On phones the panel can shrink to its title row to give the map more room. */
 export const [panelCollapsed, setPanelCollapsed] = createSignal(false)
@@ -120,10 +112,9 @@ export const [layerNote, setLayerNote] = createSignal<{
   text: string
 }>()
 
-/** Enters draw route mode for a route; georeferencing selection and menus are closed. */
+/** Enters draw route mode for a route; a waiting tap request and an open menu are closed. */
 export function startDrawing(routeId: string): void {
   cancelTapRequest()
-  setSelection(undefined)
   setMenu(undefined)
   setEditingRouteId(routeId)
   setMode('route')
@@ -141,7 +132,6 @@ export function stopDrawing(): void {
 /** Enters the move/rotate/resize mode for the active image layer. */
 export function startTransform(): void {
   cancelTapRequest()
-  setSelection(undefined)
   setMenu(undefined)
   setEditingRouteId(undefined)
   setMode('transform')

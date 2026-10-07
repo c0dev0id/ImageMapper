@@ -304,14 +304,6 @@ button.layer-select:hover:not(:disabled) {
   z-index: 1;
 }
 
-.gcp-marker-image.selected {
-  z-index: 2;
-}
-
-.gcp-marker-map.selected {
-  z-index: 3;
-}
-
 .gcp {
   display: grid;
   place-items: center;
@@ -335,11 +327,6 @@ button.layer-select:hover:not(:disabled) {
   background: var(--map-point);
   color: #fff;
   border: 2px solid #fff;
-}
-
-.gcp-marker-image.selected .gcp,
-.gcp-marker-map.selected .gcp {
-  box-shadow: 0 0 0 3px #fcc419, 0 0 8px 3px rgba(252, 196, 25, 0.8);
 }
 
 .gcp.unpaired {

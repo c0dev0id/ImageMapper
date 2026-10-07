@@ -26,9 +26,8 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      shows it), then tap its place on the map; the next pair can follow right away. A
      ring waiting for its place is only kept once that place is tapped: Esc, Cancel or
      another tool drops it, and a second Esc stops pinning. Right-click (or long-press on
-     a touch screen) starts a pair the same way, and also matches a selected point anew
-     or removes a pair. Rings belong to the image and travel with it; dots belong to the
-     map and stay where they are.
+     a touch screen) starts a pair the same way. Rings belong to the image and travel
+     with it; dots belong to the map and stay where they are.
    - **Match Towns** gives a newly added image a first placement from up to four towns
      (or other places you can find on it), as far apart as possible. For each, type its
      name and press Enter or Search, pick the right place from the results, then press

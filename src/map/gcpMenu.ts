@@ -1,12 +1,12 @@
 import type { LngLat as MapLibreLngLat, Map as MapLibreMap } from 'maplibre-gl'
 import { unwrap } from 'solid-js/store'
-import { applyGcpAction, gcpMenu, hitTest, roundImagePoint, roundMapPoint } from '../gcp/gcps.ts'
+import { gcpMenu, hitTest, roundImagePoint, roundMapPoint } from '../gcp/gcps.ts'
 import type { LngLat, Px } from '../geo/types.ts'
 import type { Warp } from '../geo/warp.ts'
 import { warpOf } from '../state/derived.ts'
 import { activeLayer, layerById, setLayerGcps } from '../state/project.ts'
 import type { Gcp, ImageLayer } from '../state/schema.ts'
-import { requestTap, selection, setMenu, setPendingPin, setSelection } from '../state/ui.ts'
+import { requestTap, setMenu, setPendingPin } from '../state/ui.ts'
 
 /** A place on the map as GCP coordinates: the map position and, where the image is drawn, its pixel there. */
 export function gcpPointAt(lngLat: MapLibreLngLat, warp: Warp | undefined): { map: LngLat; image?: Px } {
@@ -31,7 +31,6 @@ export function startPin(lngLat: MapLibreLngLat): void {
   const image = layer && gcpPointAt(lngLat, newPointWarp(layer)).image
   if (!layer || !image) return
   const layerId = layer.id
-  setSelection(undefined)
   setPendingPin({ layerId, image })
   requestTap({
     hint: 'Now tap the same place on the map.',
@@ -55,7 +54,6 @@ export function openGcpMenu(
 ): void {
   const layer = activeLayer()
   const warp = warpOf(layer?.id)
-  const at = gcpPointAt(lngLat, newPointWarp(layer))
 
   const markers: { gcpId: string; x: number; y: number }[] = []
   for (const g of layer?.gcps ?? []) {
@@ -68,12 +66,10 @@ export function openGcpMenu(
       markers.push({ gcpId: g.id, x: p.x, y: p.y })
     }
   }
-  const sel = selection()
   const entries = gcpMenu({
     gcps: layer && unwrap(layer.gcps),
-    selected: sel && sel.layerId === layer?.id ? { gcpId: sel.gcpId, side: sel.side } : undefined,
     hit: hitTest(markers, point.x, point.y, touch ? 22 : 10),
-    onImage: at.image !== undefined,
+    onImage: gcpPointAt(lngLat, newPointWarp(layer)).image !== undefined,
   })
 
   setMenu({
@@ -90,9 +86,8 @@ export function openGcpMenu(
           startPin(lngLat)
           return
         }
-        const result = applyGcpAction(unwrap(target.gcps), entry.action, at)
-        setLayerGcps(target.id, result.gcps, entry.label)
-        setSelection(result.selected && { layerId: target.id, ...result.selected })
+        const { gcpId } = entry.action
+        setLayerGcps(target.id, unwrap(target.gcps).filter((g) => g.id !== gcpId), entry.label)
       },
     })),
   })

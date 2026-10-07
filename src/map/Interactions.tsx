@@ -9,7 +9,6 @@ import {
   menu,
   mode,
   setMenu,
-  setSelection,
   setTool,
   setWaypointDraft,
   stopDrawing,
@@ -38,8 +37,8 @@ export function Interactions() {
 
   // MapLibre turns a touch held for 500 ms into a contextmenu event. The browser may still
   // send a click when that finger lifts; it must neither close the menu nor add a point.
-  // A press that closes an open menu only closes it: its click neither clears the
-  // selection (a point waiting for its match) nor adds a route point.
+  // A press that closes an open menu only closes it: its click neither starts a pin nor
+  // adds a route point.
   let pointerType = 'mouse'
   let swallowClick = false
   const onPointerDown = (e: PointerEvent) => {
@@ -69,7 +68,6 @@ export function Interactions() {
       else if (t === 'waypoint') setWaypointDraft({ lngLat: roundLngLat([lng, lat]), name: '', description: '' })
       else if (t === 'append' || t === undefined) appendPoint(routeId, roundLngLat([lng, lat]))
     } else if (t === 'pin') startPin(e.lngLat)
-    else setSelection(undefined)
   }
   const onMoveStart = () => setMenu(undefined)
   const onKeyDown = (e: KeyboardEvent) => {
@@ -92,7 +90,6 @@ export function Interactions() {
     }
     else if (mode() === 'transform') stopTransform()
     else if (tool()) setTool(undefined)
-    else setSelection(undefined)
   }
 
   // On the window, so it runs before the menu closes itself on the same press.

@@ -7,7 +7,7 @@ import type { LngLat } from '../geo/types.ts'
 import { warpOf } from '../state/derived.ts'
 import { activeLayer, layerById, setLayerGcps } from '../state/project.ts'
 import type { Side } from '../state/schema.ts'
-import { menu, mode, pendingPin, selection, setSelection } from '../state/ui.ts'
+import { mode, pendingPin } from '../state/ui.ts'
 import { useMap } from './context.ts'
 import { gcpPointAt, openGcpMenu } from './gcpMenu.ts'
 import { MarkerHandle, onMarkerMenu } from './markers.ts'
@@ -79,29 +79,20 @@ function GcpMarker(props: { layerId: string; gcpId: string; side: Side }) {
     if (side === 'map') return g?.map && [g.map[0], g.map[1]]
     return g?.image && warpOf(layerId)?.imageToMap([g.image[0], g.image[1]])
   })
-  const selected = () => {
-    const s = selection()
-    return s?.layerId === layerId && s.gcpId === gcpId && s.side === side
-  }
   const paired = () => !!(gcp()?.image && gcp()?.map)
   const number = () => gcpNumber(layer()?.gcps ?? [], gcpId)
 
   const content = (
     <div
       class={`gcp gcp-${side}`}
-      classList={{ selected: selected(), unpaired: !paired() }}
-      title={`${side === 'image' ? 'Image' : 'Map'} point ${number()}${paired() ? '' : ' (not matched yet)'}`}
+      classList={{ unpaired: !paired() }}
+      title={`${side === 'image' ? 'Image' : 'Map'} point ${number()}${paired() ? '' : ' (unmatched)'}`}
     >
       {number()}
     </div>
   ) as HTMLElement
   const handle = new MarkerHandle(map, content, { className: `gcp-marker gcp-marker-${side}`, draggable: true })
-  // A finger lifted after a long press may still click; the menu it opened gets that tap.
-  handle.root.addEventListener('click', () => {
-    if (!menu()) setSelection({ layerId, gcpId, side })
-  })
   createEffect(() => handle.setPosition(position()))
-  createEffect(() => handle.root.classList.toggle('selected', selected()))
 
   // Dragging corrects the point: a map point takes the new place, an image point the image
   // pixel there. Dropped beside the image, an image point goes back.

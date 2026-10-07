@@ -1,11 +1,9 @@
 import { Match, Switch } from 'solid-js'
-import { gcpNumber } from '../gcp/gcps.ts'
 import { activeLayer, routeById } from '../state/project.ts'
 import {
   cancelTapRequest,
   editingRouteId,
   mode,
-  selection,
   stopDrawing,
   stopTransform,
   tapRequest,
@@ -26,15 +24,7 @@ export function HintBar() {
     if (mode() !== 'georef') return undefined
     const layer = activeLayer()
     if (!layer) return undefined
-    const sel = selection()
-    const t = tool()
-    if (sel && sel.layerId === layer.id) {
-      const what = `${sel.side === 'image' ? 'Image' : 'Map'} point ${gcpNumber(layer.gcps, sel.gcpId)} selected`
-      const how = 'right-click or long-press'
-      if (sel.side === 'image') return `${what}: ${how} the same place on the map to match it, or drag it.`
-      return `${what}: ${layer.visible ? '' : 'show the image, then '}${how} the same place on the image to match it, or drag it.`
-    }
-    if (t === 'pin') {
+    if (tool() === 'pin') {
       return layer.visible
         ? 'Tap a spot on the image to pin it, then its place on the map.'
         : 'The image is hidden: show it to pin a spot on it.'
