@@ -89,8 +89,9 @@ export function Interactions() {
   // A tap made before a key comes first, so that Esc or Undo act on it, here or in a dialog.
   const onKeyDownFirst = () => taps.flush()
   const onKeyDown = (e: KeyboardEvent) => {
-    // Keys a dialog has handled are done; text fields keep their own undo and Escape handling.
-    if (e.defaultPrevented || isTextField(e.target)) return
+    // Keys a dialog has handled are done; text fields keep their own undo and Escape handling,
+    // and an open modal dialog has the keyboard to itself (its Esc closes only the dialog).
+    if (e.defaultPrevented || isTextField(e.target) || document.querySelector('dialog:modal')) return
     const key = e.key.toLowerCase()
     if ((e.ctrlKey || e.metaKey) && !e.altKey && (key === 'z' || key === 'y')) {
       e.preventDefault()
