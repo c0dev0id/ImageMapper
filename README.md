@@ -178,10 +178,17 @@ Requires Node.js 22.12 or newer.
 npm ci
 npm run dev        # development server
 npm test           # unit tests (Vitest)
+npm run e2e        # end-to-end tests of the built app (Playwright, Chromium)
 npm run typecheck  # TypeScript
 npm run build      # production build in dist/
 npm run preview    # serve dist/
 ```
+
+The end-to-end tests build the app and serve it on port 4173, unless something already
+runs there. They answer every request beyond the app themselves (tiles, styles, routing,
+search), so they run offline and never load the public services. Before the first run,
+`npx playwright install chromium` fetches the browser. `e2e/app.ts` holds the mocks and
+helpers; a failed run leaves a trace per test in `test-results/`.
 
 Stack: SolidJS, MapLibre GL JS 6, Vite, TypeScript, fflate, idb-keyval. The icons are
 drawn from or composed of [Tabler Icons](https://tabler.io/icons) (MIT License). The

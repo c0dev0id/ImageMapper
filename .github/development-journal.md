@@ -22,7 +22,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - SolidJS 1.9 (UI and state), Vite 8 (build), TypeScript 7 (type checking).
 - MapLibre GL JS 6 (map rendering, WebGL2 required).
 - fflate (ZIP project files), idb-keyval (IndexedDB access).
-- Vitest 5 for unit tests of the pure modules.
+- Vitest 5 for unit tests of the pure modules; Playwright (Chromium) for end-to-end tests
+  of the built app.
 - Icons from Tabler Icons (MIT), copied as SVG paths into `src/ui/icons.tsx` rather than
   added as a dependency; the licence text is in `src/ui/tabler-icons-license.txt`.
 - External services: base maps (OSM standard, OpenTopoMap and BKG TopPlusOpen raster
@@ -345,6 +346,20 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   source. The file sits next to `index.html` (Vite's default `.vite/` folder would be a
   hidden directory) and is linked in the footer; it only exists in builds, not on the
   development server.
+- **End-to-end tests with every outside service mocked.** The unit tests cover the pure
+  logic; the flows through the UI (georeferencing with pins and the context menu, Match
+  Towns, route and line drawing with GPX export, base maps and their missing tiles, the
+  project file, the About dialog) run in Playwright against the production build, in CI
+  before every deploy. `e2e/app.ts` answers every request beyond the app: raster tiles
+  as a grid (so screenshots show the map move), every vector style as a raster style of
+  the same grid, OSRM with a detour per leg (so routed legs differ from straight ones),
+  Nominatim from a table per test. The tests never reach the public services, run
+  offline and see the same answers every time. A test fails on any error thrown in the
+  page. Stored state is read from IndexedDB, as the app wrote it; since autosave waits
+  400 ms and taps wait 150 ms to rule out a drag, tests wait for the outcome they expect
+  rather than for fixed times. No retries: a test that fails once has found something.
+  Projects are seeded through `emptyProject()` from the schema, so a schema change shows
+  up as a type error in the tests rather than as rejected data.
 
 ## Core features
 
