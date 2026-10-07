@@ -193,8 +193,8 @@ function ActiveLayer(props: { layer: ImageLayer }) {
         />
       </div>
       <div class="row">
-        <HelpButton label="Explain blend modes" help={() => BLEND_HELP} />
         <span class="muted">Blend</span>
+        <HelpButton label="Explain blend modes" help={() => BLEND_HELP} />
         <EditableChoice
           value={blend().value}
           options={BLEND_MODES}
@@ -204,8 +204,8 @@ function ActiveLayer(props: { layer: ImageLayer }) {
         />
       </div>
       <div class="row">
-        <HelpButton label="Explain colours" help={() => colorsHelp(layer.tint ?? DEFAULT_TINT)} />
         <span class="muted">Colours</span>
+        <HelpButton label="Explain colours" help={() => colorsHelp(layer.tint ?? DEFAULT_TINT)} />
         <Show when={layer.colors === 'tinted'}>
           <input
             type="color"
