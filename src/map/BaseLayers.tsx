@@ -23,10 +23,11 @@ export function BaseLayers() {
     baseMaps.show(base).catch((error) => notify(`The base map could not be loaded: ${errorMessage(error)}`))
   })
   createEffect(() => {
-    map.setLayoutProperty(SATELLITE_LAYER, 'visibility', project.satellite.visible ? 'visible' : 'none')
+    // Off at 0, which also keeps its tiles from being fetched.
+    map.setLayoutProperty(SATELLITE_LAYER, 'visibility', project.satelliteOpacity > 0 ? 'visible' : 'none')
   })
   createEffect(() => {
-    map.setPaintProperty(SATELLITE_LAYER, 'raster-opacity', project.satellite.opacity)
+    map.setPaintProperty(SATELLITE_LAYER, 'raster-opacity', project.satelliteOpacity)
   })
   return null
 }

@@ -65,7 +65,7 @@ export function withCurrentDisplay(state: Project, current: Project): Project {
     view: current.view,
     baseMap: current.baseMap,
     baseMapSaturation: current.baseMapSaturation,
-    satellite: current.satellite,
+    satelliteOpacity: current.satelliteOpacity,
     layers: state.layers.map((l) => ({ ...l, ...display.get(l.id) })),
   }
 }

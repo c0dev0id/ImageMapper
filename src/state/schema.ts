@@ -91,7 +91,8 @@ export interface Project {
   baseMap: BaseMapId
   /** How much colour the base map and the satellite keep: 0 is grey, 1 their own colours. */
   baseMapSaturation: number
-  satellite: { visible: boolean; opacity: number }
+  /** Opacity of the satellite imagery over the base map; 0 turns it off. */
+  satelliteOpacity: number
   /** Bottom layer first. */
   layers: ImageLayer[]
   activeLayerId?: string
@@ -106,7 +107,7 @@ export function emptyProject(): Project {
     view: { center: [0, 30], zoom: 2, bearing: 0, pitch: 0 },
     baseMap: DEFAULT_BASE_MAP,
     baseMapSaturation: 1,
-    satellite: { visible: false, opacity: 1 },
+    satelliteOpacity: 0,
     layers: [],
     routes: [],
     waypoints: [],

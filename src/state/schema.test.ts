@@ -11,8 +11,10 @@ describe('parseProject', () => {
     const older: Record<string, unknown> = { ...emptyProject() }
     delete older.baseMap
     delete older.baseMapSaturation
+    delete older.satelliteOpacity
     expect(parseProject(JSON.stringify(older)).baseMap).toBe('liberty')
     expect(parseProject(JSON.stringify(older)).baseMapSaturation).toBe(1)
+    expect(parseProject(JSON.stringify(older)).satelliteOpacity).toBe(0)
   })
 
   it('rejects other versions', () => {

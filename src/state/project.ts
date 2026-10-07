@@ -141,8 +141,8 @@ export function setBaseMapSaturation(saturation: number): void {
   onChange()
 }
 
-export function setSatellite(patch: Partial<Project['satellite']>): void {
-  setProject('satellite', (s) => ({ ...s, ...patch }))
+export function setSatelliteOpacity(opacity: number): void {
+  setProject('satelliteOpacity', opacity)
   onChange()
 }
 
