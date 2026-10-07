@@ -1,5 +1,5 @@
 /* The Match Towns dialog floats over the map without blocking it, so the image can be read
-   and tapped; its title drags it aside. */
+   and tapped; its title bar, with a grip, drags it aside. */
 .dialog.floating {
   position: fixed;
   inset: auto;
@@ -9,10 +9,27 @@
   overflow: auto;
 }
 
-.dialog-handle {
+.dialog-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -16px -16px 12px;
+  padding: 6px 8px 6px 10px;
+  border-bottom: 1px solid #dee2e6;
+  background: #f1f3f5;
   cursor: move;
   touch-action: none;
   user-select: none;
+}
+
+.dialog-bar > svg {
+  flex: none;
+  color: var(--muted);
+}
+
+.dialog .dialog-bar h2 {
+  flex: 1;
+  margin: 0;
 }
 
 /* Town rows: the search with its image pin, then the results, what was picked, or why the

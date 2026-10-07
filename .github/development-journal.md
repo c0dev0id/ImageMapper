@@ -241,9 +241,10 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   crosshair. Esc, Cancel, a mode change, a tool pick or another request end it; the
   requester may refuse a tap (beside the image, or with the image hidden) and keep
   waiting. The dialog does not block the map, so the image can be panned, zoomed and
-  tapped while it is open; it is dragged by its title, stays partly on screen and keeps
-  its position, and it stays open while a row is incomplete or left out, saying per row
-  what is missing. Its searches prefer the visible area, as the panel's search does.
+  tapped while it is open; it is dragged by its title bar (a grip and a move cursor show
+  where to hold it), stays partly on screen and keeps its position, and it stays open
+  while a row is incomplete or left out, saying per row what is missing. Its searches
+  prefer the visible area, as the panel's search does.
   What a row still needs is worked out from the row itself (`rowNote`); only "does not
   fit" is stored, by the match. Everything lives in `src/match/`, its styles included,
   so the feature can be taken out in one piece.

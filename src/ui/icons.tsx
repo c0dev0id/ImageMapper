@@ -222,7 +222,7 @@ export const ArrowRightIcon = () => (
   </Icon>
 )
 
-/** A handle to drag a list item (Tabler's grip-vertical). */
+/** A handle to drag a list item or a dialog (Tabler's grip-vertical). */
 export const GripIcon = () => (
   <Icon>
     <path d="M8 5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />

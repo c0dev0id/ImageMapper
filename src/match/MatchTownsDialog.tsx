@@ -6,7 +6,7 @@ import { searchViewbox } from '../map/navigate.ts'
 import { searchPlaces, type Place } from '../search/nominatim.ts'
 import { layerById } from '../state/project.ts'
 import { cancelTapRequest, errorMessage, requestTap, tapRequest, type TapRequest } from '../state/ui.ts'
-import { PinImageIcon } from '../ui/icons.tsx'
+import { GripIcon, PinImageIcon } from '../ui/icons.tsx'
 import { PlaceResults } from '../ui/PlaceResults.tsx'
 import { matchTowns } from './matchTowns.ts'
 import './MatchTowns.css'
@@ -31,7 +31,7 @@ export function openMatchTowns(id: string): void {
  * Asks for up to four towns and places the image by them: each is searched for and picked
  * from the results, and its spot is tapped on the image. The dialog does not block the
  * map, so the image can be panned, zoomed and tapped, and it can be dragged aside by its
- * title. It stays open until every town it was given is used, saying per row what is
+ * title bar. It stays open until every town it was given is used, saying per row what is
  * missing; Close or Esc closes it.
  */
 export function MatchTownsDialog() {
@@ -67,9 +67,10 @@ export function MatchTownsDialog() {
         else close()
       }}
     >
-      <h2 class="dialog-handle" title="Drag to move" onPointerDown={(e) => dragDialog(e, dialog)}>
-        Match towns
-      </h2>
+      <div class="dialog-bar" title="Drag to move" onPointerDown={(e) => dragDialog(e, dialog)}>
+        <GripIcon />
+        <h2>Match towns</h2>
+      </div>
       <Show when={layerId()} keyed>
         {(id) => <TownForm layerId={id} onClose={close} />}
       </Show>
@@ -336,7 +337,7 @@ function placeDialog(dialog: HTMLDialogElement, map: DOMRect): void {
   )
 }
 
-/** Drags the dialog by its title, with mouse, touch or pen. */
+/** Drags the dialog by its title bar, with mouse, touch or pen. */
 function dragDialog(e: PointerEvent, dialog: HTMLDialogElement): void {
   if (!e.isPrimary || e.button !== 0) return
   const handle = e.currentTarget as HTMLElement

@@ -53,7 +53,7 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      fit the others (a namesake picked by mistake, a tap in the wrong spot) is left out
      and marked. The dialog stays open until every town it was given is used and says
      what is missing for each; it does not block the map, so the image can be zoomed and
-     tapped, and it can be dragged aside by its title.
+     tapped, and it can be dragged aside by its title bar, the grip showing where.
    - **Skew Image** (three or more pairs) fits the image to its pairs. Three pairs rotate,
      scale and skew it; more pairs also bend it so that every pair matches exactly. Add
      pairs where the image is still off and skew again.
