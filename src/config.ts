@@ -16,10 +16,13 @@ const OPENTOPOMAP_ATTRIBUTION =
 /** BKG's terms ask for the year of the last data acquisition: for tiles fetched live, this year. */
 const TOPPLUSOPEN_ATTRIBUTION = `© <a href="https://www.bkg.bund.de" target="_blank" rel="noopener">BKG</a> (${new Date().getFullYear()}) <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener">dl-de/by-2-0</a>, <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_topplusopen.html" target="_blank" rel="noopener">Data sources</a>`
 
+const CYCLOSM_ATTRIBUTION = `Map style: <a href="https://www.cyclosm.org" target="_blank" rel="noopener">CyclOSM</a>, hosted by <a href="https://www.openstreetmap.fr" target="_blank" rel="noopener">OpenStreetMap France</a> · Map data: ${OSM_ATTRIBUTION}`
+
 /**
  * The base maps to pick from, in menu order. Vector styles draw their labels at any
  * screen density, so they stay sharp; of the raster maps, OpenTopoMap and TopPlusOpen bake
- * in labels large enough to read.
+ * in labels large enough to read, and CyclOSM shows tracks and trails with their surface
+ * and difficulty.
  */
 export const BASE_MAPS = {
   osm: { label: 'OSM Standard', tiles: OSM_TILES, attribution: OSM_ATTRIBUTION },
@@ -34,6 +37,12 @@ export const BASE_MAPS = {
     tiles: 'https://sgx.geodatenzentrum.de/wmts_topplus_open/tile/1.0.0/web/default/WEBMERCATOR/{z}/{y}/{x}.png',
     maxzoom: 18,
     attribution: TOPPLUSOPEN_ATTRIBUTION,
+  },
+  cyclosm: {
+    label: 'CyclOSM',
+    tiles: 'https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+    maxzoom: 20,
+    attribution: CYCLOSM_ATTRIBUTION,
   },
   liberty: { label: 'OpenFreeMap Liberty', style: 'https://tiles.openfreemap.org/styles/liberty' },
   bright: { label: 'OpenFreeMap Bright', style: 'https://tiles.openfreemap.org/styles/bright' },

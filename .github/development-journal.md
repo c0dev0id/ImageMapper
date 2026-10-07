@@ -45,7 +45,10 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   same path; it carries the highest zoom its server renders (OpenTopoMap 17,
   TopPlusOpen 18), beyond which MapLibre enlarges the last tiles. Raster maps are not
   all small-print: OpenTopoMap and TopPlusOpen bake in large labels and are offered
-  next to the vector maps. The pick is a display setting in the project (`baseMap`), like the
+  next to the vector maps. A map earns its place by what it shows, not by its colour:
+  outdoor detail (tracks, trails, their surface and difficulty) is what the vector maps
+  leave out, so CyclOSM was added after a comparison of one trail-dense area, while a
+  copy of an existing map in another style (OSM.de) was not. The pick is a display setting in the project (`baseMap`), like the
   satellite: kept in files, not undone. Liberty is the default, also for projects saved
   before the choice existed: OpenFreeMap needs no key and sets no usage limits.
 
@@ -317,7 +320,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 
 ## Core features
 
-- A base map to pick (OSM Standard, OpenTopoMap, TopPlusOpen as raster maps; OpenFreeMap
+- A base map to pick (OSM Standard, OpenTopoMap, TopPlusOpen, CyclOSM as raster maps; OpenFreeMap
   Liberty, Bright and Positron, VersaTiles Colorful as vector maps) and an Esri
   satellite layer on top, set by one opacity slider that turns it off at 0 (the
   default; the layer is then hidden and fetches no tiles).
