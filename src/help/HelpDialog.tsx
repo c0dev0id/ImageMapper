@@ -6,7 +6,8 @@ import './Help.css'
 /**
  * The help, in a big modal dialog in the middle of the screen: one banner with its text, or
  * up to three steps side by side (one below the other on narrow screens). The close button,
- * Esc or a click beside the dialog closes it.
+ * Esc or a click beside the dialog closes it. The title takes the focus, as the dialog is
+ * there to be read: a screen reader starts at the title, and Tab leads to the button.
  */
 export function HelpDialog() {
   let dialog!: HTMLDialogElement
@@ -16,12 +17,20 @@ export function HelpDialog() {
     else if (!open && dialog.open) dialog.close()
   })
   return (
-    <dialog ref={dialog} class="dialog help" closedby="any" aria-labelledby="help-title" onClose={() => setHelp(undefined)}>
+    <dialog
+      ref={dialog}
+      class="dialog help"
+      closedby="any"
+      aria-labelledby="help-title"
+      onClose={() => setHelp(undefined)}
+    >
       <Show when={help()} keyed>
         {(h) => (
           <>
             <div class="help-head">
-              <h2 id="help-title">{h.title}</h2>
+              <h2 id="help-title" tabindex="-1" autofocus>
+                {h.title}
+              </h2>
               <button type="button" class="icon" title="Close" aria-label="Close help" onClick={() => setHelp(undefined)}>
                 ×
               </button>

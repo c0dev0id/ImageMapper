@@ -208,7 +208,11 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   was shown is noted in localStorage (`mappic.help.<id>`), not in the project, so it
   lasts until the site data is cleared, or for the session where storage is blocked. The
   dialog closes with its button, Esc or a click beside it (`closedby="any"`); while a
-  modal dialog is open, the map's keys (Esc, undo) leave it alone.
+  modal dialog is open, the map's keys (Esc, undo) leave it alone. Its title takes the
+  focus when it opens (`tabindex="-1"` and `autofocus`; Chrome ignores `autofocus` on the
+  dialog element itself), so reading starts there instead of at a ringed close button. On
+  narrow screens three pictures take two lines, and their + and arrows are dropped, as one
+  would end the first line pointing at nothing.
 - **Bringing things into view** lives in `map/navigate.ts`: one `showBounds` (padding,
   current rotation kept) behind place search, fly to image and fly to route; move image
   here is there too. Fly to

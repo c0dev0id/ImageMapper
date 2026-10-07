@@ -6,6 +6,11 @@
   padding: 20px 24px 24px;
 }
 
+/* The title takes the focus when the dialog opens, only to start reading there. */
+.help-head h2:focus {
+  outline: none;
+}
+
 .help-head {
   display: flex;
   align-items: center;
@@ -122,5 +127,11 @@
   .help-steps {
     grid-auto-flow: row;
     gap: 24px;
+  }
+
+  /* Three pictures take two lines here, where a + or an arrow at the end of the first would
+     point at nothing; the captions tell the order. */
+  .banner:has(> figure:nth-of-type(3)) > .banner-op {
+    display: none;
   }
 }
