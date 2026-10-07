@@ -199,6 +199,7 @@ the footer links to it. Design notes are in
 ## Deployment
 
 `.github/workflows/deploy.yml` type-checks, tests and builds every push and pull request,
-and deploys pushes to `main` to GitHub Pages. One-time setup: make `main` the default
-branch, then set **Settings → Pages → Build and deployment → Source** to
-**GitHub Actions**. The build uses relative paths, so it works under any sub-path.
+runs the end-to-end tests on the build, and deploys pushes to `main` to GitHub Pages
+once all of them pass; a failed end-to-end run uploads its report. One-time setup: make
+`main` the default branch, then set **Settings → Pages → Build and deployment → Source**
+to **GitHub Actions**. The build uses relative paths, so it works under any sub-path.
