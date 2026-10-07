@@ -37,6 +37,7 @@ export const BASE_MAPS = {
   },
   liberty: { label: 'OpenFreeMap Liberty', style: 'https://tiles.openfreemap.org/styles/liberty' },
   bright: { label: 'OpenFreeMap Bright', style: 'https://tiles.openfreemap.org/styles/bright' },
+  positron: { label: 'OpenFreeMap Positron', style: 'https://tiles.openfreemap.org/styles/positron' },
   colorful: { label: 'VersaTiles Colorful', style: 'https://tiles.versatiles.org/assets/styles/colorful/style.json' },
 } as const satisfies Record<string, BaseMap>
 

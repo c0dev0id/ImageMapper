@@ -258,8 +258,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 ## Core features
 
 - A base map to pick (OSM Standard, OpenTopoMap, TopPlusOpen as raster maps; OpenFreeMap
-  Liberty and Bright, VersaTiles Colorful as vector maps) and an Esri satellite layer
-  with visibility and opacity on top.
+  Liberty, Bright and Positron, VersaTiles Colorful as vector maps) and an Esri
+  satellite layer with visibility and opacity on top.
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
   reordering, visibility, opacity, blend modes and an active layer.
