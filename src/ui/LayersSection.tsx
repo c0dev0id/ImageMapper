@@ -15,7 +15,7 @@ import {
 import { DEFAULT_TINT, type ImageLayer } from '../state/schema.ts'
 import { layerNote } from '../state/ui.ts'
 import { HelpButton } from '../help/HelpDialog.tsx'
-import { blendHelp, colorsHelp } from '../help/topics.tsx'
+import { BLEND_HELP, colorsHelp } from '../help/topics.tsx'
 import { addImages, IMAGE_TYPES } from './addImages.ts'
 import { BLEND_MODES } from './blendModes.ts'
 import { EditableChoice } from './EditableChoice.tsx'
@@ -194,7 +194,7 @@ function ActiveLayer(props: { layer: ImageLayer }) {
       </div>
       <div class="row">
         <span class="muted">Blend</span>
-        <HelpButton label={`Explain ${blend().label}`} help={() => blendHelp(blend().value)} />
+        <HelpButton label="Explain blend modes" help={() => BLEND_HELP} />
         <EditableChoice
           value={blend().value}
           options={BLEND_MODES}
@@ -205,10 +205,7 @@ function ActiveLayer(props: { layer: ImageLayer }) {
       </div>
       <div class="row">
         <span class="muted">Colours</span>
-        <HelpButton
-          label={`Explain ${colors().label}`}
-          help={() => colorsHelp(colors().value, layer.tint ?? DEFAULT_TINT)}
-        />
+        <HelpButton label="Explain colours" help={() => colorsHelp(layer.tint ?? DEFAULT_TINT)} />
         <Show when={layer.colors === 'tinted'}>
           <input
             type="color"

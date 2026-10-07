@@ -57,16 +57,29 @@
   font-size: 13px;
 }
 
-.help-steps p {
-  margin: 14px 0 0;
+.help-text {
   line-height: 1.5;
 }
 
-/* A single banner and its text are centred, like a picture with its caption. */
-.help-steps li:only-child p {
+.help-text p {
+  margin: 14px 0 0;
+}
+
+/* Under a single banner the text keeps to a readable column in the middle. */
+.help-steps li:only-child .help-text {
   max-width: 64ch;
   margin-inline: auto;
-  text-align: center;
+}
+
+/* The options of a setting, each led by its name. */
+.help-options {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.help-options li + li {
+  margin-top: 6px;
 }
 
 /* Pictures in a row with + or an arrow between them, each with its caption. */
@@ -129,8 +142,8 @@
     gap: 24px;
   }
 
-  /* Three pictures take two lines here, where a + or an arrow at the end of the first would
-     point at nothing; the captions tell the order. */
+  /* Three pictures take two lines here, where an arrow at the end of the first would point
+     at nothing; the captions tell the order. */
   .banner:has(> figure:nth-of-type(3)) > .banner-op {
     display: none;
   }

@@ -31,7 +31,13 @@ export function HelpDialog() {
               <h2 id="help-title" tabindex="-1" autofocus>
                 {h.title}
               </h2>
-              <button type="button" class="icon" title="Close" aria-label="Close help" onClick={() => setHelp(undefined)}>
+              <button
+                type="button"
+                class="icon"
+                title="Close"
+                aria-label="Close help"
+                onClick={() => setHelp(undefined)}
+              >
                 ×
               </button>
             </div>
@@ -46,7 +52,22 @@ export function HelpDialog() {
                       </h3>
                     </Show>
                     <step.banner />
-                    <p>{step.text}</p>
+                    <div class="help-text">
+                      <p>{step.text}</p>
+                      <Show when={step.options}>
+                        {(options) => (
+                          <ul class="help-options">
+                            <For each={options()}>
+                              {(option) => (
+                                <li>
+                                  <strong>{option.name}:</strong> {option.text}
+                                </li>
+                              )}
+                            </For>
+                          </ul>
+                        )}
+                      </Show>
+                    </div>
                   </li>
                 )}
               </For>

@@ -187,26 +187,27 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   `showPicker()`, which not every browser supports, while a tap on the select itself
   opens the browser's own list everywhere. The swatch of a tinted image stays a colour
   input, before the name, so the pencils keep one column.
-- **Help.** A (?) beside a setting opens a help on the picked option in a big modal
-  dialog: a banner of pictures that shows the change, and its text. A help has one step
-  or up to three side by side (one below the other on narrow screens), each a banner with
-  its text; the type allows no more, as whatever needs more steps to explain should
-  rather become simpler. The banners are SVG drawings of one made-up region, as a map
-  shows it and as a magazine prints it, in the same frame, so that the two match where an
-  image fits (`help/drawings.tsx`). Blend modes are shown by the browser's own
-  `mix-blend-mode`, which follows the same W3C formulas as the image shader; vivid and
-  one colour recolour the drawing with the shader's formulas (`help/paint.ts`). Screen is
-  drawn with a dark image, which it is for, and Difference with the image a little off,
-  which it reveals. Drawings rather than screenshots: sharp on any screen, a few KB, no
-  printed map or map tiles to license, nothing to retake when the look changes. The texts
-  of the settings are the descriptions of their options (`BLEND_MODES`, `IMAGE_COLORS`).
-  Help texts are plain and structured: a few sentences on purpose, what the options do
-  and an example where it helps, nothing the title or the captions already say and
-  nothing obvious (how a slider works). The effort goes where a feature is hard to
+- **Help.** A (?) beside a setting opens one help on that setting in a big modal dialog:
+  what the setting is for, shown by one example in pictures, and its options, each with
+  when to pick it in view of the goal. There is no help per option: options make sense
+  next to each other, and those without a clear use are named as such, with the advice to
+  try them together with Colours and Opacity. A help has one step or up to three side by
+  side (one below the other on narrow screens), each a banner with its text; the type
+  allows no more, as whatever needs more steps to explain should rather become simpler.
+  The banners are SVG drawings of one made-up region, as a map shows it and as a magazine
+  prints it, in the same frame, so that the two match where an image fits
+  (`help/drawings.tsx`). The blend help shows the image as a sheet over part of the map,
+  in Normal and in Multiply, blended by the browser's own `mix-blend-mode`, which follows
+  the same W3C formulas as the image shader; Vivid and One colour recolour the drawing
+  with the shader's formulas (`help/paint.ts`). Drawings rather than screenshots: sharp
+  on any screen, a few KB, no printed map or map tiles to license, nothing to retake when
+  the look changes. Help texts are plain and structured: a few sentences on purpose, the
+  options and an example where it helps, nothing the title or the captions already say
+  and nothing obvious (how a slider works). The effort goes where a feature is hard to
   discover: the order of a pin pair, why a town match keeps no pairs, how the Match Towns
   dialog is used. A help can also come once, the first time a feature is used: that it
   was shown is noted in localStorage (`mappic.help.<id>`), not in the project, so it
-  lasts until the site data is cleared, or for the session where storage is blocked. The
+  lasts until the site data is cleared, or for the session where storage is blocked.
   About mappic is a help as well: what the app is for, under three pictures (an image
   added, pinned and skewed, the route traced and exported). It comes on the first visit
   and from the (i) beside the title. The dialog closes with its button, Esc or a click
@@ -214,8 +215,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   leave it alone. Its title takes the focus when it opens (`tabindex="-1"` and
   `autofocus`; Chrome ignores `autofocus` on the dialog element itself), so reading
   starts there instead of at a ringed close button. On narrow screens three pictures take
-  two lines, and their + and arrows are dropped, as one would end the first line pointing
-  at nothing.
+  two lines, and their arrows are dropped, as one would end the first line pointing at
+  nothing.
 - **Bringing things into view** lives in `map/navigate.ts`: one `showBounds` (padding,
   current rotation kept) behind place search, fly to image and fly to route; move image
   here is there too. Fly to
@@ -316,9 +317,9 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Place/address search (Nominatim) and locate-me.
 - Image layers (JPEG, PNG, WebP; EXIF orientation honoured) with previews, drag
   reordering, visibility, opacity, blend modes, colours and an active layer.
-- Help with drawn pictures: on the picked blend mode and colours, behind a (?), on
-  placing an image, shown with Match Towns the first time, and About, shown on the first
-  visit and from the (i) beside the title.
+- Help with drawn pictures: on blend modes and colours, behind a (?); on placing an
+  image, shown with Match Towns the first time; and About, shown on the first visit and
+  from the (i) beside the title.
 - A map toolbar with captioned tools of the active image or the route being drawn.
 - GCP editing with the Pin tool (image first, then map) or context menus (right-click or
   long press), and "skew image to map" with fold/mirror checks.

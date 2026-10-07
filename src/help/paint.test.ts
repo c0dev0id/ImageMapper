@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { inverted, tinted, vivid } from './paint.ts'
+import { tinted, vivid } from './paint.ts'
 
 describe('vivid', () => {
   it('leaves greys alone', () => {
@@ -27,12 +27,5 @@ describe('tinted', () => {
     const [, g] = tinted('#d0d0d0', '#000000').match(/[0-9a-f]{2}/g)!.map((h) => parseInt(h, 16))
     expect(g).toBeGreaterThan(200)
     expect(g).toBeLessThan(255)
-  })
-})
-
-describe('inverted', () => {
-  it('gives the negative', () => {
-    expect(inverted('#000000')).toBe('#ffffff')
-    expect(inverted('#336699')).toBe('#cc9966')
   })
 })

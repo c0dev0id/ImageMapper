@@ -20,11 +20,6 @@ export function tinted(hex: string, tint: string): string {
   return rgbToHex(hexToRgb(tint).map((v) => 1 + (v - 1) * t))
 }
 
-/** The negative: an image on a dark background, which is what Screen is for. */
-export function inverted(hex: string): string {
-  return rgbToHex(hexToRgb(hex).map((v) => 1 - v))
-}
-
 function smoothstep(edge0: number, edge1: number, x: number): number {
   const t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0), 1)
   return t * t * (3 - 2 * t)

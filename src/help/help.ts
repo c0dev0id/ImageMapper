@@ -6,6 +6,8 @@ export interface HelpStep {
   title?: string
   banner: () => JSX.Element
   text: string
+  /** The options of a setting, each with when to pick it. */
+  options?: readonly { name: string; text: string }[]
 }
 
 /**

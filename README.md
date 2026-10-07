@@ -32,8 +32,8 @@ what the app is for; the (i) beside the name at the top of the panel shows it ag
    (**Original**), **Vivid** (stronger colours, so a printed route stays the route), or in
    **One colour** you pick: all printed lines and text in that colour, the paper staying
    white. Against a grey base map (**Colour** in the Base map section) the image then
-   stands out at a glance. The (?) beside Blend and Colours shows with pictures what the
-   picked option does.
+   stands out at a glance. The (?) beside Blend and Colours explains with pictures what
+   their options are for.
 3. The **toolbar** at the bottom of the map holds the tools of the active image, each with
    a short caption and a tooltip that says more.
    - **Pin** marks point pairs, always image first: tap a spot on the image (a dashed ring

@@ -1,4 +1,4 @@
-import type { JSX } from 'solid-js'
+import { createUniqueId, Show, type JSX } from 'solid-js'
 import { ArrowRightIcon } from '../ui/icons.tsx'
 
 // Schematic drawings for the help: one made-up region as a map shows it and as a magazine
@@ -152,9 +152,41 @@ export function GpxBadge() {
   return (
     <g>
       <rect x="124" y="5" width="30" height="13" rx="3" fill="#ffffff" stroke="#adb5bd" stroke-width="0.6" />
-      <text x="139" y="14.4" text-anchor="middle" font-family="system-ui, sans-serif" font-size="7" font-weight="700" fill="#495057">
+      <text
+        x="139"
+        y="14.4"
+        text-anchor="middle"
+        font-family="system-ui, sans-serif"
+        font-size="7"
+        font-weight="700"
+        fill="#495057"
+      >
         GPX
       </text>
+    </g>
+  )
+}
+
+/** Where the image lies in the blend pictures: a sheet over the left of the region, its edge clear of the labels. */
+const SHEET = { x: 0, y: 0, width: 118, height: 100 }
+
+/**
+ * The printed map as a sheet over part of the region, at the scale of the map, so that it
+ * can be seen what it hides. `edge` outlines the sheet.
+ */
+export function SheetDrawing(props: { edge?: boolean }) {
+  const clip = createUniqueId()
+  return (
+    <g>
+      <clipPath id={clip}>
+        <rect {...SHEET} />
+      </clipPath>
+      <g clip-path={`url(#${clip})`}>
+        <PrintDrawing />
+      </g>
+      <Show when={props.edge}>
+        <rect {...SHEET} fill="none" stroke="#868e96" stroke-width="0.6" />
+      </Show>
     </g>
   )
 }
@@ -222,13 +254,6 @@ export function Panel(props: { caption: string; children: JSX.Element }) {
 export function Banner(props: { children: JSX.Element }) {
   return <div class="banner">{props.children}</div>
 }
-
-/** Between two pictures: the two go together. */
-export const Plus = () => (
-  <span class="banner-op" aria-hidden="true">
-    +
-  </span>
-)
 
 /** Between two pictures: the first turns into the second. */
 export const Then = () => (

@@ -1,7 +1,5 @@
 import { nextRouteColor } from '../routing/routeEdit.ts'
 import type { BlendMode, ImageColors } from '../state/schema.ts'
-import { BLEND_MODES } from '../ui/blendModes.ts'
-import { IMAGE_COLORS } from '../ui/imageColors.ts'
 import {
   Banner,
   Dot,
@@ -11,97 +9,122 @@ import {
   Panel,
   PhotoDrawing,
   placement,
-  Plus,
   PrintDrawing,
   RouteDrawing,
   Ring,
+  SheetDrawing,
   Then,
   TOWN_POINTS,
 } from './drawings.tsx'
 import type { Help } from './help.ts'
-import { inverted, tinted, vivid } from './paint.ts'
+import { tinted, vivid } from './paint.ts'
 
-type Paint = (hex: string) => string
-
-/** The printed map over the map in a blend mode, recoloured by `paint` and placed by `transform`. */
-function Blended(props: { mode: BlendMode; paint?: Paint; transform?: string }) {
+/** The printed map over the map in a blend mode, placed by `transform`. */
+function Blended(props: { mode: BlendMode; transform?: string }) {
   return (
     <>
       <MapDrawing />
       <g style={{ 'mix-blend-mode': props.mode }} transform={props.transform}>
-        <PrintDrawing paint={props.paint} />
+        <PrintDrawing />
+      </g>
+    </>
+  )
+}
+
+/** The image as a sheet over part of the map in a blend mode, drawn by the browser's own mix-blend-mode. */
+function SheetOnMap(props: { mode: BlendMode }) {
+  return (
+    <>
+      <MapDrawing />
+      <g style={{ 'mix-blend-mode': props.mode }}>
+        <SheetDrawing edge={props.mode === 'normal'} />
       </g>
     </>
   )
 }
 
 /**
- * What a blend mode does: image and map, and the two blended by the browser's own
- * mix-blend-mode, which follows the same W3C formulas as the image shader. Screen is shown
- * with a dark image, which it is for, and Difference with the image a little off, which it
- * finds.
+ * What blend modes are for, shown by the most common case: a sheet with white paper hides
+ * the map, Multiply lets the map through. The browser's mix-blend-mode follows the same W3C
+ * formulas as the image shader. The modes without a clear use share one entry.
  */
-export function blendHelp(mode: BlendMode): Help {
-  const { label, description } = BLEND_MODES.find((m) => m.value === mode) ?? BLEND_MODES[0]
-  const paint = mode === 'screen' ? inverted : undefined
-  const transform = mode === 'difference' ? 'translate(2.5 2)' : undefined
-  return {
-    title: `Blend mode: ${label}`,
-    steps: [
-      {
-        banner: () => (
-          <Banner>
-            <Panel caption="Image">
-              <PrintDrawing paint={paint} />
-            </Panel>
-            <Plus />
-            <Panel caption="Map">
-              <MapDrawing />
-            </Panel>
-            <Then />
-            <Panel caption="Result">
-              <Blended mode={mode} paint={paint} transform={transform} />
-            </Panel>
-          </Banner>
-        ),
-        text: description,
-      },
-    ],
-  }
+export const BLEND_HELP: Help = {
+  title: 'Blend modes',
+  steps: [
+    {
+      banner: () => (
+        <Banner>
+          <Panel caption="Normal">
+            <SheetOnMap mode="normal" />
+          </Panel>
+          <Then />
+          <Panel caption="Multiply">
+            <SheetOnMap mode="multiply" />
+          </Panel>
+        </Banner>
+      ),
+      text:
+        'A blend mode sets how the image combines with the map below it, so that the printed route and the ' +
+        'details of the map show together.',
+      options: [
+        { name: 'Normal', text: 'the image as it is. It hides the map unless its opacity is lowered.' },
+        {
+          name: 'Multiply',
+          text:
+            'for an image whose white background hides the map. The white disappears, the printed lines ' +
+            'stay; the usual choice for scans and photos.',
+        },
+        { name: 'Darken', text: 'like Multiply, for when printed colours turn muddy over coloured areas of the map.' },
+        { name: 'Screen', text: 'the reverse of Multiply, for an image with a dark background.' },
+        { name: 'Difference', text: 'to check a skew. Lines that show twice mark where the image is still off.' },
+        {
+          name: 'Overlay, Soft light, Hard light',
+          text:
+            'no fixed use. Try them together with Colours and Opacity until the printed route and the map ' +
+            'details both show well.',
+        },
+      ],
+    },
+  ],
 }
 
-/** What a colour option does to the image; Original shows all three side by side. */
-export function colorsHelp(colors: ImageColors, tint: string): Help {
-  const option = (value: ImageColors) => IMAGE_COLORS.find((c) => c.value === value) ?? IMAGE_COLORS[0]
-  const paints: Record<ImageColors, Paint | undefined> = {
+/** What the colour options are for: all three side by side, One colour in the layer's colour. */
+export function colorsHelp(tint: string): Help {
+  const paints: Record<ImageColors, ((hex: string) => string) | undefined> = {
     original: undefined,
     vivid,
     tinted: (hex) => tinted(hex, tint),
   }
-  const picture = (value: ImageColors) => (
-    <Panel caption={option(value).label}>
-      <PrintDrawing paint={paints[value]} />
-    </Panel>
-  )
   return {
-    title: `Colours: ${option(colors).label}`,
+    title: 'Colours',
     steps: [
       {
-        banner: () =>
-          colors === 'original' ? (
-            <Banner>
-              {picture('original')}
-              {picture('vivid')}
-              {picture('tinted')}
-            </Banner>
-          ) : (
-            <Banner>
-              {picture('original')}
-              <Then />
-              {picture(colors)}
-            </Banner>
-          ),
-        text: option(colors).description,
+        banner: () => (
+          <Banner>
+            <Panel caption="Original">
+              <PrintDrawing paint={paints.original} />
+            </Panel>
+            <Panel caption="Vivid">
+              <PrintDrawing paint={paints.vivid} />
+            </Panel>
+            <Panel caption="One colour">
+              <PrintDrawing paint={paints.tinted} />
+            </Panel>
+          </Banner>
+        ),
+        text:
+          'Colours change only the image, before it is blended with the map, so that the printed route stands ' +
+          'out from the map.',
+        options: [
+          { name: 'Original', text: 'the colours as printed or photographed.' },
+          { name: 'Vivid', text: 'for faded colours, as in a photo or an old print; their saturation is doubled.' },
+          {
+            name: 'One colour',
+            text:
+              'for the strongest contrast. All lines and text take the colour of the swatch, while paper and ' +
+              'pale areas turn white; best over a grey base map (Colour, in the Base map section).',
+          },
+        ],
       },
     ],
   }
