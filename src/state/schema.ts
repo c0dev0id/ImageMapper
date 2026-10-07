@@ -21,8 +21,6 @@ export interface Gcp {
   id: string
   image?: Px
   map?: LngLat
-  /** The town a town match created this pair for; the next match replaces such pairs. */
-  town?: string
 }
 
 export interface ImageLayer {

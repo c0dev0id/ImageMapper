@@ -186,7 +186,7 @@ function TownForm(props: { layerId: string; onClose: () => void }) {
     >
       <p class="muted hint">
         For each town, search for it and pick it from the results, then tap its spot on the image with the image pin.
-        Towns far apart work best. The image is placed by them, and each becomes a point pair.
+        Towns far apart work best; they give the image a first placement.
       </p>
       <ol class="town-rows">
         <For each={rows}>

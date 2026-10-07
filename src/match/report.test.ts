@@ -16,7 +16,7 @@ describe('describeMatch', () => {
   it('names the towns used and what to do next', () => {
     expect(describeMatch(three, [])).toEqual({
       kind: 'info',
-      text: 'Placed by Kleve, Goch and Wesel. Skew to fit the image to the pairs exactly.',
+      text: 'Placed by Kleve, Goch and Wesel. Pin three or more point pairs and skew for a closer fit.',
     })
   })
 
@@ -25,7 +25,7 @@ describe('describeMatch', () => {
       kind: 'warning',
       text:
         'Placed by Kleve, Goch and Wesel. Xanten does not fit the others and was left out. ' +
-        'Skew to fit the image to the pairs exactly.',
+        'Pin three or more point pairs and skew for a closer fit.',
     })
     expect(describeMatch(three, ['Xanten', 'Emmerich']).text).toContain(
       'Xanten and Emmerich do not fit the others and were left out.',
@@ -35,6 +35,9 @@ describe('describeMatch', () => {
   it('warns when only two towns placed the image', () => {
     const note = describeMatch(['Kleve', 'Goch'], [])
     expect(note.kind).toBe('warning')
-    expect(note.text).toContain('Two towns cannot be checked against each other')
+    expect(note.text).toBe(
+      'Placed by Kleve and Goch. Two towns cannot be checked against each other, so look closely. ' +
+        'Pin three or more point pairs and skew for a closer fit.',
+    )
   })
 })

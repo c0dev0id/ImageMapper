@@ -32,13 +32,12 @@ It runs entirely in the browser; nothing is uploaded anywhere.
      (or other places you can find on it), as far apart as possible. For each, type its
      name and press Enter or Search, pick the right place from the results, then press
      the row's image pin and tap where the town is on the image. **Match** places the
-     image by them, and each becomes a point pair. A town that does not fit the others
-     (a namesake picked by mistake, a tap in the wrong spot) is left out and marked. The
-     dialog stays open until every town it was given is used and says what is missing
-     for each; it does not block the map, so the image can be zoomed and tapped, and it
-     can be dragged aside by its title. Matching again replaces the pairs of the previous
-     match, also ones you dragged (Undo brings them back); pairs you pinned yourself
-     stay.
+     image by them and shows it. Towns are too rough to skew by, so the match leaves no
+     point pairs behind: pin pairs where the image is off and skew. A town that does not
+     fit the others (a namesake picked by mistake, a tap in the wrong spot) is left out
+     and marked. The dialog stays open until every town it was given is used and says
+     what is missing for each; it does not block the map, so the image can be zoomed and
+     tapped, and it can be dragged aside by its title.
    - **Skew Image** (three or more pairs) fits the image to its pairs. Three pairs rotate,
      scale and skew it; more pairs also bend it so that every pair matches exactly. Add
      pairs where the image is still off and skew again.

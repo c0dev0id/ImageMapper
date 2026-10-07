@@ -165,13 +165,12 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   towns agree with wins. One wrong pick (a namesake, a tap in the wrong spot) is thus
   left out and flagged on its row instead of spoiling the placement. A similarity rather
   than the thin plate spline, because printed maps are distorted and a first placement
-  should not bend the image; skewing afterwards fits it to the pairs exactly. The towns
-  that fit become ordinary point pairs, in one undo step with the new placement. Each
-  carries the name of its town (`Gcp.town`), and the next match replaces all such pairs,
-  edited or not, while pairs pinned by hand stay: a corrected namesake or a dragged ring
-  cannot leave a stale pair or a second one for the same town. The marker is project
-  data, not session memory, so undo, reloads and project files keep it consistent. The
-  tap goes through a general tap request: the next map tap goes to the requester, also
+  should not bend the image; skewing afterwards fits it to the pairs exactly. The match
+  only sets the placement, in one undo step, and flies to the image; it keeps no point
+  pairs. It once did, but a town is rough on both sides (the centre of a search result,
+  a tap on a symbol or a label), so its pair pulled the skew off, and its markers were
+  in the way of the pairs pinned afterwards for a closer fit. Pairs pinned by hand stay.
+  The tap goes through a general tap request: the next map tap goes to the requester, also
   where a marker sits (markers take no pointer events meanwhile), with a hint and a
   crosshair. Esc, Cancel, a mode change, a tool pick or another request end it; the
   requester may refuse a tap (beside the image, or with the image hidden) and keep

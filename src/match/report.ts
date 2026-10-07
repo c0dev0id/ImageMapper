@@ -18,10 +18,7 @@ export function describeMatch(placed: readonly string[], left: readonly string[]
   const sentences = [`Placed by ${listNames(placed)}.`]
   if (left.length === 1) sentences.push(`${left[0]} does not fit the others and was left out.`)
   if (left.length > 1) sentences.push(`${listNames(left)} do not fit the others and were left out.`)
-  sentences.push(
-    placed.length < 3
-      ? 'Two towns cannot be checked against each other, so look closely; skewing needs a third pair.'
-      : 'Skew to fit the image to the pairs exactly.',
-  )
+  if (placed.length < 3) sentences.push('Two towns cannot be checked against each other, so look closely.')
+  sentences.push('Pin three or more point pairs and skew for a closer fit.')
   return { kind: left.length > 0 || placed.length < 3 ? 'warning' : 'info', text: sentences.join(' ') }
 }
