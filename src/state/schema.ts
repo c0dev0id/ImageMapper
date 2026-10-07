@@ -55,6 +55,8 @@ export interface ImageLayer {
 export interface RoutePoint {
   id: string
   lngLat: LngLat
+  /** The leg from the point before is a straight line rather than routed: for a way the routing does not know. */
+  straight?: boolean
 }
 
 export interface Route {
@@ -64,7 +66,7 @@ export interface Route {
   color: string
   /** The points the route runs through, in order. */
   points: RoutePoint[]
-  /** Routed geometry per leg as polyline6, keyed by profile and both end points. */
+  /** Routed geometry per leg as polyline6, keyed by profile and both end points; straight legs have none. */
   legs: Record<string, string>
 }
 

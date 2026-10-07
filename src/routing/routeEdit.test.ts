@@ -28,6 +28,26 @@ describe('route edits', () => {
     expect(r.legs).toEqual({ 'car/2,2;3,3': 'bc' })
   })
 
+  it('splits a straight leg into two straight legs', () => {
+    const straight = { ...base, points: base.points.map((p) => (p.id === 'b' ? { ...p, straight: true } : p)) }
+    const r = insertPoint(straight, 1, { id: 'x', lngLat: [1.5, 1.5] })
+    expect(r.points.map((p) => [p.id, p.straight === true])).toEqual([
+      ['a', false],
+      ['x', true],
+      ['b', true],
+      ['c', false],
+    ])
+  })
+
+  it('splits a routed leg into two routed legs', () => {
+    expect(insertPoint(base, 2, { id: 'x', lngLat: [2.5, 2.5] }).points.some((p) => p.straight)).toBe(false)
+  })
+
+  it('stores no routed geometry for a straight leg', () => {
+    const r = appendPoint(base, { id: 'd', lngLat: [4, 4], straight: true })
+    expect(addLeg(r, 'car/3,3;4,4', 'cd').legs).toEqual(base.legs)
+  })
+
   it('drops both legs next to a moved point', () => {
     const r = movePoint(base, 'b', [2.5, 2.5])
     expect(r.points[1].lngLat).toEqual([2.5, 2.5])

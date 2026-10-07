@@ -69,5 +69,32 @@ describe('routePoints', () => {
     const partial = { ...tour, legs: { 'car/1,1;2,2': '[[1,1],[1.5,1.2],[2,2]]' } }
     expect(routePoints(partial, decode)).toEqual([[1, 1], [1.5, 1.2], [2, 2], [3, 3]])
   })
+
+  it('draws a straight leg as its two ends, whatever is cached for it', () => {
+    const points = tour.points.map((p, i) => (i === 1 ? { ...p, straight: true } : p))
+    expect(routePoints({ ...tour, points }, decode)).toEqual([[1, 1], [2, 2], [2.5, 2.8], [3, 3]])
+  })
+})
+
+describe('straight legs', () => {
+  const r = route('s', [
+    [1, 1],
+    [2, 2],
+    [3, 3],
+  ])
+  r.points[1].straight = true
+
+  it('are marked by the point they lead to', () => {
+    expect(routeLegs(r).map((l) => l.straight)).toEqual([true, false])
+  })
+
+  it('are never routed', () => {
+    expect(nextMissingLeg([r], new Set())).toMatchObject({ key: 'bike/2,2;3,3' })
+    expect(nextMissingLeg([{ ...r, legs: { 'bike/2,2;3,3': 'b' } }], new Set())).toBeUndefined()
+  })
+
+  it('keep no cached geometry', () => {
+    expect(pruneLegs({ ...r, legs: { 'bike/1,1;2,2': 'a', 'bike/2,2;3,3': 'b' } })).toEqual({ 'bike/2,2;3,3': 'b' })
+  })
 })
 

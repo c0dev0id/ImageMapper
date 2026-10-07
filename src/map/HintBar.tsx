@@ -4,6 +4,7 @@ import {
   cancelTapRequest,
   editingRouteId,
   mode,
+  reach,
   stopDrawing,
   stopTransform,
   tapRequest,
@@ -17,6 +18,9 @@ const ROUTE_HINTS: Partial<Record<Tool, string>> = {
   waypoint: 'tap the map to place a waypoint; right-click or long-press one to edit it.',
   delete: 'tap a route point or a waypoint to delete it.',
 }
+
+/** Appending while new points are reached by a straight line. */
+const LINE_HINT = 'tap the map to add points at the end, joined by straight lines; Route goes back to routing.'
 
 /** A short instruction for the current state, shown over the map. */
 export function HintBar() {
@@ -32,6 +36,10 @@ export function HintBar() {
     return 'Pin a spot on the image and its place on the map; skew with 3 or more pairs.'
   }
   const drawing = () => (mode() === 'route' ? routeById(editingRouteId()) : undefined)
+  const routeHint = () => {
+    const t = tool() ?? 'append'
+    return t === 'append' && reach() === 'line' ? LINE_HINT : ROUTE_HINTS[t]
+  }
   return (
     <Switch>
       <Match when={tapRequest()}>
@@ -45,7 +53,7 @@ export function HintBar() {
       <Match when={drawing()}>
         {(route) => (
           <div class="hint-bar interactive">
-            <strong>{route().name}</strong>: {ROUTE_HINTS[tool() ?? 'append']}{' '}
+            <strong>{route().name}</strong>: {routeHint()}{' '}
             <button class="primary" onClick={stopDrawing}>
               Done
             </button>

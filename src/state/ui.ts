@@ -28,6 +28,13 @@ export const [pendingPin, setPendingPin] = createSignal<{ layerId: string; image
 
 export const [mode, setMode] = createSignal<Mode>('georef')
 export const [tool, setTool] = createSignal<Tool>()
+
+/**
+ * How a point appended to the route is reached: by routing along the roads, or by a
+ * straight line, for a way the routing does not know. Every drawing starts with routing.
+ */
+export type Reach = 'route' | 'line'
+export const [reach, setReach] = createSignal<Reach>('route')
 export const [editingRouteId, setEditingRouteId] = createSignal<string>()
 export const [notices, setNotices] = createSignal<Notice[]>([])
 /** On phones the panel can shrink to its title row to give the map more room. */
@@ -119,6 +126,7 @@ export function startDrawing(routeId: string): void {
   setEditingRouteId(routeId)
   setMode('route')
   setTool('append')
+  setReach('route')
 }
 
 export function stopDrawing(): void {

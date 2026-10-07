@@ -1,6 +1,6 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import { nearestLine, type XY } from '../geo/nearest.ts'
-import { roundLngLat, routeLegs } from '../routing/legs.ts'
+import { legGeometry, roundLngLat, routeLegs } from '../routing/legs.ts'
 import { decodePolyline } from '../routing/polyline.ts'
 import { insertPoint, routeById } from '../state/project.ts'
 
@@ -13,7 +13,7 @@ export function insertPointOnLine(map: MapLibreMap, routeId: string, tap: XY, to
   const route = routeById(routeId)
   if (!route) return false
   const lines = routeLegs(route).map((leg) => {
-    const geometry = route.legs[leg.key]
+    const geometry = legGeometry(route, leg)
     return (geometry ? decodePolyline(geometry) : [leg.from, leg.to]).map((c): XY => {
       const { x, y } = map.project(c)
       return [x, y]

@@ -92,7 +92,14 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   cached in the route under a key built from profile and both coordinates and stored
   as polyline6 strings. A pull-based pump fetches missing legs one at a time with at
   least 1.1 s between requests (FOSSGIS allows one request per second). Legs are
-  persisted so reloading never re-routes on newer OSM data.
+  persisted so reloading never re-routes on newer OSM data. A leg can be straight
+  instead, for a way the routing does not know: the point it leads to carries
+  `straight`, and such a leg is never requested, keeps no cached geometry, is drawn solid
+  like a routed leg and exported as its two ends. The flag sits on the point at the end
+  of the leg, so a removed point leaves the merged leg the kind of the next one, and a
+  point inserted into a leg takes that leg's kind, keeping both halves as they were. The
+  toolbar's Route/Line pair (`reach`, not saved) sets it for appended points and starts
+  at Route with every drawing.
 - **Waypoints are places of their own** (GPX `wpt`), independent of the routes: name
   and optional description, stored in the project's `waypoints`. Route points are only
   route points (`points`); an earlier version named route points instead, which mixed
@@ -329,7 +336,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   into the view.
 - Undo/redo of content edits.
 - Draw route mode: append, insert, drag and delete route points; per-route OSRM
-  profile; fly to a route.
+  profile; straight legs where the routing knows no way; fly to a route.
 - Waypoints with name and description, independent of the routes.
 - GPX export of all routes as tracks, with all waypoints.
 - Project save/open/new; automatic persistence in IndexedDB including map view.

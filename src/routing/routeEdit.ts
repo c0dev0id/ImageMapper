@@ -1,6 +1,6 @@
 import type { LngLat } from '../geo/types.ts'
 import type { Profile, Route, RoutePoint } from '../state/schema.ts'
-import { pruneLegs, routeLegs } from './legs.ts'
+import { pruneLegs, routedLegs } from './legs.ts'
 
 /** Pure route edits. Each result keeps exactly the cached legs it still needs. */
 
@@ -12,9 +12,10 @@ export function appendPoint(route: Route, point: RoutePoint): Route {
   return withPrunedLegs({ ...route, points: [...route.points, point] })
 }
 
-/** Inserts a point before the one at `index`, splitting the leg that led there. */
+/** Inserts a point before the one at `index`, splitting the leg that led there; both halves keep its kind. */
 export function insertPoint(route: Route, index: number, point: RoutePoint): Route {
-  return withPrunedLegs({ ...route, points: [...route.points.slice(0, index), point, ...route.points.slice(index)] })
+  const split = route.points[index]?.straight ? { ...point, straight: true } : point
+  return withPrunedLegs({ ...route, points: [...route.points.slice(0, index), split, ...route.points.slice(index)] })
 }
 
 export function movePoint(route: Route, id: string, lngLat: LngLat): Route {
@@ -34,7 +35,7 @@ export function changeProfile(route: Route, profile: Profile): Route {
 
 /** Stores a routed leg if the route still needs it (the request may be outdated). */
 export function addLeg(route: Route, key: string, geometry: string): Route {
-  if (!routeLegs(route).some((leg) => leg.key === key)) return route
+  if (!routedLegs(route).some((leg) => leg.key === key)) return route
   return { ...route, legs: { ...route.legs, [key]: geometry } }
 }
 

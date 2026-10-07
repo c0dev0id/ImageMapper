@@ -75,9 +75,15 @@ what the app is for; the (i) beside the name at the top of the panel shows it ag
    blend mode also helps to find a feature on the map.
 4. **Draw route** switches the toolbar to the route tools: **Append** (tap the map to add
    points at the end), **Insert** (tap the route line to add a point there),
-   **Waypoint** and **Delete** (tap a route point or waypoint). Drag points to move them. Esc goes back to appending, a second Esc or Done finishes. Each route
-   is routed for car, bike or foot. In a route's row, the pencil renames the route, the
-   crosshair flies to it and **Edit** continues drawing it.
+   **Waypoint** and **Delete** (tap a route point or waypoint). Drag points to move them.
+   Esc goes back to appending, a second Esc or Done finishes. Each route is routed for
+   car, bike or foot. **Route** and **Line** set how a new point at the end is reached:
+   along the roads by routing, as every drawing starts, or by a straight line, for a way
+   the routing does not know, such as a track shown on the base map but missing from the
+   routing data. Switch back to **Route** for the points after it. A point inserted into
+   a leg keeps that leg's kind on both sides, and straight legs are exported as drawn. In
+   a route's row, the pencil renames the route, the crosshair flies to it and **Edit**
+   continues drawing it.
 5. **Waypoints** are places of their own, independent of the routes: a viewpoint, a café,
    a warning about the road. Each has a name and an optional description and is always
    shown on the map. While a route is being drawn, waypoints can be dragged, edited

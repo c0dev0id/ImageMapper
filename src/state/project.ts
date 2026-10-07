@@ -307,8 +307,10 @@ export function setRouteProfile(id: string, profile: Profile): void {
   updateRoute(id, (r) => (r.profile === profile ? r : edit.changeProfile(r, profile)), 'Change routing profile')
 }
 
-export function appendPoint(routeId: string, lngLat: LngLat): void {
-  updateRoute(routeId, (r) => edit.appendPoint(r, { id: crypto.randomUUID(), lngLat }), 'Add point')
+/** Adds a point at the end of a route, reached by routing or, if `straight`, by a straight line. */
+export function appendPoint(routeId: string, lngLat: LngLat, straight = false): void {
+  const point = { id: crypto.randomUUID(), lngLat, ...(straight ? { straight } : {}) }
+  updateRoute(routeId, (r) => edit.appendPoint(r, point), 'Add point')
 }
 
 /** Inserts a route point before the one at `index`. */

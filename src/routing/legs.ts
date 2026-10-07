@@ -10,24 +10,36 @@ export interface Leg {
   key: string
   from: LngLat
   to: LngLat
+  /** Drawn and exported as the straight line between its ends, never routed. */
+  straight: boolean
 }
 
 type RoutePath = Pick<Route, 'profile' | 'points'>
 
-/** The legs a route needs: one per pair of consecutive points. */
+/** The legs of a route: one per pair of consecutive points, straight where the second point says so. */
 export function routeLegs(route: RoutePath): Leg[] {
   const legs: Leg[] = []
   for (let i = 1; i < route.points.length; i++) {
     const from = route.points[i - 1].lngLat
     const to = route.points[i].lngLat
-    legs.push({ key: legKey(route.profile, from, to), from, to })
+    legs.push({ key: legKey(route.profile, from, to), from, to, straight: route.points[i].straight === true })
   }
   return legs
 }
 
+/** The legs that are routed, not straight. */
+export function routedLegs(route: RoutePath): Leg[] {
+  return routeLegs(route).filter((leg) => !leg.straight)
+}
+
+/** The routed geometry of a leg, if it has arrived; a straight leg never has one. */
+export function legGeometry(route: Pick<Route, 'legs'>, leg: Leg): string | undefined {
+  return leg.straight ? undefined : route.legs[leg.key]
+}
+
 /**
- * The points of a route: routed legs in order, unrouted legs as the straight line shown
- * on the map, with the shared point between consecutive legs only once.
+ * The points of a route: routed legs in order, straight and unrouted legs as the straight
+ * line shown on the map, with the shared point between consecutive legs only once.
  */
 export function routePoints(
   route: RoutePath & Pick<Route, 'legs'>,
@@ -35,7 +47,7 @@ export function routePoints(
 ): LngLat[] {
   const points: LngLat[] = []
   for (const leg of routeLegs(route)) {
-    const geometry = route.legs[leg.key]
+    const geometry = legGeometry(route, leg)
     for (const p of geometry ? decode(geometry) : [leg.from, leg.to]) {
       const last = points.at(-1)
       if (!last || last[0] !== p[0] || last[1] !== p[1]) points.push([p[0], p[1]])
@@ -44,9 +56,9 @@ export function routePoints(
   return points
 }
 
-/** The cached legs the route still needs; everything else is dropped. */
+/** The cached legs the route still needs; everything else, straight legs included, is dropped. */
 export function pruneLegs(route: RoutePath & Pick<Route, 'legs'>): Record<string, string> {
-  const needed = new Set(routeLegs(route).map((l) => l.key))
+  const needed = new Set(routedLegs(route).map((l) => l.key))
   return Object.fromEntries(Object.entries(route.legs).filter(([key]) => needed.has(key)))
 }
 
@@ -55,7 +67,7 @@ export interface LegJob extends Leg {
   profile: Profile
 }
 
-/** The next leg without geometry that has not failed; the edited route goes first. */
+/** The next routed leg without geometry that has not failed; the edited route goes first. */
 export function nextMissingLeg(
   routes: readonly Route[],
   failed: ReadonlySet<string>,
@@ -63,7 +75,7 @@ export function nextMissingLeg(
 ): LegJob | undefined {
   const ordered = [...routes].sort((a, b) => Number(b.id === preferRouteId) - Number(a.id === preferRouteId))
   for (const route of ordered) {
-    for (const leg of routeLegs(route)) {
+    for (const leg of routedLegs(route)) {
       if (!(leg.key in route.legs) && !failed.has(leg.key)) {
         return { ...leg, routeId: route.id, profile: route.profile }
       }

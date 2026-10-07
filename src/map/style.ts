@@ -1,4 +1,4 @@
-import type { MapOptions } from 'maplibre-gl'
+import type { FilterSpecification, MapOptions } from 'maplibre-gl'
 import type { FeatureCollection } from 'geojson'
 import { SATELLITE_ATTRIBUTION, SATELLITE_TILES } from '../config.ts'
 
@@ -16,6 +16,8 @@ export const FIRST_OVERLAY_LAYER = 'routes-casing'
 export const IMAGE_HIT_LAYER = 'image-hit'
 
 const round = { 'line-join': 'round', 'line-cap': 'round' } as const
+/** Legs drawn as part of the route: routed, or straight by choice. Pending and failed legs are dashed. */
+const DRAWN: FilterSpecification = ['in', ['get', 'state'], ['literal', ['routed', 'straight']]]
 
 export function baseStyle(): StyleSpecification {
   return {
@@ -38,7 +40,7 @@ export function baseStyle(): StyleSpecification {
         id: 'routes-casing',
         type: 'line',
         source: 'routes',
-        filter: ['==', ['get', 'state'], 'routed'],
+        filter: DRAWN,
         layout: round,
         paint: { 'line-color': '#ffffff', 'line-width': 7, 'line-opacity': 0.85 },
       },
@@ -46,7 +48,7 @@ export function baseStyle(): StyleSpecification {
         id: 'routes-line',
         type: 'line',
         source: 'routes',
-        filter: ['==', ['get', 'state'], 'routed'],
+        filter: DRAWN,
         layout: round,
         paint: { 'line-color': ['get', 'color'], 'line-width': 4 },
       },
@@ -54,7 +56,7 @@ export function baseStyle(): StyleSpecification {
         id: 'routes-unrouted',
         type: 'line',
         source: 'routes',
-        filter: ['!=', ['get', 'state'], 'routed'],
+        filter: ['in', ['get', 'state'], ['literal', ['pending', 'failed']]],
         paint: {
           'line-color': ['match', ['get', 'state'], 'failed', '#d9480f', '#495057'],
           'line-width': 2.5,

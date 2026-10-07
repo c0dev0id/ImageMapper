@@ -134,6 +134,24 @@ export const AppendIcon = () => (
   </Icon>
 )
 
+/** Reach new points by routing: a winding path between two points (Tabler's route). */
+export const RouteIcon = () => (
+  <Icon>
+    <path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+    <path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4" />
+    <path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5" />
+  </Icon>
+)
+
+/** Reach new points by a straight line (Tabler's line). */
+export const LineIcon = () => (
+  <Icon>
+    <path d="M4 18a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+    <path d="M16 6a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+    <path d="M7.5 16.5l9 -9" />
+  </Icon>
+)
+
 /** Insert a route point: a line between two points with a plus in its middle. */
 export const InsertIcon = () => (
   <Icon>

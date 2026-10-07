@@ -3,7 +3,7 @@ import { unwrap } from 'solid-js/store'
 import { ROUTING_MIN_INTERVAL_MS } from '../config.ts'
 import { project, setRouteLeg } from '../state/project.ts'
 import { editingRouteId, errorMessage } from '../state/ui.ts'
-import { nextMissingLeg, routeLegs, type LegJob } from './legs.ts'
+import { nextMissingLeg, routedLegs, type LegJob } from './legs.ts'
 import { createPump, fetchLeg } from './osrm.ts'
 
 const [failedLegs, setFailedLegs] = createSignal<ReadonlySet<string>>(new Set())
@@ -35,7 +35,7 @@ const service = createRoot(() => {
     const failed = failedLegs()
     let count = 0
     for (const route of project.routes) {
-      for (const leg of routeLegs(route)) if (!(leg.key in route.legs) && !failed.has(leg.key)) count++
+      for (const leg of routedLegs(route)) if (!(leg.key in route.legs) && !failed.has(leg.key)) count++
     }
     return count
   })

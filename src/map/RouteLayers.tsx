@@ -2,7 +2,7 @@ import type { GeoJSONSource } from 'maplibre-gl'
 import type { Feature, LineString } from 'geojson'
 import { createEffect } from 'solid-js'
 import type { LngLat } from '../geo/types.ts'
-import { routeLegs } from '../routing/legs.ts'
+import { legGeometry, routeLegs } from '../routing/legs.ts'
 import { decodePolyline } from '../routing/polyline.ts'
 import { failedLegs } from '../routing/service.ts'
 import { project } from '../state/project.ts'
@@ -11,7 +11,7 @@ import { useMap } from './context.ts'
 /** Decoded leg geometries; polyline strings are immutable, so they are their own cache key. */
 let decoded = new Map<string, LngLat[]>()
 
-/** Draws all routes: routed legs solid, pending legs grey dashed, failed legs red dashed. */
+/** Draws all routes: routed and straight legs solid, pending legs grey dashed, failed legs red dashed. */
 export function RouteLayers() {
   const map = useMap()
   createEffect(() => {
@@ -20,7 +20,7 @@ export function RouteLayers() {
     const features: Feature<LineString>[] = []
     for (const route of project.routes) {
       for (const leg of routeLegs(route)) {
-        const geometry = route.legs[leg.key]
+        const geometry = legGeometry(route, leg)
         let coordinates: LngLat[]
         let state: string
         if (geometry) {
@@ -32,7 +32,7 @@ export function RouteLayers() {
             [leg.from[0], leg.from[1]],
             [leg.to[0], leg.to[1]],
           ]
-          state = failed.has(leg.key) ? 'failed' : 'pending'
+          state = leg.straight ? 'straight' : failed.has(leg.key) ? 'failed' : 'pending'
         }
         features.push({
           type: 'Feature',

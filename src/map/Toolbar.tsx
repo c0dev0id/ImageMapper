@@ -7,6 +7,8 @@ import type { ImageLayer } from '../state/schema.ts'
 import {
   cancelTapRequest,
   mode,
+  reach,
+  setReach,
   setTool,
   startTransform,
   stopTransform,
@@ -18,11 +20,13 @@ import {
   CenterOnImageIcon,
   DeleteIcon,
   InsertIcon,
+  LineIcon,
   MatchTownsIcon,
   MoveImageHereIcon,
   PinImageIcon,
   RedoIcon,
   ResizeIcon,
+  RouteIcon,
   SkewIcon,
   UndoIcon,
   WaypointIcon,
@@ -66,6 +70,7 @@ export function Toolbar() {
       </Show>
       <Show when={mode() === 'route'}>
         <RouteTools />
+        <ReachTools />
       </Show>
       <div class="toolbar-group" role="group" aria-label="History">
         <ToolButton
@@ -189,6 +194,30 @@ function RouteTools() {
         <WaypointIcon />,
       )}
       {button('delete', 'Delete', 'Tap a route point or a waypoint to delete it', <DeleteIcon />)}
+    </div>
+  )
+}
+
+/** How appended points are reached: along the roads, or by a straight line where the routing knows no way. */
+function ReachTools() {
+  return (
+    <div class="toolbar-group" role="group" aria-label="Reach new points by">
+      <ToolButton
+        label="Route"
+        title="New points at the end are reached along the roads, by routing"
+        active={reach() === 'route'}
+        onClick={() => setReach('route')}
+      >
+        <RouteIcon />
+      </ToolButton>
+      <ToolButton
+        label="Line"
+        title="New points at the end are reached by a straight line: for a way the routing does not know"
+        active={reach() === 'line'}
+        onClick={() => setReach('line')}
+      >
+        <LineIcon />
+      </ToolButton>
     </div>
   )
 }

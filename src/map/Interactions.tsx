@@ -8,6 +8,7 @@ import {
   editingRouteId,
   menu,
   mode,
+  reach,
   setMenu,
   setTool,
   setWaypointDraft,
@@ -82,7 +83,7 @@ export function Interactions() {
     if (mode() === 'route' && routeId) {
       if (t === 'insert') insertPointOnLine(map, routeId, [e.point.x, e.point.y], pointerType === 'mouse' ? 10 : 24)
       else if (t === 'waypoint') setWaypointDraft({ lngLat: roundLngLat([lng, lat]), name: '', description: '' })
-      else if (t === 'append' || t === undefined) appendPoint(routeId, roundLngLat([lng, lat]))
+      else if (t === 'append' || t === undefined) appendPoint(routeId, roundLngLat([lng, lat]), reach() === 'line')
     } else if (t === 'pin') startPin(e.lngLat)
   }
   const onMoveStart = () => setMenu(undefined)
