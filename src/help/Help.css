@@ -63,6 +63,7 @@
 
 .help-text p {
   margin: 14px 0 0;
+  white-space: pre-line;
 }
 
 /* Under a single banner the text keeps to a readable column in the middle. */

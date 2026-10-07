@@ -223,10 +223,10 @@ export const ABOUT_HELP: Help = {
         </Banner>
       ),
       text:
-        'MapPic is a tool, which can help you to create a route for your navigation system from an image in a magazine. ' +
-        'Step 1: Import a photo that contains the route. ' +
-        'Step 2: Match the photo with the underlying map (which contains routing information). ' +
-        'Step 3: Trace the line in the photo along roads found on the map. ' +
+        'MapPic is a tool, which can help you to create a route for your navigation system from an image in a magazine.\n' +
+        'Step 1: Import a photo that contains the route.\n' +
+        'Step 2: Match the photo with the underlying map (which contains routing information).\n' +
+        'Step 3: Trace the line in the photo along roads found on the map.\n' +
         'There are tools, like blend modes, town match, pin + skew, and more available, to make this process fast and painless.',
     },
   ],
