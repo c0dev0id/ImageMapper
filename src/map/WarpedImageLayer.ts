@@ -17,7 +17,7 @@ void main() {
 // Blend modes after the W3C Compositing and Blending spec, with b the backdrop (what lies
 // below) and s the image colour. Mode 0 (normal) relies on MapLibre's blending; the other
 // modes read the backdrop from a copy of the framebuffer and write the final colour. The
-// image's colours are first shown as printed, vivid or tinted (u_colors 0, 1, 2).
+// image's colours are first shown original, vivid or tinted (u_colors 0, 1, 2).
 const FRAGMENT_SHADER = `#version 300 es
 precision highp float;
 uniform sampler2D u_texture;
@@ -78,7 +78,7 @@ const MODE_NUMBERS: Record<BlendMode, number> = {
   difference: 7,
 }
 
-const COLOR_NUMBERS: Record<ImageColors, number> = { printed: 0, vivid: 1, tinted: 2 }
+const COLOR_NUMBERS: Record<ImageColors, number> = { original: 0, vivid: 1, tinted: 2 }
 
 /** Longest texture side: about 350 dpi for an A4 page while bounding GPU memory per layer. */
 const MAX_TEXTURE_SIDE = 4096
@@ -123,7 +123,7 @@ export class WarpedImageLayer implements CustomLayerInterface {
   private origin: [number, number] = [0, 0]
   private opacity = 1
   private blend: BlendMode = 'normal'
-  private colors: ImageColors = 'printed'
+  private colors: ImageColors = 'original'
   private tint = hexToRgb(DEFAULT_TINT)
   /** Copy of what was drawn below this layer, for blend modes other than normal. */
   private readonly backdrop = new Backdrop()

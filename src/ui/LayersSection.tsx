@@ -205,7 +205,7 @@ function ActiveLayer(props: { layer: ImageLayer }) {
         <select
           class="grow"
           aria-label={`Colours of ${layer.name}`}
-          value={layer.colors ?? 'printed'}
+          value={layer.colors ?? 'original'}
           onChange={(e) => setLayerColors(layer.id, e.currentTarget.value as ImageColors)}
         >
           <For each={IMAGE_COLORS}>{(c) => <option value={c.value}>{c.label}</option>}</For>

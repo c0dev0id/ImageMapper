@@ -39,7 +39,7 @@ function ImageLayer(props: { id: string }) {
   })
   createEffect(() => glLayer.setOpacity(layer()?.opacity ?? 0))
   createEffect(() => glLayer.setBlend(layer()?.blend ?? 'normal'))
-  createEffect(() => glLayer.setColors(layer()?.colors ?? 'printed', layer()?.tint ?? DEFAULT_TINT))
+  createEffect(() => glLayer.setColors(layer()?.colors ?? 'original', layer()?.tint ?? DEFAULT_TINT))
   createEffect(() => {
     map.setLayoutProperty(id, 'visibility', layer()?.visible ? 'visible' : 'none')
   })

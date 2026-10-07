@@ -18,10 +18,10 @@ export type BlendMode =
 export type Profile = 'car' | 'bike' | 'foot'
 
 /**
- * How an image's own colours are shown before it is blended with the map: as printed,
+ * How an image's own colours are shown before it is blended with the map: original,
  * vivid (more saturated), or tinted (all ink in one colour, the paper staying white).
  */
-export type ImageColors = 'printed' | 'vivid' | 'tinted'
+export type ImageColors = 'original' | 'vivid' | 'tinted'
 
 /** The colour of tinted images unless another is picked: a pink that no route, pin or map uses. */
 export const DEFAULT_TINT = '#d6336c'
@@ -42,7 +42,7 @@ export interface ImageLayer {
   opacity: number
   /** Absent means normal. */
   blend?: BlendMode
-  /** Absent means as printed. */
+  /** Absent means original. */
   colors?: ImageColors
   /** The colour of a tinted image, as #rrggbb; absent means DEFAULT_TINT. */
   tint?: string
