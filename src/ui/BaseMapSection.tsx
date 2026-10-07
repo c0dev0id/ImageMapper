@@ -1,6 +1,6 @@
 import { For } from 'solid-js'
 import { BASE_MAPS, type BaseMapId } from '../config.ts'
-import { project, setBaseMap, setSatellite } from '../state/project.ts'
+import { project, setBaseMap, setBaseMapSaturation, setSatellite } from '../state/project.ts'
 import { PencilIcon } from './icons.tsx'
 
 export function BaseMapSection() {
@@ -37,6 +37,20 @@ export function BaseMapSection() {
           disabled={!project.satellite.visible}
           value={project.satellite.opacity}
           onInput={(e) => setSatellite({ opacity: e.currentTarget.valueAsNumber })}
+        />
+      </div>
+      <div class="row">
+        <span class="muted">Colour</span>
+        <input
+          class="grow"
+          type="range"
+          aria-label="Colour of the base map"
+          title="From grey to full colour, for the base map and the satellite: images stand out against grey"
+          min="0"
+          max="1"
+          step="0.05"
+          value={project.baseMapSaturation}
+          onInput={(e) => setBaseMapSaturation(e.currentTarget.valueAsNumber)}
         />
       </div>
     </section>

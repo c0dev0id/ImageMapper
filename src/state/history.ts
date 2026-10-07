@@ -51,8 +51,8 @@ export class History<T> {
 
 /**
  * A state from the history combined with the current display settings: the map view,
- * the base map, the satellite layer and each image layer's visibility, opacity and blend
- * mode are not undone.
+ * the base map and its colour, the satellite layer and each image layer's visibility,
+ * opacity and blend mode are not undone.
  */
 export function withCurrentDisplay(state: Project, current: Project): Project {
   const display = new Map(
@@ -62,6 +62,7 @@ export function withCurrentDisplay(state: Project, current: Project): Project {
     ...state,
     view: current.view,
     baseMap: current.baseMap,
+    baseMapSaturation: current.baseMapSaturation,
     satellite: current.satellite,
     layers: state.layers.map((l) => ({ ...l, ...display.get(l.id) })),
   }

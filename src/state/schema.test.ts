@@ -7,10 +7,12 @@ describe('parseProject', () => {
     expect(parseProject(JSON.stringify(project))).toEqual(project)
   })
 
-  it('gives a project without a base map the default one', () => {
+  it('gives a project saved before base maps could be picked the defaults', () => {
     const older: Record<string, unknown> = { ...emptyProject() }
     delete older.baseMap
+    delete older.baseMapSaturation
     expect(parseProject(JSON.stringify(older)).baseMap).toBe('liberty')
+    expect(parseProject(JSON.stringify(older)).baseMapSaturation).toBe(1)
   })
 
   it('rejects other versions', () => {

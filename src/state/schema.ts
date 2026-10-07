@@ -76,6 +76,8 @@ export interface Project {
   view: View
   /** The base map below everything; an id that is no longer offered shows the default. */
   baseMap: BaseMapId
+  /** How much colour the base map and the satellite keep: 0 is grey, 1 their own colours. */
+  baseMapSaturation: number
   satellite: { visible: boolean; opacity: number }
   /** Bottom layer first. */
   layers: ImageLayer[]
@@ -90,6 +92,7 @@ export function emptyProject(): Project {
     name: 'Untitled',
     view: { center: [0, 30], zoom: 2, bearing: 0, pitch: 0 },
     baseMap: DEFAULT_BASE_MAP,
+    baseMapSaturation: 1,
     satellite: { visible: false, opacity: 1 },
     layers: [],
     routes: [],

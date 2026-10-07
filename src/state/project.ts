@@ -135,6 +135,11 @@ export function setBaseMap(id: BaseMapId): void {
   onChange()
 }
 
+export function setBaseMapSaturation(saturation: number): void {
+  setProject('baseMapSaturation', saturation)
+  onChange()
+}
+
 export function setSatellite(patch: Partial<Project['satellite']>): void {
   setProject('satellite', (s) => ({ ...s, ...patch }))
   onChange()

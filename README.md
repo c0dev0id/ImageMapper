@@ -18,7 +18,8 @@ It runs entirely in the browser; nothing is uploaded anywhere.
    Liberty, OpenFreeMap Bright, OpenFreeMap Positron and VersaTiles Colorful, whose
    labels stay sharp on any screen. Positron is light grey, so the coloured lines of an
    image in Multiply stand out against it. The satellite imagery can be laid over any of
-   them.
+   them. **Colour** takes the colour out of the base map and the satellite, down to grey,
+   so that any base map shows the images above it clearly.
 2. **Add images** (JPEG, PNG, WebP). Each image becomes a layer, listed with a preview.
    Click an entry to make it the active layer, the one you work on. Drag an entry by its
    handle to change the order (or press the arrow keys on the handle); the eye hides a

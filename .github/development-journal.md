@@ -128,6 +128,12 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   an undo step and is not confirmed; what cannot be undone asks first: New and Open
   while the project holds layers, routes or waypoints, and discarding a stored project
   that cannot be read (a notice action can carry such a question).
+- **Base map colour.** A slider takes the colour out of the base map and the satellite,
+  so that images stand out. MapLibre can desaturate raster layers (`raster-saturation`),
+  but vector styles keep their colours in hundreds of layers, so a small custom layer
+  (`DesaturateLayer`) sits between the base layers and the images: it copies what is
+  drawn below it and draws it again in grey, mixed by the slider. It draws nothing at
+  full colour. Images, routes and pins lie above it and keep their colours.
 - **Taps versus drags.** A click on the map only counts 150 ms after it was made
   (`TapFilter`): a drag that starts at the tap within that time takes it back, and a
   click where a drag ended no more than 150 ms before is dropped. The first is a mouse

@@ -71,6 +71,7 @@ describe('withCurrentDisplay', () => {
       name: 'new',
       view: { center: [11, 48], zoom: 12, bearing: 30, pitch: 40 },
       baseMap: 'osm',
+      baseMapSaturation: 0.2,
       satellite: { visible: true, opacity: 0.4 },
       layers: [{ ...layer('a', false, 0.3), blend: 'multiply' }],
     }
@@ -78,6 +79,7 @@ describe('withCurrentDisplay', () => {
     expect(merged.name).toBe('old')
     expect(merged.view).toEqual(current.view)
     expect(merged.baseMap).toBe('osm')
+    expect(merged.baseMapSaturation).toBe(0.2)
     expect(merged.satellite).toEqual(current.satellite)
     expect(merged.layers.map((l) => [l.id, l.visible, l.opacity, l.blend])).toEqual([
       ['a', false, 0.3, 'multiply'],
