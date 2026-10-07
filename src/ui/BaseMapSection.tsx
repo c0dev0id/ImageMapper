@@ -1,23 +1,21 @@
-import { For } from 'solid-js'
 import { BASE_MAPS, type BaseMapId } from '../config.ts'
 import { project, setBaseMap, setBaseMapSaturation, setSatelliteOpacity } from '../state/project.ts'
-import { PencilIcon } from './icons.tsx'
+import { EditableChoice } from './EditableChoice.tsx'
+
+const BASE_MAP_CHOICES = Object.entries(BASE_MAPS).map(([id, base]) => ({ value: id as BaseMapId, label: base.label }))
 
 export function BaseMapSection() {
   return (
     <section class="section">
       <h2>Base map</h2>
-      <div class="row base-map">
-        <select
-          class="grow"
-          aria-label="Base map"
-          title="Change the base map"
+      <div class="row">
+        <EditableChoice
           value={project.baseMap}
-          onChange={(e) => setBaseMap(e.currentTarget.value as BaseMapId)}
-        >
-          <For each={Object.entries(BASE_MAPS)}>{([id, base]) => <option value={id}>{base.label}</option>}</For>
-        </select>
-        <PencilIcon />
+          options={BASE_MAP_CHOICES}
+          label="Base map"
+          title="Change the base map"
+          onChange={setBaseMap}
+        />
       </div>
       <div class="row">
         <span class="muted">Satellite</span>

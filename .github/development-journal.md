@@ -33,7 +33,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 
 ## Key decisions
 
-- **Base maps.** A dropdown picks the base map from `BASE_MAPS`: raster entries are a
+- **Base maps.** The panel picks the base map from `BASE_MAPS`: raster entries are a
   tile URL, vector entries a MapLibre style URL. OSM's raster tiles have their labels
   baked in at about 11 px and are upscaled, blurry, on high-density screens; vector
   styles draw labels in CSS pixels at any density, so they are larger and sharp. The
@@ -47,11 +47,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   all small-print: OpenTopoMap and TopPlusOpen bake in large labels and are offered
   next to the vector maps. The pick is a display setting in the project (`baseMap`), like the
   satellite: kept in files, not undone. Liberty is the default, also for projects saved
-  before the choice existed: OpenFreeMap needs no key and sets no usage limits. In the
-  panel the choice reads like the names, with a pencil, but it is a select without its
-  box whose arrow is the pencil: opening a list from a separate button would need
-  `showPicker()`, which not every browser supports, while a tap on the select itself
-  opens the browser's own list everywhere.
+  before the choice existed: OpenFreeMap needs no key and sets no usage limits.
 
 - **Thin plate spline, own implementation.** TPS interpolates every GCP exactly; with
   three pairs it is the affine transform. It is fitted in Web Mercator (the display
@@ -182,10 +178,15 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   on touch screens); a copy follows the pointer and a line marks the drop place. The
   handle also takes the arrow keys. One opacity slider and the blend mode below the list
   act on the active layer.
-- **Names are text, not fields.** Route and project names show as text with a pencil
-  button; renaming swaps in a focused field in place (Enter or leaving it keeps the
-  name, Esc or an empty field drops the change). The panel shows no open text fields
-  apart from the search box.
+- **Names and choices are text, not fields.** Route and project names show as text with
+  a pencil button; renaming swaps in a focused field in place (Enter or leaving it keeps
+  the name, Esc or an empty field drops the change). The panel shows no open text fields
+  apart from the search box. The base map, blend mode and colours read the same way, as
+  the picked name with a pencil (`EditableChoice`), but each is a select without its box
+  whose arrow is the pencil: opening a list from a separate button would need
+  `showPicker()`, which not every browser supports, while a tap on the select itself
+  opens the browser's own list everywhere. The swatch of a tinted image stays a colour
+  input, before the name, so the pencils keep one column.
 - **Bringing things into view** lives in `map/navigate.ts`: one `showBounds` (padding,
   current rotation kept) behind place search, fly to image and fly to route; move image
   here is there too. Fly to

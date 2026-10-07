@@ -12,10 +12,11 @@ import {
   setLayerTint,
   setLayerVisible,
 } from '../state/project.ts'
-import { DEFAULT_TINT, type BlendMode, type ImageColors, type ImageLayer } from '../state/schema.ts'
+import { DEFAULT_TINT, type ImageLayer } from '../state/schema.ts'
 import { layerNote } from '../state/ui.ts'
 import { addImages, IMAGE_TYPES } from './addImages.ts'
 import { BLEND_MODES } from './blendModes.ts'
+import { EditableChoice } from './EditableChoice.tsx'
 import { EyeIcon, EyeOffIcon, GripIcon } from './icons.tsx'
 import { IMAGE_COLORS } from './imageColors.ts'
 import { reorderTarget } from './reorder.ts'
@@ -190,26 +191,17 @@ function ActiveLayer(props: { layer: ImageLayer }) {
       </div>
       <div class="row">
         <span class="muted">Blend</span>
-        <select
-          class="grow"
-          aria-label={`Blend mode of ${layer.name}`}
+        <EditableChoice
           value={blend().value}
-          onChange={(e) => setLayerBlend(layer.id, e.currentTarget.value as BlendMode)}
-        >
-          <For each={BLEND_MODES}>{(m) => <option value={m.value}>{m.label}</option>}</For>
-        </select>
+          options={BLEND_MODES}
+          label={`Blend mode of ${layer.name}`}
+          title="Change the blend mode"
+          onChange={(mode) => setLayerBlend(layer.id, mode)}
+        />
       </div>
       <p class="muted hint">{blend().description}</p>
       <div class="row">
         <span class="muted">Colours</span>
-        <select
-          class="grow"
-          aria-label={`Colours of ${layer.name}`}
-          value={layer.colors ?? 'original'}
-          onChange={(e) => setLayerColors(layer.id, e.currentTarget.value as ImageColors)}
-        >
-          <For each={IMAGE_COLORS}>{(c) => <option value={c.value}>{c.label}</option>}</For>
-        </select>
         <Show when={layer.colors === 'tinted'}>
           <input
             type="color"
@@ -220,6 +212,13 @@ function ActiveLayer(props: { layer: ImageLayer }) {
             onInput={(e) => setLayerTint(layer.id, e.currentTarget.value)}
           />
         </Show>
+        <EditableChoice
+          value={layer.colors ?? 'original'}
+          options={IMAGE_COLORS}
+          label={`Colours of ${layer.name}`}
+          title="Change how the colours of the image are shown"
+          onChange={(colors) => setLayerColors(layer.id, colors)}
+        />
       </div>
       <div class="row">
         <span class="grow muted">

@@ -271,7 +271,7 @@ button.layer-select:hover:not(:disabled) {
   white-space: nowrap;
 }
 
-/* The colour of a tinted image, as a swatch beside its select. */
+/* The colour of a tinted image, as a swatch before the name of its choice. */
 input.tint {
   width: 34px;
   height: 24px;
@@ -282,14 +282,16 @@ input.tint {
   cursor: pointer;
 }
 
-/* The base map reads like a name with its pencil, but is a select without its box: the
-   pencil takes the place of the arrow and lets clicks through, so a click on the name or
-   the pencil opens the browser's own list. */
-.base-map {
+/* A choice reads like a name with its pencil, but is a select without its box: the pencil
+   takes the place of the arrow and lets clicks through, so a click on the name or the
+   pencil opens the browser's own list. */
+.choice {
   position: relative;
 }
 
-.base-map select {
+.choice select {
+  display: block;
+  width: 100%;
   appearance: none;
   padding: 0 30px 0 0;
   border: none;
@@ -299,7 +301,7 @@ input.tint {
   text-overflow: ellipsis;
 }
 
-.base-map svg {
+.choice svg {
   position: absolute;
   top: 50%;
   right: 6px;
@@ -757,11 +759,11 @@ input[type='search'] {
   }
 
   /* In line with the pencils of the wider icon buttons. */
-  .base-map select {
+  .choice select {
     padding-right: 34px;
   }
 
-  .base-map svg {
+  .choice svg {
     right: 8px;
   }
 
