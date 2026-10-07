@@ -12,6 +12,17 @@ describe('parseProject', () => {
     expect(() => parseProject(JSON.stringify(project))).toThrow(/version 1 is not supported/)
   })
 
+  it('reads complete point pairs and rejects a point without its partner', () => {
+    const project = (gcps: unknown[]) =>
+      JSON.stringify({
+        ...emptyProject(),
+        layers: [{ id: 'l', name: 'scan.jpg', mime: 'image/jpeg', width: 100, height: 80, visible: true, opacity: 1, placement: [], gcps }],
+      })
+    expect(parseProject(project([{ id: 'g', image: [1, 2], map: [11, 48] }])).layers[0].gcps).toHaveLength(1)
+    expect(() => parseProject(project([{ id: 'g', image: [1, 2] }]))).toThrow(/"scan\.jpg" holds a point without its partner/)
+    expect(() => parseProject(project([{ id: 'g', map: [11, 48] }]))).toThrow(/without its partner/)
+  })
+
   it('rejects data that is not a project', () => {
     expect(() => parseProject('{"hello": 1}')).toThrow(/not a mappic project/)
     expect(() => parseProject('[]')).toThrow(/not a mappic project/)

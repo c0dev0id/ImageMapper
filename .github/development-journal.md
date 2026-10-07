@@ -49,7 +49,10 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   finding the mesh triangle under it, so the result is exactly the pixel on screen.
   Where a skew folds the image over itself, several triangles lie under the click; the
   search starts from the one drawn last, which is the one on top and the one seen.
-- **GCP model.** A GCP has an optional image side and an optional map side. New pairs are
+- **GCP model.** A GCP is a complete pair: an image point and its map point, both
+  required. Half pairs used to be allowed and are now turned away when a project loads
+  (same version, no migration before 1.0): nothing creates them any more, and allowing
+  them cost checks in the markers, the menu, the skew and the layer row. New pairs are
   pinned in a strict order, image first, because pinning the two sides in either order
   made it easy to put a map point where an image point was meant. The Pin tool (or the
   menu's "Pin point on image") takes the image point, which waits as a dashed ring
@@ -59,8 +62,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   is left behind. Removing always takes the whole pair, named by its number in the menu.
   There is no selection: selecting one side to match it anew and removing a single side
   went together, since neither was used in practice, dragging already corrects a side,
-  and both only served half pairs, which nothing creates any more (halves in older
-  projects count as unmatched and can only be removed). Both markers can be
+  and both only served half pairs. Both markers can be
   dragged to correct a point. A map dot keeps the dropped position; an image ring takes
   the pixel under the drop through the drawn mesh (the same inverse as a click) and goes
   back when dropped beside the image. The warp itself only changes on the next skew.

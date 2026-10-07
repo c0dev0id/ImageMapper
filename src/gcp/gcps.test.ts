@@ -3,7 +3,6 @@ import { fromMercator, toMercator } from '../geo/mercator.ts'
 import type { LngLat, Px } from '../geo/types.ts'
 import type { Gcp } from '../state/schema.ts'
 import {
-  countPairs,
   gcpMenu,
   hitTest,
   moveGcpSide,
@@ -15,9 +14,8 @@ import {
 
 const labels = (entries: MenuEntry[]) => entries.map((e) => `${e.label}${e.enabled ? '' : ' (disabled)'}`)
 
-const paired: Gcp = { id: 'a', image: [10, 10], map: [11, 48] }
-const imageOnly: Gcp = { id: 'b', image: [20, 20] }
-const mapOnly: Gcp = { id: 'c', map: [11.1, 48.1] }
+const first: Gcp = { id: 'a', image: [10, 10], map: [11, 48] }
+const second: Gcp = { id: 'b', image: [20, 20], map: [11.1, 48.1] }
 
 describe('gcpMenu', () => {
   it('starts a new pair on the image', () => {
@@ -37,29 +35,26 @@ describe('gcpMenu', () => {
   })
 
   it('offers removing the pair under the click, named by its number', () => {
-    const entries = gcpMenu({ gcps: [paired, imageOnly], hit: 'b', onImage: true })
+    const entries = gcpMenu({ gcps: [first, second], hit: 'b', onImage: true })
     expect(labels(entries)).toEqual(['Pin point on image', 'Remove point pair 2'])
     expect(entries[1].action).toEqual({ kind: 'remove', gcpId: 'b' })
   })
 
   it('offers removing beside the image too', () => {
-    const entries = gcpMenu({ gcps: [paired], hit: 'a', onImage: false })
+    const entries = gcpMenu({ gcps: [first], hit: 'a', onImage: false })
     expect(labels(entries)).toEqual(['Pin point on image (disabled)', 'Remove point pair 1'])
   })
 })
 
 describe('moveGcpSide', () => {
   it('moves one side and leaves the partner and other points alone', () => {
-    const gcps = [paired, imageOnly]
+    const gcps = [first, second]
     const moved = moveGcpSide(gcps, 'a', 'map', [11.2, 48.2])
     expect(moved[0]).toEqual({ id: 'a', image: [10, 10], map: [11.2, 48.2] })
-    expect(moved[1]).toBe(imageOnly)
+    expect(moved[1]).toBe(second)
     expect(moveGcpSide(gcps, 'a', 'image', [12, 13])[0]).toEqual({ id: 'a', image: [12, 13], map: [11, 48] })
   })
 
-  it('does not add a side that is missing', () => {
-    expect(moveGcpSide([imageOnly], 'b', 'map', [1, 1])).toEqual([imageOnly])
-  })
 })
 
 describe('hitTest', () => {
@@ -79,12 +74,6 @@ describe('hitTest', () => {
   })
 })
 
-describe('countPairs', () => {
-  it('counts complete and unmatched points', () => {
-    expect(countPairs([paired, imageOnly, mapOnly])).toEqual({ complete: 1, unmatched: 2 })
-  })
-})
-
 describe('prepareSkew', () => {
   const W = 1000
   const H = 800
@@ -92,8 +81,8 @@ describe('prepareSkew', () => {
   const geo = ([x, y]: Px): LngLat => fromMercator([center[0] + (x - W / 2) * 1e-8, center[1] + (y - H / 2) * 1e-8])
   const gcp = (id: string, image: Px, map = geo(image)): Gcp => ({ id, image, map })
 
-  it('returns the complete pairs as placement and ignores unmatched points', () => {
-    const result = prepareSkew([gcp('1', [0, 0]), imageOnly, gcp('2', [900, 50]), gcp('3', [400, 700])], W, H)
+  it('returns the pairs as placement', () => {
+    const result = prepareSkew([gcp('1', [0, 0]), gcp('2', [900, 50]), gcp('3', [400, 700])], W, H)
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.pairs).toHaveLength(3)
@@ -103,11 +92,11 @@ describe('prepareSkew', () => {
 
   it('needs three pairs', () => {
     const result = prepareSkew([gcp('1', [0, 0]), gcp('2', [900, 50])], W, H)
-    expect(result).toEqual({ ok: false, error: 'At least 3 complete point pairs are needed.' })
+    expect(result).toEqual({ ok: false, error: 'At least 3 point pairs are needed.' })
   })
 
   it('names duplicate image points by their marker numbers', () => {
-    const result = prepareSkew([imageOnly, gcp('1', [0, 0]), gcp('2', [900, 50]), gcp('3', [900.2, 50])], W, H)
+    const result = prepareSkew([gcp('0', [500, 500]), gcp('1', [0, 0]), gcp('2', [900, 50]), gcp('3', [900.2, 50])], W, H)
     expect(result).toEqual({ ok: false, error: 'Image points 3 and 4 are at the same spot.' })
   })
 

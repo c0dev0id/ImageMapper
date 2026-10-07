@@ -16,7 +16,7 @@ const project: Project = {
       visible: true,
       opacity: 0.7,
       placement: [{ image: [0, 0], map: [11, 46] }],
-      gcps: [{ id: 'g1', image: [1, 2] }],
+      gcps: [{ id: 'g1', image: [1, 2], map: [11.1, 46.1] }],
     },
   ],
   activeLayerId: 'l1',

@@ -53,9 +53,9 @@ export function gcpMenu({ gcps, hit, onImage }: MenuInput): MenuEntry[] {
   return entries
 }
 
-/** Moves one existing side of a GCP, as when its marker is dragged; the other side stays. */
+/** Moves one side of a GCP, as when its marker is dragged; the other side stays. */
 export function moveGcpSide(gcps: readonly Gcp[], gcpId: string, side: Side, value: Px | LngLat): Gcp[] {
-  return gcps.map((g) => (g.id === gcpId && g[side] ? { ...g, [side]: value } : g))
+  return gcps.map((g) => (g.id === gcpId ? { ...g, [side]: value } : g))
 }
 
 /** The GCP whose marker (ring or dot) is nearest to a click, if one lies within `radius` CSS pixels. */
@@ -78,22 +78,15 @@ export function gcpNumber(gcps: readonly Gcp[], id: string): number {
   return gcps.findIndex((g) => g.id === id) + 1
 }
 
-export function countPairs(gcps: readonly Gcp[]): { complete: number; unmatched: number } {
-  const complete = gcps.filter((g) => g.image && g.map).length
-  return { complete, unmatched: gcps.length - complete }
-}
-
 export type SkewResult = { ok: true; pairs: Pair[]; warning?: string } | { ok: false; error: string }
 
-/** Checks the complete pairs of a layer and returns them as the new placement. */
+/** Checks the point pairs of a layer and returns them as the new placement. */
 export function prepareSkew(gcps: readonly Gcp[], width: number, height: number): SkewResult {
-  const complete = gcps.filter((g): g is Gcp & Pair => !!(g.image && g.map))
-  const pairs: Pair[] = complete.map((g) => ({ image: [...g.image], map: [...g.map] }))
-  const labels = complete.map((g) => String(gcpNumber(gcps, g.id)))
+  const pairs: Pair[] = gcps.map((g) => ({ image: [...g.image], map: [...g.map] }))
   const problem = checkControlPoints(
     pairs.map((p) => p.image),
     pairs.map((p) => toMercator(p.map)),
-    labels,
+    pairs.map((_, i) => String(i + 1)),
   )
   if (problem) return { ok: false, error: problem }
 

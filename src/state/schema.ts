@@ -1,4 +1,4 @@
-import type { LngLat, Pair, Px } from '../geo/types.ts'
+import type { LngLat, Pair } from '../geo/types.ts'
 
 export const PROJECT_VERSION = 2
 
@@ -16,11 +16,9 @@ export type BlendMode =
   | 'difference'
 export type Profile = 'car' | 'bike' | 'foot'
 
-/** A ground control point; either side may still be missing. */
-export interface Gcp {
+/** A ground control point: a spot on the image and its place on the map. */
+export interface Gcp extends Pair {
   id: string
-  image?: Px
-  map?: LngLat
 }
 
 export interface ImageLayer {
@@ -115,6 +113,14 @@ export function parseProject(json: string): Project {
     throw new Error(
       `Project version ${String(data.version)} is not supported; this mappic reads version ${PROJECT_VERSION}.`,
     )
+  }
+  // Every point pair has both sides; data with a lone side is turned away here rather than
+  // failing later.
+  for (const layer of data.layers) {
+    const gcps: unknown = isRecord(layer) ? layer.gcps : undefined
+    if (Array.isArray(gcps) && gcps.some((g) => !isRecord(g) || !Array.isArray(g.image) || !Array.isArray(g.map))) {
+      throw new Error(`Image layer "${String(layer.name)}" holds a point without its partner; this mappic needs both.`)
+    }
   }
   return { ...emptyProject(), ...data } as Project
 }

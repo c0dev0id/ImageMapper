@@ -25,10 +25,7 @@ export function GcpMarkers() {
       const layer = georefLayer()
       if (!layer) return []
       const out: string[] = []
-      for (const g of layer.gcps) {
-        if (g.image) out.push(`${layer.id}/${g.id}/image`)
-        if (g.map) out.push(`${layer.id}/${g.id}/map`)
-      }
+      for (const g of layer.gcps) out.push(`${layer.id}/${g.id}/image`, `${layer.id}/${g.id}/map`)
       return out
     },
     [],
@@ -76,18 +73,14 @@ function GcpMarker(props: { layerId: string; gcpId: string; side: Side }) {
   const gcp = createMemo(() => layer()?.gcps.find((g) => g.id === gcpId))
   const position = createMemo((): LngLat | undefined => {
     const g = gcp()
-    if (side === 'map') return g?.map && [g.map[0], g.map[1]]
-    return g?.image && warpOf(layerId)?.imageToMap([g.image[0], g.image[1]])
+    if (!g) return undefined
+    if (side === 'map') return [g.map[0], g.map[1]]
+    return warpOf(layerId)?.imageToMap([g.image[0], g.image[1]])
   })
-  const paired = () => !!(gcp()?.image && gcp()?.map)
   const number = () => gcpNumber(layer()?.gcps ?? [], gcpId)
 
   const content = (
-    <div
-      class={`gcp gcp-${side}`}
-      classList={{ unpaired: !paired() }}
-      title={`${side === 'image' ? 'Image' : 'Map'} point ${number()}${paired() ? '' : ' (unmatched)'}`}
-    >
+    <div class={`gcp gcp-${side}`} title={`${side === 'image' ? 'Image' : 'Map'} point ${number()}`}>
       {number()}
     </div>
   ) as HTMLElement
@@ -126,7 +119,6 @@ export function GcpLinks() {
     const features: Feature<LineString>[] = []
     if (layer && warp) {
       for (const g of layer.gcps) {
-        if (!g.image || !g.map) continue
         features.push({
           type: 'Feature',
           properties: {},

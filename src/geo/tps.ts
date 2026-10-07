@@ -117,7 +117,7 @@ export function checkControlPoints(
   labels: string[],
   minSourceDistance = 1,
 ): string | undefined {
-  if (src.length < 3) return 'At least 3 complete point pairs are needed.'
+  if (src.length < 3) return 'At least 3 point pairs are needed.'
   for (let i = 0; i < src.length; i++) {
     for (let j = i + 1; j < src.length; j++) {
       if (Math.hypot(src[i][0] - src[j][0], src[i][1] - src[j][1]) < minSourceDistance) {

@@ -1,5 +1,4 @@
 import { createResource, For, Show } from 'solid-js'
-import { countPairs } from '../gcp/gcps.ts'
 import { useMapAccessor } from '../map/context.ts'
 import {
   activeLayer,
@@ -166,7 +165,7 @@ function dragToReorder(e: PointerEvent, layer: ImageLayer, entry: HTMLLIElement,
 function ActiveLayer(props: { layer: ImageLayer }) {
   const layer = props.layer
   const blend = () => BLEND_MODES.find((m) => m.value === (layer.blend ?? 'normal')) ?? BLEND_MODES[0]
-  const counts = () => countPairs(layer.gcps)
+  const pairs = () => layer.gcps.length
   const note = () => {
     const n = layerNote()
     return n?.layerId === layer.id ? n : undefined
@@ -200,8 +199,7 @@ function ActiveLayer(props: { layer: ImageLayer }) {
       <p class="muted hint">{blend().description}</p>
       <div class="row">
         <span class="grow muted">
-          {counts().complete} {counts().complete === 1 ? 'pair' : 'pairs'}
-          {counts().unmatched > 0 ? `, ${counts().unmatched} unmatched` : ''}
+          {pairs()} {pairs() === 1 ? 'pair' : 'pairs'}
         </span>
       </div>
       <Show when={note()}>{(n) => <p class={`note ${n().kind}`}>{n().text}</p>}</Show>

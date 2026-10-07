@@ -329,11 +329,9 @@ button.layer-select:hover:not(:disabled) {
   border: 2px solid #fff;
 }
 
-.gcp.unpaired {
-  border-style: dashed;
-}
-
+/* The image point of a pair being pinned, until its place on the map is tapped. */
 .gcp-image.unpaired {
+  border-style: dashed;
   color: var(--image-point);
   background: rgba(255, 255, 255, 0.6);
 }

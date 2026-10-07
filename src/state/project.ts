@@ -210,7 +210,7 @@ export function setLayerPlacement(id: string, placement: Pair[], label?: string)
   onChange()
 }
 
-/** Fits a layer's image to its complete point pairs; problems are shown as its layer note. */
+/** Fits a layer's image to its point pairs; problems are shown as its layer note. */
 export function skewImageToMap(layerId: string): void {
   const layer = layerById(layerId)
   if (!layer) return

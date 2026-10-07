@@ -1,5 +1,4 @@
 import { Show, type JSX } from 'solid-js'
-import { countPairs } from '../gcp/gcps.ts'
 import type { Warp } from '../geo/warp.ts'
 import { openMatchTowns } from '../match/MatchTownsDialog.tsx'
 import { warpOf } from '../state/derived.ts'
@@ -94,7 +93,7 @@ export function Toolbar() {
 function ImageTools(props: { layer: ImageLayer }) {
   const map = useMap()
   const layer = props.layer
-  const pairs = () => countPairs(layer.gcps).complete
+  const pairs = () => layer.gcps.length
   // Picking Pin again stops pinning; leaving Resize (or a waiting pin) comes first.
   const pickPin = () => {
     stopTransform()

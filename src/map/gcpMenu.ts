@@ -57,14 +57,11 @@ export function openGcpMenu(
 
   const markers: { gcpId: string; x: number; y: number }[] = []
   for (const g of layer?.gcps ?? []) {
-    if (g.image && warp) {
-      const p = map.project(warp.imageToMap([g.image[0], g.image[1]]))
-      markers.push({ gcpId: g.id, x: p.x, y: p.y })
-    }
-    if (g.map) {
-      const p = map.project([g.map[0], g.map[1]])
-      markers.push({ gcpId: g.id, x: p.x, y: p.y })
-    }
+    const dot = map.project([g.map[0], g.map[1]])
+    markers.push({ gcpId: g.id, x: dot.x, y: dot.y })
+    if (!warp) continue
+    const ring = map.project(warp.imageToMap([g.image[0], g.image[1]]))
+    markers.push({ gcpId: g.id, x: ring.x, y: ring.y })
   }
   const entries = gcpMenu({
     gcps: layer && unwrap(layer.gcps),
