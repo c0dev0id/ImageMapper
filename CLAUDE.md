@@ -79,6 +79,11 @@ do not recreate map objects. Key pieces:
   with the 150 ms tap delay that filters clicks around drags.
 - `navigate.ts`: all "bring into view" logic.
 
+**Colours:** UI colours are tokens in `:root` of `src/styles.css`, each defined with
+`light-dark()`; `src/ui/theme.ts` sets `data-theme` on the document to pick the
+`color-scheme`. Use the tokens rather than literal colours in panel, toolbar and dialog
+styles. The map and anything drawn on it (markers, handles, help drawings) stay unthemed.
+
 **Panel (`src/ui/`)**, **help dialogs with SVG drawings (`src/help/`)**, and **Match Towns
 (`src/match/`, self-contained including its CSS)**.
 
