@@ -25,10 +25,10 @@ export function decodeProjectFile(data: Uint8Array): { project: Project; images:
   try {
     files = unzipSync(data)
   } catch {
-    throw new Error('This is not a mappic project file.')
+    throw new Error('This is not an Image Mapper project file.')
   }
   const json = files['project.json']
-  if (!json) throw new Error('This is not a mappic project file: project.json is missing.')
+  if (!json) throw new Error('This is not an Image Mapper project file: project.json is missing.')
   const project = parseProject(strFromU8(json))
   const images = new Map<string, ArrayBuffer>()
   for (const layer of project.layers) {

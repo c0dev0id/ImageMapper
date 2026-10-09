@@ -12,7 +12,7 @@ const LICENSES = 'licenses.txt'
 function iconLicense(): Plugin {
   let root = ''
   return {
-    name: 'mappic:icon-license',
+    name: 'image-mapper:icon-license',
     configResolved(config) {
       root = config.root
     },
@@ -32,7 +32,7 @@ function iconLicense(): Plugin {
 }
 
 export default defineConfig({
-  // Relative base: the build works under any path (e.g. https://<user>.github.io/mappic/).
+  // Relative base: the build works under any path (e.g. https://<user>.github.io/<repository>/).
   base: './',
   plugins: [solid(), iconLicense()],
   build: {

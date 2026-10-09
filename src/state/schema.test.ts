@@ -34,8 +34,8 @@ describe('parseProject', () => {
   })
 
   it('rejects data that is not a project', () => {
-    expect(() => parseProject('{"hello": 1}')).toThrow(/not a mappic project/)
-    expect(() => parseProject('[]')).toThrow(/not a mappic project/)
+    expect(() => parseProject('{"hello": 1}')).toThrow(/not an Image Mapper project/)
+    expect(() => parseProject('[]')).toThrow(/not an Image Mapper project/)
     expect(() => parseProject('not json')).toThrow(/not valid JSON/)
   })
 })

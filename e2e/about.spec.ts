@@ -4,7 +4,7 @@ test.use({ firstVisit: true })
 
 test('the About dialog opens on the first visit only, and again from the (i) beside the title', async ({ page }) => {
   await openApp(page)
-  const about = page.getByRole('dialog', { name: 'About MapPic' })
+  const about = page.getByRole('dialog', { name: 'About Image Mapper' })
   await expect(about).toBeVisible()
   await expect(about.locator('figure')).toHaveCount(3)
   await about.getByRole('button', { name: 'Close help' }).click()
@@ -14,6 +14,6 @@ test('the About dialog opens on the first visit only, and again from the (i) bes
   await expect(page.getByRole('toolbar', { name: 'Tools' })).toBeVisible()
   await expect(about).toBeHidden()
 
-  await page.getByRole('button', { name: 'About mappic' }).click()
+  await page.getByRole('button', { name: 'About Image Mapper' }).click()
   await expect(about).toBeVisible()
 })

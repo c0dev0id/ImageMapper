@@ -43,11 +43,11 @@ export function ProjectSection() {
   return (
     <header class="section panel-header">
       <div class="row title-row">
-        <h1>mappic</h1>
+        <h1>Image Mapper</h1>
         <button
           class="icon help-button about-button"
-          title="About mappic"
-          aria-label="About mappic"
+          title="About Image Mapper"
+          aria-label="About Image Mapper"
           onClick={() => setHelp(ABOUT_HELP)}
         >
           <InfoIcon />

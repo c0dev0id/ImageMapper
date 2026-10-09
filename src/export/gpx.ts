@@ -24,7 +24,7 @@ const coordinates = ([lng, lat]: LngLat) => `lat="${lat.toFixed(6)}" lon="${wrap
 export function toGpx(name: string, waypoints: readonly Waypoint[], tracks: readonly Track[], time: Date): string {
   const lines = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<gpx version="1.1" creator="mappic" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">',
+    '<gpx version="1.1" creator="Image Mapper" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">',
     '  <metadata>',
     `    <name>${escapeXml(name)}</name>`,
     `    <time>${time.toISOString()}</time>`,

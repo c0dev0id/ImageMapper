@@ -47,7 +47,7 @@ describe('project file', () => {
   })
 
   it('rejects files that are not ZIP archives', () => {
-    expect(() => decodeProjectFile(strToU8('hello'))).toThrow('This is not a mappic project file.')
+    expect(() => decodeProjectFile(strToU8('hello'))).toThrow('This is not an Image Mapper project file.')
   })
 
   it('rejects archives without project.json', () => {

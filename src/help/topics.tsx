@@ -194,9 +194,9 @@ export const MATCH_TOWNS_HELP: Help = {
   ],
 }
 
-/** What mappic is for: shown on the first visit, and from the (i) beside the title. */
+/** What Image Mapper is for: shown on the first visit, and from the (i) beside the title. */
 export const ABOUT_HELP: Help = {
-  title: 'About MapPic',
+  title: 'About Image Mapper',
   steps: [
     {
       banner: () => (
@@ -223,7 +223,7 @@ export const ABOUT_HELP: Help = {
         </Banner>
       ),
       text:
-        'MapPic is a tool, which can help you to create a route for your navigation system from an image in a magazine.\n' +
+        'Image Mapper is a tool, which can help you to create a route for your navigation system from an image in a magazine.\n' +
         'Step 1: Import a photo that contains the route.\n' +
         'Step 2: Match the photo with the underlying map (which contains routing information).\n' +
         'Step 3: Trace the line in the photo along roads found on the map.\n' +

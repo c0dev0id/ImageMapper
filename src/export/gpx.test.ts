@@ -12,7 +12,7 @@ describe('toGpx', () => {
       { name: 'Day 2', points: [[12, 47]] },
     ], time)
     expect(gpx).toBe(`<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="mappic" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<gpx version="1.1" creator="Image Mapper" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
   <metadata>
     <name>Alps</name>
     <time>2026-10-05T12:00:00.000Z</time>

@@ -130,11 +130,11 @@ export function parseProject(json: string): Project {
     throw new Error('The project data is not valid JSON.')
   }
   if (!isRecord(data) || !Array.isArray(data.layers) || !Array.isArray(data.routes)) {
-    throw new Error('This is not a mappic project.')
+    throw new Error('This is not an Image Mapper project.')
   }
   if (data.version !== PROJECT_VERSION) {
     throw new Error(
-      `Project version ${String(data.version)} is not supported; this mappic reads version ${PROJECT_VERSION}.`,
+      `Project version ${String(data.version)} is not supported; this release of Image Mapper reads version ${PROJECT_VERSION}.`,
     )
   }
   // Every point pair has both sides; data with a lone side is turned away here rather than
@@ -142,7 +142,7 @@ export function parseProject(json: string): Project {
   for (const layer of data.layers) {
     const gcps: unknown = isRecord(layer) ? layer.gcps : undefined
     if (Array.isArray(gcps) && gcps.some((g) => !isRecord(g) || !Array.isArray(g.image) || !Array.isArray(g.map))) {
-      throw new Error(`Image layer "${String(layer.name)}" holds a point without its partner; this mappic needs both.`)
+      throw new Error(`Image layer "${String(layer.name)}" holds a point without its partner; Image Mapper needs both.`)
     }
   }
   return { ...emptyProject(), ...data } as Project

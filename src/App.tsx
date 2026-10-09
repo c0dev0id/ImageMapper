@@ -34,7 +34,7 @@ export function App() {
       notify(`Browser storage failed, work will not be kept: ${errorMessage(error)}`)
     } finally {
       setLoaded(true)
-      // The first visit starts with what mappic is for.
+      // The first visit starts with what Image Mapper is for.
       showHelpOnce('about', ABOUT_HELP)
     }
   })

@@ -1,11 +1,11 @@
-# mappic
+# Image Mapper
 
 Transfer a tour printed in a magazine onto a real map and take it along as GPX.
 
 Printed tour maps are simplified, stretched to fit the page and often photographed at
-an angle. mappic overlays photos or scans of such maps on OpenStreetMap, warps them into
-place using point pairs you mark on the image and on the map (georeferencing with a thin
-plate spline), and lets you trace the route on top with OSRM routing.
+an angle. Image Mapper overlays photos or scans of such maps on OpenStreetMap, warps them
+into place using point pairs you mark on the image and on the map (georeferencing with a
+thin plate spline), and lets you trace the route on top with OSRM routing.
 
 It runs entirely in the browser; nothing is uploaded anywhere. The first visit opens with
 what the app is for; the (i) beside the name at the top of the panel shows it again.
@@ -132,7 +132,7 @@ opened: there are no migrations before version 1.0.
 
 ## Services
 
-mappic uses public services directly from the browser. Please respect their terms:
+Image Mapper uses public services directly from the browser. Please respect their terms:
 
 - **Base maps**: [OpenStreetMap tile servers](https://operations.osmfoundation.org/policies/tiles/)
   for OSM Standard; [OpenTopoMap](https://opentopomap.org/about) (CC-BY-SA; free to use
@@ -162,8 +162,9 @@ mappic uses public services directly from the browser. Please respect their term
   only when you press Enter or Search (no search-as-you-type), at most one request per
   second, repeated searches answered from a cache.
 - **Routing**: [FOSSGIS OSRM servers](https://routing.openstreetmap.de/about.html) (car, bike,
-  foot). At most one request per second; mappic waits 1.1 s between requests. The terms
-  require the operator's contact address to be shown, which the app does in its panel.
+  foot). At most one request per second; Image Mapper waits 1.1 s between requests. The
+  terms require the operator's contact address to be shown, which the app does in its
+  panel.
 
 The credits of all of these sit at the bottom right of the map. They start open and fold
 into their (i) after five seconds or at the first pan, zoom or click, as the

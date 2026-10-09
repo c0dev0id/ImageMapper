@@ -12,5 +12,5 @@ export function downloadBlob(blob: Blob, fileName: string): void {
 
 /** A file name based on the project name, without characters file systems reject. */
 export function fileBaseName(name: string): string {
-  return name.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-').trim().slice(0, 80) || 'mappic'
+  return name.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-').trim().slice(0, 80) || 'image-mapper'
 }

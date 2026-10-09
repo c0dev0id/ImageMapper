@@ -3,8 +3,8 @@
 ## Overview and intent
 
 Magazines print tour maps that are geometrically wrong: simplified, skewed to fit
-the page, and often photographed at an angle. mappic transfers such a route to a
-real map:
+the page, and often photographed at an angle. Image Mapper transfers such a route
+to a real map:
 
 1. Load photos or scans of the printed map as image layers on top of OSM.
 2. Georeference each image with ground control points (GCPs): pairs of the same
@@ -247,14 +247,14 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   dialog is used. A help can also come once, the first time a feature is used: that it
   was shown is noted in localStorage (`mappic.help.<id>`), not in the project, so it
   lasts until the site data is cleared, or for the session where storage is blocked.
-  About mappic is a help as well: what the app is for, under three pictures (an image
-  added, pinned and skewed, the route traced and exported). It comes on the first visit
-  and from the (i) beside the title. The dialog closes with its button, Esc or a click
-  beside it (`closedby="any"`); while a modal dialog is open, the map's keys (Esc, undo)
-  leave it alone. Its title takes the focus when it opens (`tabindex="-1"` and
-  `autofocus`; Chrome ignores `autofocus` on the dialog element itself), so reading
-  starts there instead of at a ringed close button. On narrow screens three pictures take
-  two lines, and their arrows are dropped, as one would end the first line pointing at
+  About Image Mapper is a help as well: what the app is for, under three pictures (an
+  image added, pinned and skewed, the route traced and exported). It comes on the first
+  visit and from the (i) beside the title. The dialog closes with its button, Esc or a
+  click beside it (`closedby="any"`); while a modal dialog is open, the map's keys (Esc,
+  undo) leave it alone. Its title takes the focus when it opens (`tabindex="-1"` and
+  `autofocus`; Chrome ignores `autofocus` on the dialog element itself), so reading starts
+  there instead of at a ringed close button. On narrow screens three pictures take two
+  lines, and their arrows are dropped, as one would end the first line pointing at
   nothing.
 - **Bringing things into view** lives in `map/navigate.ts`: one `showBounds` (padding,
   current rotation kept) behind place search, fly to image and fly to route; move image
