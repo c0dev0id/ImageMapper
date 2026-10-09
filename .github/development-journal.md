@@ -245,7 +245,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   and nothing obvious (how a slider works). The effort goes where a feature is hard to
   discover: the order of a pin pair, why a town match keeps no pairs, how the Match Towns
   dialog is used. A help can also come once, the first time a feature is used: that it
-  was shown is noted in localStorage (`mappic.help.<id>`), not in the project, so it
+  was shown is noted in localStorage (`image-mapper.help.<id>`), not in the project, so it
   lasts until the site data is cleared, or for the session where storage is blocked.
   About Image Mapper is a help as well: what the app is for, under three pictures (an
   image added, pinned and skewed, the route traced and exported). It comes on the first
@@ -325,7 +325,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - **Rendering limits.** Textures are capped at 4096 px on the long side (about 350 dpi
   for an A4 page) to bound GPU memory. `renderWorldCopies` is off because the custom
   layer draws a single world copy; markers and lines would otherwise repeat.
-- **Project file.** A `.mappic` file is a plain ZIP with `project.json` and the
+- **Project file.** An `.imgmap` file is a plain ZIP with `project.json` and the
   original image bytes. Opening validates the whole file before anything is replaced.
 - **No migrations before 1.0.** Project files and stored data carry a version number;
   unknown versions are rejected.

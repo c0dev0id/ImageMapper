@@ -33,7 +33,7 @@ const shown = new Set<string>()
  * note lasts until the site data is cleared, or for the session where storage is blocked.
  */
 export function firstTime(id: string, storage: NoteStore = () => localStorage): boolean {
-  const key = `mappic.help.${id}`
+  const key = `image-mapper.help.${id}`
   if (shown.has(key)) return false
   shown.add(key)
   try {

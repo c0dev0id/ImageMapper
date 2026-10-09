@@ -18,7 +18,7 @@ export function ProjectSection() {
   const save = () => {
     try {
       const file = encodeProjectFile(unwrap(project), allImageBytes())
-      downloadBlob(new Blob([file], { type: 'application/zip' }), `${fileBaseName(project.name)}.mappic`)
+      downloadBlob(new Blob([file], { type: 'application/zip' }), `${fileBaseName(project.name)}.imgmap`)
     } catch (error) {
       notify(`The project could not be saved: ${errorMessage(error)}`)
     }
@@ -65,15 +65,15 @@ export function ProjectSection() {
         <EditableName value={project.name} label="project" onRename={setProjectName} />
       </div>
       <div class="row buttons">
-        <button title="Download the project with all images as a .mappic file" onClick={save}>
+        <button title="Download the project with all images as an .imgmap file" onClick={save}>
           Save
         </button>
-        <label class="button" title="Open a .mappic project file">
+        <label class="button" title="Open an .imgmap project file">
           Open
           <input
             type="file"
             hidden
-            accept=".mappic,application/zip"
+            accept=".imgmap,application/zip"
             onChange={(e) => {
               const input = e.currentTarget
               const file = input.files?.[0]

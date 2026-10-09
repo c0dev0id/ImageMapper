@@ -4,7 +4,7 @@ import { project, replaceProject, serializeProject, setChangeListener } from './
 import { parseProject, type Project } from './schema.ts'
 import { errorMessage, notify } from './ui.ts'
 
-const db = createStore('mappic', 'data')
+const db = createStore('image-mapper', 'data')
 const PROJECT_KEY = 'project'
 const imageKey = (id: string) => `image:${id}`
 

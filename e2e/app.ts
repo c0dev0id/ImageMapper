@@ -88,7 +88,7 @@ export const test = base.extend<Fixtures>({
   page: async ({ page, requests, places, firstVisit }, use) => {
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
-    if (!firstVisit) await page.addInitScript(() => localStorage.setItem('mappic.help.about', 'shown'))
+    if (!firstVisit) await page.addInitScript(() => localStorage.setItem('image-mapper.help.about', 'shown'))
     await page.route((url) => url.hostname !== 'localhost', (request) => answer(request, requests, places))
     await use(page)
     expect(errors, 'errors thrown in the page').toEqual([])
@@ -103,7 +103,7 @@ export async function openApp(page: Page, project?: Partial<Project>): Promise<v
     await page.evaluate(
       (json) =>
         new Promise<void>((resolve, reject) => {
-          const open = indexedDB.open('mappic')
+          const open = indexedDB.open('image-mapper')
           open.onupgradeneeded = () => open.result.createObjectStore('data')
           open.onerror = () => reject(open.error)
           open.onsuccess = () => {
@@ -127,7 +127,7 @@ export function storedProject(page: Page): Promise<Project> {
   return page.evaluate(
     () =>
       new Promise<Project>((resolve, reject) => {
-        const open = indexedDB.open('mappic')
+        const open = indexedDB.open('image-mapper')
         open.onerror = () => reject(open.error)
         open.onsuccess = () => {
           const read = open.result.transaction('data').objectStore('data').get('project')

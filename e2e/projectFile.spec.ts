@@ -25,13 +25,14 @@ test('a saved project file brings back images, routes and waypoints after New', 
 
   const download = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Save' }).click()
+  expect((await download).suggestedFilename()).toBe('Eifel tour.imgmap')
   const file = await (await download).path()
 
   await page.getByRole('button', { name: 'New' }).click()
   await expect.poll(async () => (await storedProject(page)).routes).toEqual([])
   expect((await storedProject(page)).layers).toEqual([])
 
-  await page.locator('input[type=file][accept^=".mappic"]').setInputFiles(file)
+  await page.locator('input[type=file][accept^=".imgmap"]').setInputFiles(file)
   await expect.poll(async () => (await storedProject(page)).name).toBe('Eifel tour')
   const after = await storedProject(page)
   expect(after.layers.map(({ name, width, height, placement }) => ({ name, width, height, placement }))).toEqual(

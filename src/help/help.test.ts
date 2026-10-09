@@ -15,11 +15,11 @@ describe('firstTime', () => {
     const storage = memoryStorage()
     expect(firstTime('a', storage)).toBe(true)
     expect(firstTime('a', storage)).toBe(false)
-    expect(storage().data.get('mappic.help.a')).toBe('shown')
+    expect(storage().data.get('image-mapper.help.a')).toBe('shown')
   })
 
   it('knows the helps shown on an earlier visit', () => {
-    expect(firstTime('b', memoryStorage({ 'mappic.help.b': 'shown' }))).toBe(false)
+    expect(firstTime('b', memoryStorage({ 'image-mapper.help.b': 'shown' }))).toBe(false)
   })
 
   it('keeps helps apart', () => {
