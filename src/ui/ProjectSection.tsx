@@ -15,6 +15,8 @@ import { theme, toggleTheme } from './theme.ts'
 
 export function ProjectSection() {
   const map = useMapAccessor()
+  const dark = () => theme() === 'dark'
+  const themeLabel = () => (dark() ? 'Switch to light mode' : 'Switch to dark mode')
 
   const save = () => {
     try {
@@ -55,11 +57,11 @@ export function ProjectSection() {
         </button>
         <button
           class="icon theme-button"
-          title={theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          aria-label={theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={themeLabel()}
+          aria-label={themeLabel()}
           onClick={toggleTheme}
         >
-          {theme() === 'dark' ? <SunIcon /> : <MoonIcon />}
+          {dark() ? <SunIcon /> : <MoonIcon />}
         </button>
         <button
           class="icon panel-toggle"

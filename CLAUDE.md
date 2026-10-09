@@ -80,8 +80,8 @@ do not recreate map objects. Key pieces:
 - `navigate.ts`: all "bring into view" logic.
 
 **Colours:** UI colours are tokens in `:root` of `src/styles.css`, each defined with
-`light-dark()`; `src/ui/theme.ts` sets `data-theme` on the document to pick the
-`color-scheme`. Use the tokens rather than literal colours in panel, toolbar and dialog
+`light-dark()` and switched by `color-scheme`, which follows the browser unless
+`src/ui/theme.ts` sets a chosen theme as `data-theme` on the document. Use the tokens rather than literal colours in panel, toolbar and dialog
 styles. The map and anything drawn on it (markers, handles, help drawings) stay unthemed.
 
 **Panel (`src/ui/`)**, **help dialogs with SVG drawings (`src/help/`)**, and **Match Towns

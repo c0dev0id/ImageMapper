@@ -17,15 +17,11 @@ export function readTheme(storage: ThemeStore = () => localStorage): Theme | und
   }
 }
 
-/**
- * Keeps a chosen theme that differs from the browser's preference. One that equals it is
- * forgotten, so that toggling back follows the browser again, also when its preference
- * changes later. Where storage is blocked, the choice lasts for the session.
- */
-export function writeTheme(theme: Theme, preferred: Theme, storage: ThemeStore = () => localStorage): void {
+/** Keeps a chosen theme, or forgets the choice. Where storage is blocked, it lasts for the session. */
+export function writeTheme(choice: Theme | undefined, storage: ThemeStore = () => localStorage): void {
   try {
-    if (theme === preferred) storage().removeItem(KEY)
-    else storage().setItem(KEY, theme)
+    if (choice) storage().setItem(KEY, choice)
+    else storage().removeItem(KEY)
   } catch {
     // Storage is blocked or full: the signal has to do.
   }
@@ -37,15 +33,21 @@ const [chosen, setChosen] = createSignal<Theme>()
 /** The theme in use: the one chosen in this browser, else the browser's preference. */
 export const theme = (): Theme => chosen() ?? preferred()
 
+/**
+ * Switches to the other theme. A choice is only kept while it differs from the browser's
+ * preference, so switching back follows the browser again, also when its preference
+ * changes later.
+ */
 export function toggleTheme(): void {
   const next = theme() === 'dark' ? 'light' : 'dark'
-  writeTheme(next, preferred())
-  setChosen(next === preferred() ? undefined : next)
+  const choice = next === preferred() ? undefined : next
+  writeTheme(choice)
+  setChosen(choice)
 }
 
 /**
- * Follows the browser's colour preference and sets the theme in use as `data-theme` on the
- * document, which picks the `color-scheme` the styles' colours depend on.
+ * Tracks the browser's colour preference, which the styles follow by themselves through
+ * `color-scheme`, and sets a chosen theme as `data-theme` on the document to override it.
  */
 export function initTheme(): void {
   const media = matchMedia('(prefers-color-scheme: dark)')
@@ -55,7 +57,9 @@ export function initTheme(): void {
   setChosen(readTheme())
   createRoot(() => {
     createEffect(() => {
-      document.documentElement.dataset.theme = theme()
+      const choice = chosen()
+      if (choice) document.documentElement.dataset.theme = choice
+      else delete document.documentElement.dataset.theme
     })
   })
 }

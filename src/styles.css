@@ -7,7 +7,6 @@
 :root {
   color-scheme: light dark;
   --accent: #1c7ed6;
-  --accent-hover: #1971c2;
   --image-point: #e8590c;
   --map-point: #1c7ed6;
   --text: light-dark(#212529, #e9ecef);
@@ -98,9 +97,18 @@ button {
   margin-bottom: 4px;
 }
 
-/* Beside the name; the panel toggle, where there is one, stays at the right. */
+/* Beside the name; the theme and panel toggles stay at the right. */
 .about-button {
   margin-right: auto;
+}
+
+/* Quiet like the (i) beside it. */
+.theme-button {
+  color: var(--muted);
+}
+
+.theme-button:hover {
+  color: inherit;
 }
 
 .panel-toggle {
@@ -192,7 +200,6 @@ input[type='range'] {
   border: 1px solid var(--control-border);
   border-radius: 4px;
   background: var(--control);
-  color: inherit;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -215,7 +222,7 @@ input[type='range'] {
 }
 
 :where(.panel, .context-menu, .hint-bar, .dialog) button.primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: #1971c2;
 }
 
 .hint {
