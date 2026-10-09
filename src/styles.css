@@ -1,9 +1,42 @@
+/*
+ * Colours of the app around the map. Each token has its light and its dark value; which one
+ * applies follows `color-scheme`: the browser's preference, or the theme picked in the
+ * panel (`data-theme`, set by src/ui/theme.ts). The map and what is drawn on it (markers,
+ * handles, waypoint names) keep their colours in both themes.
+ */
 :root {
+  color-scheme: light dark;
   --accent: #1c7ed6;
+  --accent-hover: #1971c2;
   --image-point: #e8590c;
   --map-point: #1c7ed6;
-  --border: #dee2e6;
-  --muted: #868e96;
+  --text: light-dark(#212529, #e9ecef);
+  --muted: light-dark(#868e96, #909296);
+  --background: light-dark(#f1f3f5, #101113);
+  --surface: light-dark(#fff, #1a1b1e);
+  --subtle: light-dark(#f1f3f5, #25262b);
+  --border: light-dark(#dee2e6, #373a40);
+  --control: light-dark(#f8f9fa, #2c2e33);
+  --control-hover: light-dark(#e9ecef, #373a40);
+  --control-border: light-dark(#ced4da, #4a4d53);
+  --selected: light-dark(#e7f5ff, #1b3550);
+  --toolbar: light-dark(rgba(255, 255, 255, 0.96), rgba(37, 38, 43, 0.96));
+  --tool-text: light-dark(#343a40, #dee2e6);
+  --notice: light-dark(#fff4e6, #3b2a17);
+  --notice-border: light-dark(#ffd8a8, #6b4a1f);
+  --error: light-dark(#fff5f5, #3b1f1f);
+  --error-text: light-dark(#c92a2a, #ff8787);
+  --warning: light-dark(#fff9db, #3a3215);
+  --warning-text: light-dark(#8f5f00, #ffd43b);
+  --info-text: light-dark(#1864ab, #74c0fc);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 html,
@@ -15,14 +48,19 @@ body,
 
 body {
   font: 14px/1.4 system-ui, sans-serif;
-  color: #212529;
-  background: #f1f3f5;
+  color: var(--text);
+  background: var(--background);
 }
 
 button,
 input,
 select {
   font: inherit;
+}
+
+/* Buttons take the colour of their surroundings rather than the browser's button text. */
+button {
+  color: inherit;
 }
 
 .loading {
@@ -42,7 +80,7 @@ select {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  background: #fff;
+  background: var(--surface);
   border-right: 1px solid var(--border);
 }
 
@@ -122,8 +160,8 @@ input[type='range'] {
   gap: 6px;
   align-items: flex-start;
   padding: 8px 12px;
-  background: #fff4e6;
-  border-bottom: 1px solid #ffd8a8;
+  background: var(--notice);
+  border-bottom: 1px solid var(--notice-border);
 }
 
 .notices li span {
@@ -151,9 +189,9 @@ input[type='range'] {
 :where(.panel, .context-menu, .hint-bar, .dialog) button:not(.icon) {
   display: inline-block;
   padding: 3px 10px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--control-border);
   border-radius: 4px;
-  background: #f8f9fa;
+  background: var(--control);
   color: inherit;
   cursor: pointer;
   white-space: nowrap;
@@ -161,7 +199,7 @@ input[type='range'] {
 
 .button:hover,
 :where(.panel, .context-menu, .hint-bar, .dialog) button:not(.icon):hover:not(:disabled) {
-  background: #e9ecef;
+  background: var(--control-hover);
 }
 
 .button.disabled,
@@ -177,7 +215,7 @@ input[type='range'] {
 }
 
 :where(.panel, .context-menu, .hint-bar, .dialog) button.primary:hover:not(:disabled) {
-  background: #1971c2;
+  background: var(--accent-hover);
 }
 
 .hint {
@@ -202,7 +240,7 @@ input[type='range'] {
 }
 
 .layer.active {
-  background: #e7f5ff;
+  background: var(--selected);
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
@@ -233,7 +271,7 @@ button.layer-select:hover:not(:disabled) {
   height: 32px;
   object-fit: cover;
   border-radius: 3px;
-  background: #dee2e6;
+  background: var(--border);
 }
 
 .layer .grip {
@@ -259,7 +297,7 @@ button.layer-select:hover:not(:disabled) {
   z-index: 1000;
   margin: 0;
   list-style: none;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   opacity: 0.95;
   pointer-events: none;
@@ -281,7 +319,7 @@ input.tint {
   width: 34px;
   height: 24px;
   padding: 0;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--control-border);
   border-radius: 4px;
   background: none;
   cursor: pointer;
@@ -322,18 +360,18 @@ input.tint {
 }
 
 .note.error {
-  background: #fff5f5;
-  color: #c92a2a;
+  background: var(--error);
+  color: var(--error-text);
 }
 
 .note.warning {
-  background: #fff9db;
-  color: #8f5f00;
+  background: var(--warning);
+  color: var(--warning-text);
 }
 
 .note.info {
-  background: #e7f5ff;
-  color: #1864ab;
+  background: var(--selected);
+  color: var(--info-text);
 }
 
 /* Ground control point markers: image side = ring, map side = dot; matched pairs nest.
@@ -386,7 +424,7 @@ input.tint {
   margin: 0;
   padding: 4px 0;
   list-style: none;
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
@@ -403,7 +441,7 @@ input.tint {
 }
 
 .context-menu button:hover:not(:disabled) {
-  background: #e7f5ff;
+  background: var(--selected);
 }
 
 button.icon svg {
@@ -440,7 +478,7 @@ button.icon svg {
 }
 
 .route.active {
-  background: #e7f5ff;
+  background: var(--selected);
 }
 
 .swatch {
@@ -552,7 +590,7 @@ button.icon svg {
   gap: 2px;
   padding: 3px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--toolbar);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
   pointer-events: auto;
 }
@@ -569,7 +607,7 @@ button.icon svg {
   border: none;
   border-radius: 8px;
   background: none;
-  color: #343a40;
+  color: var(--tool-text);
   cursor: pointer;
 }
 
@@ -586,7 +624,7 @@ button.icon svg {
 }
 
 .tool:hover:not(:disabled) {
-  background: #f1f3f5;
+  background: var(--subtle);
 }
 
 .tool.active,
@@ -673,7 +711,7 @@ button.icon svg {
 }
 
 .search-results button.result:hover {
-  background: #e7f5ff;
+  background: var(--selected);
 }
 
 .search-results .result span {
@@ -827,6 +865,8 @@ input[type='search'] {
   padding: 16px;
   border: none;
   border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 

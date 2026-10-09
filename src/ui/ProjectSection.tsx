@@ -10,7 +10,8 @@ import { emptyProject, hasContent } from '../state/schema.ts'
 import { errorMessage, notify, panelCollapsed, setPanelCollapsed } from '../state/ui.ts'
 import { downloadBlob, fileBaseName } from './download.ts'
 import { EditableName } from './EditableName.tsx'
-import { InfoIcon } from './icons.tsx'
+import { InfoIcon, MoonIcon, SunIcon } from './icons.tsx'
+import { theme, toggleTheme } from './theme.ts'
 
 export function ProjectSection() {
   const map = useMapAccessor()
@@ -51,6 +52,14 @@ export function ProjectSection() {
           onClick={() => setHelp(ABOUT_HELP)}
         >
           <InfoIcon />
+        </button>
+        <button
+          class="icon theme-button"
+          title={theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          onClick={toggleTheme}
+        >
+          {theme() === 'dark' ? <SunIcon /> : <MoonIcon />}
         </button>
         <button
           class="icon panel-toggle"

@@ -269,6 +269,19 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   tool, and can still be moved by hand, so a pair can be pinned on the image and then on
   the map below it. A new image point needs the image shown, because the user cannot see
   what they would pin; the hint bar says so.
+- **Light and dark.** The colours around the map are tokens in `:root` (`styles.css`), each
+  given as `light-dark(light, dark)`. Which applies follows `color-scheme`: `light dark` by
+  default, so the browser's preference decides, or the theme set as `data-theme` on the
+  document by the sun/moon button (`ui/theme.ts`). `color-scheme` also switches the
+  browser's own parts: inputs, selects and their lists, scrollbars. A two-state button
+  rather than a three-way light/dark/system choice: a choice is only stored
+  (`image-mapper.theme` in localStorage) while it differs from the browser's preference,
+  so switching back to that preference follows the browser again, also when it changes
+  later. The theme is a browser setting, not part of the project. The map, the markers,
+  handles and waypoint names on it, the hint bar, MapLibre's controls and the help
+  drawings stay as they are: they belong to the map, whose tiles have no dark version
+  for every base map. Vite's CSS minifier rewrites `light-dark()` into variables for
+  older browsers; the `data-theme` rules switch those as well.
 - **Phones.** Below 720 px the panel moves under the map (at most 45 % of the height)
   and can be folded to its title row. Coarse pointers get larger buttons, markers and
   handles, and 16 px inputs so iOS does not zoom in on focus. The toolbar sits higher
@@ -388,4 +401,5 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Waypoints with name and description, independent of the routes.
 - GPX export of all routes as tracks, with all waypoints.
 - Project save/open/new; automatic persistence in IndexedDB including map view.
+- Light and dark mode, following the browser until switched in the panel.
 - Layout for phones and touch screens.

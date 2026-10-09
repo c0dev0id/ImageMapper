@@ -115,6 +115,10 @@ layer, route, point or waypoint is an undo step like any other edit. What cannot
 undone asks first: **New** and **Open** when the current project holds anything, and
 discarding a stored project that cannot be read.
 
+The moon (or sun) at the top of the panel switches the app between light and dark. It
+starts as the browser prefers; a choice that differs from that is kept until it is
+switched back. The map and what is drawn on it look the same in both.
+
 On a phone the panel sits below the map; the arrow at the top of the panel folds it
 away to give the map more room. The toolbar takes up to two rows there.
 
@@ -124,7 +128,8 @@ The pencil next to the project name at the top of the panel renames the project;
 name is used for the saved file and the GPX export. The project is kept in the browser's
 IndexedDB and restored on the next visit. Clearing the browser's site data removes it,
 and Safari may delete it after seven days without a visit. Which helps were already shown
-once is kept in the browser's localStorage, apart from the project. **Save** downloads the whole
+once, and a chosen light or dark mode, are kept in the browser's localStorage, apart from
+the project. **Save** downloads the whole
 project, images included, as an `.imgmap` file (a plain ZIP archive with `project.json`
 and the original images); **Open** loads such a file again. Projects in the format of
 earlier versions (format 1, before waypoints became places of their own) cannot be
