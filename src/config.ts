@@ -200,7 +200,7 @@ export const NOMINATIM_URL = 'https://nominatim.openstreetmap.org'
 export const SEARCH_MIN_INTERVAL_MS = 1000
 export const SEARCH_TIMEOUT_MS = 10_000
 
-export const SOURCE_URL = 'https://github.com/c0dev0id/mappic'
+export const SOURCE_URL = 'https://github.com/c0dev0id/ImageMapper'
 
 /** Operator contact required by the FOSSGIS terms, assembled at runtime to keep it from crawlers. */
-export const CONTACT_PARTS = ['mappic', 'textmail', 'me']
+export const CONTACT_PARTS = ['tools', 'shagen', 'me']
