@@ -1,4 +1,6 @@
-# Image Mapper
+<p align="center">
+  <img src="docs/banner.svg" alt="Image Mapper" width="100%"/>
+</p>
 
 Take a tour printed in a magazine and carry it along as GPX. Image Mapper overlays a
 photo or scan of a printed tour map on a web map, warps it into place, and lets you

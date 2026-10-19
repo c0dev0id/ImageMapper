@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" role="img" aria-label="Image Mapper">
+  <defs>
+    <clipPath id="frame">
+      <rect width="800" height="200" rx="16" />
+    </clipPath>
+    <clipPath id="print">
+      <polygon points="-41,-1 98.2,-1 79.8,101 -41,101" />
+    </clipPath>
+    <clipPath id="map">
+      <polygon points="98.2,-1 161,-1 161,101 79.8,101" />
+    </clipPath>
+    <linearGradient id="fade" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0.53" stop-color="#f2efe9" />
+      <stop offset="0.61" stop-color="#f2efe9" stop-opacity="0" />
+    </linearGradient>
+    <path id="forests" d="M62 8 C70 2 88 4 92 12 C96 20 82 24 72 21 C62 19 56 13 62 8 Z M2 60 C8 54 22 56 24 64 C26 72 12 74 6 70 C0 67 -2 63 2 60 Z M136 40 C144 34 156 38 156 48 C156 58 144 60 138 55 C132 50 130 45 136 40 Z" />
+    <path id="river" d="M-40 58 C-25 58 -15 55 0 52 C30 46 52 60 80 54 S130 40 160 46" />
+    <path id="roads" d="M34 30 C64 44 96 52 124 74 M122 24 L160 14 M40 78 L-40 106 M124 74 L160 86 M34 30 L22 0" />
+    <path id="tour" d="M34 30 C60 18 92 34 122 24 C132 40 116 56 124 74 C98 86 70 66 40 78 C26 62 46 46 34 30 Z" />
+    <ellipse id="lake" cx="94" cy="91" rx="9" ry="4" />
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="800" height="200" fill="#f2efe9" />
+
+    <g transform="translate(480 0) scale(2)">
+      <!-- The region as the web map shows it. -->
+      <g clip-path="url(#map)">
+        <use href="#forests" fill="#c3dba9" />
+        <use href="#river" fill="none" stroke="#9fcbe0" stroke-width="3" />
+        <use href="#lake" fill="#9fcbe0" />
+        <g fill="#e0dad0">
+          <rect x="114" y="19" width="16" height="10" rx="3" />
+          <rect x="116" y="69" width="16" height="10" rx="3" />
+        </g>
+        <g fill="none" stroke-linecap="round">
+          <use href="#roads" stroke="#c9bfb1" stroke-width="2.4" />
+          <use href="#roads" stroke="#ffffff" stroke-width="1.5" />
+          <use href="#tour" stroke="#ffffff" stroke-width="3.6" stroke-opacity="0.85" />
+          <use href="#tour" stroke="#1c7ed6" stroke-width="2" />
+        </g>
+        <g fill="#1c7ed6" stroke="#ffffff" stroke-width="0.9">
+          <circle cx="122" cy="24" r="2.6" />
+          <circle cx="124" cy="74" r="2.6" />
+        </g>
+      </g>
+
+      <!-- The same region as a magazine prints it, a sheet lying over the map. -->
+      <line x1="99.6" y1="0" x2="81.2" y2="100" stroke="#000000" stroke-opacity="0.05" stroke-width="3" />
+      <line x1="98.8" y1="0" x2="80.4" y2="100" stroke="#000000" stroke-opacity="0.1" stroke-width="1" />
+      <g clip-path="url(#print)">
+        <rect x="-40" width="200" height="100" fill="#fbfaf6" />
+        <use href="#forests" fill="#dfe9d3" />
+        <use href="#river" fill="none" stroke="#7aa7cf" stroke-width="1.2" />
+        <use href="#lake" fill="#b9d3ea" stroke="#7aa7cf" stroke-width="0.6" />
+        <g fill="none" stroke-linecap="round">
+          <use href="#roads" stroke="#8a8578" stroke-width="2.2" />
+          <use href="#roads" stroke="#ecd77e" stroke-width="1.3" />
+          <use href="#tour" stroke="#b8434c" stroke-width="3.6" />
+        </g>
+        <g fill="#fbfaf6" stroke="#333333" stroke-width="0.8">
+          <circle cx="34" cy="30" r="1.8" />
+          <circle cx="40" cy="78" r="1.8" />
+        </g>
+        <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="6.5" font-weight="700" fill="#2b2b2b" stroke="#fbfaf6" stroke-width="1.6" stroke-linejoin="round" paint-order="stroke">
+          <text x="30" y="40" text-anchor="end">Altdorf</text>
+          <text x="45" y="88">Kirchrode</text>
+        </g>
+      </g>
+
+      <!-- The route as a GPX file. -->
+      <rect x="124" y="5" width="30" height="13" rx="3" fill="#ffffff" stroke="#adb5bd" stroke-width="0.6" />
+      <text x="139" y="14.4" text-anchor="middle" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="7" font-weight="700" fill="#495057">GPX</text>
+    </g>
+
+    <rect width="800" height="200" fill="url(#fade)" />
+
+    <text x="40" y="92" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="50" font-weight="800" fill="#212529">Image Mapper</text>
+    <rect x="42" y="108" width="72" height="4" rx="2" fill="#1c7ed6" />
+    <text x="42" y="142" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-size="18" fill="#495057">From a printed tour map to a GPX track</text>
+  </g>
+</svg>

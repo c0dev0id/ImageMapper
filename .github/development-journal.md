@@ -256,6 +256,12 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   there instead of at a ringed close button. On narrow screens three pictures take two
   lines, and their arrows are dropped, as one would end the first line pointing at
   nothing.
+- **README banner.** `docs/banner.svg` is a hand-written SVG that copies the made-up
+  region of `help/drawings.tsx`: the printed sheet on the left, the map with the traced
+  route on the right, split by the sheet's edge. It is not generated from the help code, so
+  a change to the drawings does not reach it. It has its own light background and reads
+  the same in GitHub's light and dark theme. The README has no `#` heading; the banner
+  carries the name, with the name as its alt text.
 - **Bringing things into view** lives in `map/navigate.ts`: one `showBounds` (padding,
   current rotation kept) behind place search, fly to image and fly to route; move image
   here is there too. Fly to
