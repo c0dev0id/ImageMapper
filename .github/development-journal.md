@@ -142,8 +142,8 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   symbol layer, because the inline map style has no glyph source for text.
 - **Toolbar and tools.** A toolbar over the map carries the tools of the current scope:
   the active image (Pin, Match Towns, Skew Image | Center on Image, Move Image Here,
-  Resize) or the route being drawn (Append, Insert, Waypoint, Delete), with undo and redo
-  always. Each group is a box of its own; the boxes wrap onto a second row on narrow
+  Resize) or the route being drawn (Append, Insert, Waypoint, Delete), with Measure, undo
+  and redo always. Each group is a box of its own; the boxes wrap onto a second row on narrow
   screens instead of scrolling, so no tool is out of sight. Every tool has a one-line
   caption (its accessible name) and a longer tooltip. Icons of related tools are variants
   of one icon: the same pin badge on a map or on a picture, the same arrow into or out of
@@ -152,6 +152,17 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
   context menus stay as a second way to the same actions. Inserting finds the leg
   nearest to the tap in screen pixels (routed geometry, or the straight line while
   unrouted) and puts the new point on the line, so the route keeps its shape.
+- **Measuring.** Measure is a tool, not a mode, and is offered in every mode like undo
+  and redo: a distance is as useful while tracing a route as while placing an image.
+  Picking it ends moving the image by hand and a waiting pin; picking it again, Esc or
+  Done leave it, back to appending while a route is drawn. Two taps set the ends, a third
+  starts a new distance, and either end can be dragged, measured anew as it moves rather
+  than only where it is dropped. The distance is the great circle on MapLibre's sphere
+  (`LngLat.distanceTo`), within about half a percent of the ellipsoid, and metric like the
+  scale bar. It is shown beside the second end rather than in the hint bar, so the eye
+  stays on the line. The line is drawn straight in Web Mercator; over the distances of a
+  tour it does not visibly differ from the great circle. A measurement is no part of the
+  project: not stored, not undone, and gone when the tool is left.
 - **State updates.** All writes go through actions; results of pure functions are
   applied with `reconcile` at the narrowest path. Components that own MapLibre
   objects are keyed by id so edits never recreate map layers.
@@ -405,6 +416,7 @@ It is a static single-page app hosted on GitHub Pages. Work is kept in the brows
 - Draw route mode: append, insert, drag and delete route points; per-route OSRM
   profile; straight legs where the routing knows no way; fly to a route.
 - Waypoints with name and description, independent of the routes.
+- Measuring the distance between two points on the map, in every mode.
 - GPX export of all routes as tracks, with all waypoints.
 - Project save/open/new; automatic persistence in IndexedDB including map view.
 - Light and dark mode, following the browser until switched in the panel.

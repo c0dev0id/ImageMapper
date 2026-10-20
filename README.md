@@ -13,6 +13,7 @@ trace the route and export it. It runs entirely in the browser; nothing is uploa
 - **Blend and recolour** — Multiply, Difference and recolouring read the map through the image and show misalignment.
 - **Route tracing** — trace routes with OSRM for car, bike or foot, with straight-line legs where routing has no data.
 - **Waypoints** — named places with optional descriptions, independent of the routes.
+- **Measuring** — tap two points on the map for the distance between them.
 - **GPX export** — all routes (one track each) and all waypoints in one file.
 - **Many base maps** — raster and vector world maps, official regional maps, and an optional satellite overlay.
 - **Local only** — stored in the browser's IndexedDB; save and reopen the whole project as a single `.imgmap` file.
