@@ -531,24 +531,29 @@ button.icon svg {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
 }
 
-.waypoint-name {
+/* Labels beside a marker: waypoint names and the measured distance. */
+.waypoint-name,
+.measure-distance {
   position: absolute;
-  top: 11px;
   left: 100%;
-  max-width: 180px;
-  margin-left: 2px;
   padding: 1px 6px;
-  overflow: hidden;
   transform: translateY(-50%);
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   color: #212529;
   font: 600 12px/1.4 system-ui, sans-serif;
-  text-overflow: ellipsis;
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
+}
+
+.waypoint-name {
+  top: 11px;
+  max-width: 180px;
+  margin-left: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* The ends of a measured distance, above the point markers; the second carries the distance. */
@@ -569,20 +574,8 @@ button.icon svg {
 }
 
 .measure-distance {
-  position: absolute;
   top: 50%;
-  left: 100%;
   margin-left: 6px;
-  padding: 1px 6px;
-  transform: translateY(-50%);
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  color: #212529;
-  font: 600 12px/1.4 system-ui, sans-serif;
-  white-space: nowrap;
-  pointer-events: none;
-  user-select: none;
 }
 
 /* While a tool waits for a tap, the map shows a crosshair instead of the grab hand;
