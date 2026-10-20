@@ -11,6 +11,7 @@ import { Interactions } from './map/Interactions.tsx'
 import { RouteEditor } from './map/RouteEditor.tsx'
 import { RouteLayers } from './map/RouteLayers.tsx'
 import { MapView } from './map/MapView.tsx'
+import { Measurement } from './map/Measurement.tsx'
 import { Toolbar } from './map/Toolbar.tsx'
 import { Waypoints } from './map/Waypoints.tsx'
 import { HelpDialog } from './help/HelpDialog.tsx'
@@ -55,6 +56,7 @@ export function App() {
               <GcpMarkers />
               <RouteEditor />
               <ImageTransform />
+              <Measurement />
               <Interactions />
               <ContextMenu />
               <HintBar />

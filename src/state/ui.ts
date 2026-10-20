@@ -15,10 +15,11 @@ export interface Notice {
 }
 
 /**
- * Map tools picked in the toolbar: pinning point pairs on the active image, and adding,
- * inserting or deleting while a route is drawn. Without a tool the map only navigates.
+ * Map tools picked in the toolbar: pinning point pairs on the active image, adding,
+ * inserting or deleting while a route is drawn, and measuring a distance in any mode.
+ * Without a tool the map only navigates.
  */
-export type Tool = 'pin' | 'append' | 'insert' | 'waypoint' | 'delete'
+export type Tool = 'pin' | 'append' | 'insert' | 'waypoint' | 'delete' | 'measure'
 
 /**
  * The image point of a pair being pinned, while it waits for its place on the map. It
@@ -149,4 +150,24 @@ export function startTransform(): void {
 export function stopTransform(): void {
   cancelTapRequest()
   if (mode() === 'transform') setMode('georef')
+}
+
+/** The ends of the distance being measured: none yet, the start, or start and end. */
+export const [measurement, setMeasurement] = createSignal<LngLat[]>([])
+
+/** Picks the measure tool with no ends set; moving the image by hand and a waiting tap request end. */
+export function startMeasuring(): void {
+  stopTransform()
+  setMeasurement([])
+  setTool('measure')
+}
+
+/** Leaves the measure tool; drawing a route goes back to appending. */
+export function stopMeasuring(): void {
+  setTool(mode() === 'route' ? 'append' : undefined)
+}
+
+/** Sets an end of the measurement where the map was tapped: the end after a start, else a new start. */
+export function placeMeasurementEnd(lngLat: LngLat): void {
+  setMeasurement((ends) => (ends.length === 1 ? [ends[0], lngLat] : [lngLat]))
 }

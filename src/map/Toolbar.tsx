@@ -10,7 +10,9 @@ import {
   reach,
   setReach,
   setTool,
+  startMeasuring,
   startTransform,
+  stopMeasuring,
   stopTransform,
   tool,
   type Tool,
@@ -22,6 +24,7 @@ import {
   InsertIcon,
   LineIcon,
   MatchTownsIcon,
+  MeasureIcon,
   MoveImageHereIcon,
   PinImageIcon,
   RedoIcon,
@@ -61,7 +64,7 @@ function ToolButton(props: {
   )
 }
 
-/** The tools of the current scope over the map, with undo and redo always at hand. */
+/** The tools of the current scope over the map, with measuring, undo and redo always at hand. */
 export function Toolbar() {
   return (
     <div class="toolbar" role="toolbar" aria-label="Tools">
@@ -72,6 +75,16 @@ export function Toolbar() {
         <RouteTools />
         <ReachTools />
       </Show>
+      <div class="toolbar-group" role="group" aria-label="Measure">
+        <ToolButton
+          label="Measure"
+          title="Measure the distance between two points on the map"
+          active={tool() === 'measure'}
+          onClick={() => (tool() === 'measure' ? stopMeasuring() : startMeasuring())}
+        >
+          <MeasureIcon />
+        </ToolButton>
+      </div>
       <div class="toolbar-group" role="group" aria-label="History">
         <ToolButton
           label="Undo"
@@ -168,7 +181,7 @@ function ImageTools(props: { layer: ImageLayer }) {
   )
 }
 
-/** Tools of the route being drawn; one of them is always picked. */
+/** Tools of the route being drawn; one of them is always picked, unless a distance is measured. */
 function RouteTools() {
   const button = (t: Tool, label: string, title: string, icon: JSX.Element) => (
     <ToolButton

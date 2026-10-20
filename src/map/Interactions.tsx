@@ -8,6 +8,7 @@ import {
   editingRouteId,
   menu,
   mode,
+  placeMeasurementEnd,
   reach,
   setMenu,
   setTool,
@@ -80,7 +81,8 @@ export function Interactions() {
     setMenu(undefined)
     const routeId = editingRouteId()
     const t = tool()
-    if (mode() === 'route' && routeId) {
+    if (t === 'measure') placeMeasurementEnd([lng, lat])
+    else if (mode() === 'route' && routeId) {
       if (t === 'insert') insertPointOnLine(map, routeId, [e.point.x, e.point.y], pointerType === 'mouse' ? 10 : 24)
       else if (t === 'waypoint') setWaypointDraft({ lngLat: roundLngLat([lng, lat]), name: '', description: '' })
       else if (t === 'append' || t === undefined) appendPoint(routeId, roundLngLat([lng, lat]), reach() === 'line')

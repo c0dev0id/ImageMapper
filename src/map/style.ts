@@ -33,6 +33,7 @@ export function baseStyle(): StyleSpecification {
       routes: { type: 'geojson', data: EMPTY_COLLECTION },
       'gcp-links': { type: 'geojson', data: EMPTY_COLLECTION },
       'image-frame': { type: 'geojson', data: EMPTY_COLLECTION },
+      measure: { type: 'geojson', data: EMPTY_COLLECTION },
     },
     layers: [
       { id: SATELLITE_LAYER, type: 'raster', source: 'satellite', layout: { visibility: 'none' } },
@@ -80,6 +81,19 @@ export function baseStyle(): StyleSpecification {
         type: 'line',
         source: 'image-frame',
         paint: { 'line-color': '#1c7ed6', 'line-width': 2, 'line-dasharray': [3, 2] },
+      },
+      {
+        id: 'measure-casing',
+        type: 'line',
+        source: 'measure',
+        layout: round,
+        paint: { 'line-color': '#ffffff', 'line-width': 5, 'line-opacity': 0.85 },
+      },
+      {
+        id: 'measure-line',
+        type: 'line',
+        source: 'measure',
+        paint: { 'line-color': '#212529', 'line-width': 2, 'line-dasharray': [3, 2] },
       },
     ],
   }

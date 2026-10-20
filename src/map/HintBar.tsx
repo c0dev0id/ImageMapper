@@ -3,9 +3,11 @@ import { activeLayer, routeById } from '../state/project.ts'
 import {
   cancelTapRequest,
   editingRouteId,
+  measurement,
   mode,
   reach,
   stopDrawing,
+  stopMeasuring,
   stopTransform,
   tapRequest,
   tool,
@@ -21,6 +23,13 @@ const ROUTE_HINTS: Partial<Record<Tool, string>> = {
 
 /** Appending while new points are reached by a straight line. */
 const LINE_HINT = 'tap the map to add points at the end, joined by straight lines; Route goes back to routing.'
+
+/** By the number of ends of the measurement already set. */
+const MEASURE_HINTS = [
+  'Tap where the distance to measure starts.',
+  'Now tap where it ends.',
+  'Drag an end to move it; a tap starts a new distance.',
+]
 
 /** A short instruction for the current state, shown over the map. */
 export function HintBar() {
@@ -49,6 +58,14 @@ export function HintBar() {
             <button onClick={cancelTapRequest}>Cancel</button>
           </div>
         )}
+      </Match>
+      <Match when={tool() === 'measure'}>
+        <div class="hint-bar interactive">
+          {MEASURE_HINTS[measurement().length]}{' '}
+          <button class="primary" onClick={stopMeasuring}>
+            Done
+          </button>
+        </div>
       </Match>
       <Match when={drawing()}>
         {(route) => (
