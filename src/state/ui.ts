@@ -30,6 +30,11 @@ export const [pendingPin, setPendingPin] = createSignal<{ layerId: string; image
 export const [mode, setMode] = createSignal<Mode>('georef')
 export const [tool, setTool] = createSignal<Tool>()
 
+/** Leaves the picked tool for the one the mode falls back to: appending while a route is drawn, else none. */
+export function leaveTool(): void {
+  setTool(mode() === 'route' ? 'append' : undefined)
+}
+
 /**
  * How a point appended to the route is reached: by routing along the roads, or by a
  * straight line, for a way the routing does not know. Every drawing starts with routing.
@@ -154,18 +159,6 @@ export function stopTransform(): void {
 
 /** The ends of the distance being measured: none yet, the start, or start and end. */
 export const [measurement, setMeasurement] = createSignal<LngLat[]>([])
-
-/** Picks the measure tool with no ends set; moving the image by hand and a waiting tap request end. */
-export function startMeasuring(): void {
-  stopTransform()
-  setMeasurement([])
-  setTool('measure')
-}
-
-/** Leaves the measure tool; drawing a route goes back to appending. */
-export function stopMeasuring(): void {
-  setTool(mode() === 'route' ? 'append' : undefined)
-}
 
 /** Sets an end of the measurement where the map was tapped: the end after a start, else a new start. */
 export function placeMeasurementEnd(lngLat: LngLat): void {

@@ -6,13 +6,12 @@ import { activeLayer, redo, redoLabel, skewImageToMap, undo, undoLabel } from '.
 import type { ImageLayer } from '../state/schema.ts'
 import {
   cancelTapRequest,
+  leaveTool,
   mode,
   reach,
   setReach,
   setTool,
-  startMeasuring,
   startTransform,
-  stopMeasuring,
   stopTransform,
   tool,
   type Tool,
@@ -66,6 +65,14 @@ function ToolButton(props: {
 
 /** The tools of the current scope over the map, with measuring, undo and redo always at hand. */
 export function Toolbar() {
+  // Picking Measure again leaves it; leaving Resize (or a waiting pin) comes first.
+  const pickMeasure = () => {
+    if (tool() === 'measure') leaveTool()
+    else {
+      stopTransform()
+      setTool('measure')
+    }
+  }
   return (
     <div class="toolbar" role="toolbar" aria-label="Tools">
       <Show when={mode() !== 'route' && activeLayer()} keyed>
@@ -80,7 +87,7 @@ export function Toolbar() {
           label="Measure"
           title="Measure the distance between two points on the map"
           active={tool() === 'measure'}
-          onClick={() => (tool() === 'measure' ? stopMeasuring() : startMeasuring())}
+          onClick={pickMeasure}
         >
           <MeasureIcon />
         </ToolButton>

@@ -1,5 +1,4 @@
 import { LngLat as MapLibreLngLat, type GeoJSONSource } from 'maplibre-gl'
-import type { Feature, LineString } from 'geojson'
 import { createEffect, onCleanup, Show } from 'solid-js'
 import { measurement, setMeasurement, tool } from '../state/ui.ts'
 import { useMap } from './context.ts'
@@ -18,41 +17,38 @@ const distance = () => {
  * two draggable ends, with the distance beside the second.
  */
 export function Measurement() {
+  const map = useMap()
+  createEffect(() => {
+    const ends = measurement()
+    void map.getSource<GeoJSONSource>('measure')?.setData(
+      ends.length === 2
+        ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: ends } }
+        : EMPTY_COLLECTION,
+    )
+  })
   return (
     <Show when={tool() === 'measure'}>
-      <MeasureLine />
-      <MeasureEnd index={0} />
-      <MeasureEnd index={1} />
+      <MeasureEnds />
     </Show>
   )
 }
 
-function MeasureLine() {
+/** The ends of the measurement; the measurement is dropped with them when the tool is left. */
+function MeasureEnds() {
   const map = useMap()
-  const source = () => map.getSource<GeoJSONSource>('measure')
-  createEffect(() => {
-    const ends = measurement()
-    const features: Feature<LineString>[] =
-      ends.length === 2 ? [{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: ends } }] : []
-    void source()?.setData({ type: 'FeatureCollection', features })
-  })
-  onCleanup(() => void source()?.setData(EMPTY_COLLECTION))
-  return null
-}
-
-function MeasureEnd(props: { index: number }) {
-  const map = useMap()
-  const index = props.index
-  const content = (
-    <div class="measure-end">{index === 1 && <span class="measure-distance">{distance()}</span>}</div>
-  ) as HTMLElement
-  const handle = new MarkerHandle(map, content, { className: 'measure-end-marker', draggable: true })
-  createEffect(() => handle.setPosition(measurement()[index]))
-  // Measured anew all along the drag, not only where the end is dropped.
-  handle.marker.on('drag', () => {
-    const { lng, lat } = handle.marker.getLngLat().wrap()
-    setMeasurement((ends) => ends.with(index, [lng, lat]))
-  })
-  onCleanup(() => handle.remove())
+  for (const index of [0, 1]) {
+    const content = (
+      <div class="measure-end">{index === 1 && <span class="measure-distance">{distance()}</span>}</div>
+    ) as HTMLElement
+    const handle = new MarkerHandle(map, content, { className: 'measure-end-marker', draggable: true })
+    createEffect(() => handle.setPosition(measurement()[index]))
+    // Measured anew all along the drag, not only where the end is dropped.
+    handle.marker.on('drag', () => {
+      const { lng, lat } = handle.marker.getLngLat().wrap()
+      setMeasurement((ends) => ends.with(index, [lng, lat]))
+    })
+    onCleanup(() => handle.remove())
+  }
+  onCleanup(() => setMeasurement([]))
   return null
 }

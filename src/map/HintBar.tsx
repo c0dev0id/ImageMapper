@@ -3,11 +3,11 @@ import { activeLayer, routeById } from '../state/project.ts'
 import {
   cancelTapRequest,
   editingRouteId,
+  leaveTool,
   measurement,
   mode,
   reach,
   stopDrawing,
-  stopMeasuring,
   stopTransform,
   tapRequest,
   tool,
@@ -62,7 +62,7 @@ export function HintBar() {
       <Match when={tool() === 'measure'}>
         <div class="hint-bar interactive">
           {MEASURE_HINTS[measurement().length]}{' '}
-          <button class="primary" onClick={stopMeasuring}>
+          <button class="primary" onClick={leaveTool}>
             Done
           </button>
         </div>

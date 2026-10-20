@@ -6,12 +6,12 @@ import {
   cancelTapRequest,
   deliverTap,
   editingRouteId,
+  leaveTool,
   menu,
   mode,
   placeMeasurementEnd,
   reach,
   setMenu,
-  setTool,
   setWaypointDraft,
   stopDrawing,
   stopTransform,
@@ -107,11 +107,11 @@ export function Interactions() {
     else if (menu()) setMenu(undefined)
     else if (mode() === 'route') {
       // The other route tools fall back to appending; Esc while appending ends drawing.
-      if (tool() !== 'append') setTool('append')
+      if (tool() !== 'append') leaveTool()
       else stopDrawing()
     }
     else if (mode() === 'transform') stopTransform()
-    else if (tool()) setTool(undefined)
+    else if (tool()) leaveTool()
   }
 
   // On the window, so it runs before the menu closes itself on the same press.
